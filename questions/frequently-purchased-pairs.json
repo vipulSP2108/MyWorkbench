@@ -20,6 +20,10 @@
           "data_type": "VARCHAR(255)"
         },
         {
+          "column_name": "transaction_id",
+          "data_type": "INT"
+        },
+        {
           "column_name": "user_id",
           "data_type": "INT"
         }
@@ -56,22 +60,19 @@
   },
   "sample_output": [
     {
-      "product_1": "Bread",
-      "product_2": "Butter",
-      "combo_num": "3"
+      "product1": "Bread",
+      "product2": "Butter"
     },
     {
-      "product_1": "Bread",
-      "product_2": "Jam",
-      "combo_num": "2"
+      "product1": "Bread",
+      "product2": "Jam"
     },
     {
-      "product_1": "Butter",
-      "product_2": "Jam",
-      "combo_num": "1"
+      "product1": "Butter",
+      "product2": "Jam"
     }
   ],
-  "reference_sql": "SELECT a.product_name AS product1, b.product_name AS product2\nFROM products a\nJOIN products b ON a.user_id = b.user_id AND a.product_id < b.product_id\nGROUP BY a.product_name, b.product_name\nORDER BY a.product_name, b.product_name;",
+  "reference_sql": "SELECT a.product_name AS product1, b.product_name AS product2\nFROM products a\nJOIN products b ON a.transaction_id = b.transaction_id AND a.product_id < b.product_id\nGROUP BY a.product_name, b.product_name\nORDER BY a.product_name, b.product_name;",
   "tags": [
     "aggregation",
     "cte",

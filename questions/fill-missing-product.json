@@ -102,7 +102,7 @@
       "name": "Nautica Linen Shirt"
     }
   ],
-  "reference_sql": "WITH filled AS (\n  SELECT \n    product_id,\n    COALESCE(category, FIRST_VALUE(category) OVER (ORDER BY product_id)) AS category,\n    name\n  FROM products\n)\nSELECT product_id, category, name FROM filled ORDER BY product_id;",
+  "reference_sql": "WITH grouped AS (\n  SELECT \n    product_id,\n    category,\n    name,\n    COUNT(NULLIF(category, '')) OVER (ORDER BY product_id) AS grp\n  FROM products\n)\nSELECT \n  product_id,\n  MAX(NULLIF(category, '')) OVER (PARTITION BY grp) AS category,\n  name\nFROM grouped\nORDER BY product_id;",
   "tags": [
     "accenture",
     "aggregation",
@@ -193,7 +193,7 @@
         },
         {
           "product_id": 5,
-          "category": "Shoes",
+          "category": "Jeans",
           "name": "Wrangler Straight Fit"
         },
         {
@@ -203,7 +203,7 @@
         },
         {
           "product_id": 7,
-          "category": "Shoes",
+          "category": "Shirts",
           "name": "Nautica Linen Shirt"
         }
       ],
@@ -309,7 +309,7 @@
         },
         {
           "product_id": 5,
-          "category": "Shoes",
+          "category": "Jeans",
           "name": "Wrangler Straight Fit"
         },
         {
@@ -319,7 +319,7 @@
         },
         {
           "product_id": 7,
-          "category": "Shoes",
+          "category": "Shirts",
           "name": "Nautica Linen Shirt"
         },
         {
@@ -344,7 +344,7 @@
         },
         {
           "product_id": 1005,
-          "category": "Shoes",
+          "category": "Jeans",
           "name": "Wrangler Straight Fit"
         },
         {
@@ -354,7 +354,7 @@
         },
         {
           "product_id": 1007,
-          "category": "Shoes",
+          "category": "Shirts",
           "name": "Nautica Linen Shirt"
         }
       ],
@@ -440,7 +440,7 @@
         },
         {
           "product_id": 5,
-          "category": "Shoes",
+          "category": "Jeans",
           "name": "Wrangler Straight Fit"
         },
         {
@@ -450,7 +450,7 @@
         },
         {
           "product_id": 7,
-          "category": "Shoes",
+          "category": "Shirts",
           "name": "Nautica Linen Shirt"
         },
         {
@@ -555,7 +555,7 @@
         },
         {
           "product_id": 5,
-          "category": "Shoes",
+          "category": "Jeans",
           "name": "Wrangler Straight Fit"
         },
         {
@@ -565,7 +565,7 @@
         },
         {
           "product_id": 7,
-          "category": "Shoes",
+          "category": "Shirts",
           "name": "Nautica Linen Shirt"
         },
         {
@@ -606,7 +606,7 @@
     },
     {
       "product_id": 5,
-      "category": "Shoes",
+      "category": "Jeans",
       "name": "Wrangler Straight Fit"
     },
     {
@@ -616,7 +616,7 @@
     },
     {
       "product_id": 7,
-      "category": "Shoes",
+      "category": "Shirts",
       "name": "Nautica Linen Shirt"
     }
   ]

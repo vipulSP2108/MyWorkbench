@@ -5,74 +5,82 @@
   "difficulty": "Medium",
   "company": "Facebook",
   "premium": true,
-  "question": "Facebook logs user email interactions in a row-based format. Write a query to transform (pivot) this data so that each user has a single output row showing their total counts for emails sent, opened, and clicked. Order by user ID in ascending order.",
+  "question": "Each Facebook user can designate a personal email address, a business email address, and a recovery email address.\n\nUnfortunately, the table is currently in the wrong format, so you need to transform its structure to show the following columns (see example output): user id, personal email, business email, and recovery email. Sort your answer by user id in ascending order.",
   "notes": [],
   "tables": [
     {
-      "table_name": "email_logs",
+      "table_name": "users",
       "columns": [
-        {
-          "column_name": "email_id",
-          "data_type": "INT"
-        },
         {
           "column_name": "user_id",
           "data_type": "INT"
         },
         {
-          "column_name": "action_type",
+          "column_name": "email_type",
           "data_type": "VARCHAR(255)"
         },
         {
-          "column_name": "action_date",
-          "data_type": "DATETIME"
+          "column_name": "email",
+          "data_type": "VARCHAR(255)"
         }
       ]
     }
   ],
   "sample_data": {
-    "email_logs": [
+    "users": [
       {
-        "email_id": 1,
-        "user_id": 101,
-        "action_type": "sent",
-        "action_date": "01/01/2022 08:00:00"
+        "user_id": 123,
+        "email_type": "personal",
+        "email": "hello@nicksingh.com"
       },
       {
-        "email_id": 2,
-        "user_id": 101,
-        "action_type": "opened",
-        "action_date": "01/01/2022 08:05:00"
+        "user_id": 123,
+        "email_type": "business",
+        "email": "nick@datalemur.com"
       },
       {
-        "email_id": 3,
-        "user_id": 101,
-        "action_type": "clicked",
-        "action_date": "01/01/2022 08:06:00"
+        "user_id": 123,
+        "email_type": "recovery",
+        "email": "ns2se@virginia.edu"
       },
       {
-        "email_id": 4,
-        "user_id": 102,
-        "action_type": "sent",
-        "action_date": "01/02/2022 09:00:00"
+        "user_id": 234,
+        "email_type": "personal",
+        "email": "aubrey1986@gmail.com"
+      },
+      {
+        "user_id": 234,
+        "email_type": "business",
+        "email": "mgmt@ovo.com"
+      },
+      {
+        "user_id": 789,
+        "email_type": "recovery",
+        "email": "cbale@edu.com"
       }
     ]
   },
   "sample_output": [
     {
-      "user_id": 101,
-      "emails_sent": 1,
-      "emails_opened": 1,
-      "emails_clicked": 1
+      "user_id": 123,
+      "personal": "hello@nicksingh.com",
+      "business": "nick@datalemur.com",
+      "recovery": "ns2se@virginia.edu"
     },
     {
-      "user_id": 102,
-      "emails_sent": 1,
-      "emails_opened": 0,
-      "emails_clicked": 0
+      "user_id": 234,
+      "personal": "aubrey1986@gmail.com",
+      "business": "mgmt@ovo.com",
+      "recovery": null
+    },
+    {
+      "user_id": 789,
+      "personal": null,
+      "business": null,
+      "recovery": "cbale@edu.com"
     }
   ],
-  "reference_sql": "SELECT \n  user_id,\n  MAX(CASE WHEN action_type = 'open' THEN action_date END) AS open_date,\n  MAX(CASE WHEN action_type = 'click' THEN action_date END) AS click_date\nFROM email_logs\nGROUP BY user_id\nORDER BY user_id;",
+  "reference_sql": "SELECT \n  user_id,\n  MAX(CASE WHEN email_type = 'personal' THEN email END) AS personal,\n  MAX(CASE WHEN email_type = 'business' THEN email END) AS business,\n  MAX(CASE WHEN email_type = 'recovery' THEN email END) AS recovery\nFROM users\nGROUP BY user_id\nORDER BY user_id ASC;",
   "tags": [
     "aggregation",
     "ecommerce",
@@ -96,260 +104,320 @@
       "test_case_id": "tc_1_baseline",
       "description": "Baseline sample input data from problem description",
       "input_data": {
-        "email_logs": [
+        "users": [
           {
-            "email_id": 1,
-            "user_id": 101,
-            "action_type": "sent",
-            "action_date": "01/01/2022 08:00:00"
+            "user_id": 123,
+            "email_type": "personal",
+            "email": "hello@nicksingh.com"
           },
           {
-            "email_id": 2,
-            "user_id": 101,
-            "action_type": "opened",
-            "action_date": "01/01/2022 08:05:00"
+            "user_id": 123,
+            "email_type": "business",
+            "email": "nick@datalemur.com"
           },
           {
-            "email_id": 3,
-            "user_id": 101,
-            "action_type": "clicked",
-            "action_date": "01/01/2022 08:06:00"
+            "user_id": 123,
+            "email_type": "recovery",
+            "email": "ns2se@virginia.edu"
           },
           {
-            "email_id": 4,
-            "user_id": 102,
-            "action_type": "sent",
-            "action_date": "01/02/2022 09:00:00"
+            "user_id": 234,
+            "email_type": "personal",
+            "email": "aubrey1986@gmail.com"
+          },
+          {
+            "user_id": 234,
+            "email_type": "business",
+            "email": "mgmt@ovo.com"
+          },
+          {
+            "user_id": 789,
+            "email_type": "recovery",
+            "email": "cbale@edu.com"
           }
         ]
       },
       "expected_output": [
         {
-          "user_id": 101,
-          "open_date": null,
-          "click_date": null
+          "user_id": 123,
+          "personal": "hello@nicksingh.com",
+          "business": "nick@datalemur.com",
+          "recovery": "ns2se@virginia.edu"
         },
         {
-          "user_id": 102,
-          "open_date": null,
-          "click_date": null
+          "user_id": 234,
+          "personal": "aubrey1986@gmail.com",
+          "business": "mgmt@ovo.com",
+          "recovery": null
+        },
+        {
+          "user_id": 789,
+          "personal": null,
+          "business": null,
+          "recovery": "cbale@edu.com"
         }
       ],
       "category": "normal"
     },
     {
       "test_case_id": "tc_2_high_volume",
-      "description": "Multiple entities with scaled volume and multi-group distributions",
+      "description": "Multiple users with varied combinations of email types",
       "input_data": {
-        "email_logs": [
+        "users": [
           {
-            "email_id": 1,
-            "user_id": 101,
-            "action_type": "sent",
-            "action_date": "01/01/2022 08:00:00"
+            "user_id": 123,
+            "email_type": "personal",
+            "email": "hello@nicksingh.com"
           },
           {
-            "email_id": 2,
-            "user_id": 101,
-            "action_type": "opened",
-            "action_date": "01/01/2022 08:05:00"
+            "user_id": 123,
+            "email_type": "business",
+            "email": "nick@datalemur.com"
           },
           {
-            "email_id": 3,
-            "user_id": 101,
-            "action_type": "clicked",
-            "action_date": "01/01/2022 08:06:00"
+            "user_id": 123,
+            "email_type": "recovery",
+            "email": "ns2se@virginia.edu"
           },
           {
-            "email_id": 4,
-            "user_id": 102,
-            "action_type": "sent",
-            "action_date": "01/02/2022 09:00:00"
+            "user_id": 234,
+            "email_type": "personal",
+            "email": "aubrey1986@gmail.com"
           },
           {
-            "email_id": 1001,
-            "user_id": 1101,
-            "action_type": "sent",
-            "action_date": "01/06/2022 08:00:00"
+            "user_id": 234,
+            "email_type": "business",
+            "email": "mgmt@ovo.com"
           },
           {
-            "email_id": 1002,
-            "user_id": 1101,
-            "action_type": "opened",
-            "action_date": "01/06/2022 08:05:00"
+            "user_id": 789,
+            "email_type": "recovery",
+            "email": "cbale@edu.com"
           },
           {
-            "email_id": 1003,
-            "user_id": 1101,
-            "action_type": "clicked",
-            "action_date": "01/06/2022 08:06:00"
+            "user_id": 1001,
+            "email_type": "personal",
+            "email": "user1001_p@example.com"
           },
           {
-            "email_id": 1004,
-            "user_id": 1102,
-            "action_type": "sent",
-            "action_date": "01/07/2022 09:00:00"
+            "user_id": 1001,
+            "email_type": "business",
+            "email": "user1001_b@corp.com"
+          },
+          {
+            "user_id": 1001,
+            "email_type": "recovery",
+            "email": "user1001_r@safe.com"
+          },
+          {
+            "user_id": 1002,
+            "email_type": "personal",
+            "email": "user1002@gmail.com"
+          },
+          {
+            "user_id": 1003,
+            "email_type": "business",
+            "email": "sales@startup.io"
+          },
+          {
+            "user_id": 1004,
+            "email_type": "recovery",
+            "email": "backup@recovery.net"
           }
         ]
       },
       "expected_output": [
         {
-          "user_id": 101,
-          "open_date": null,
-          "click_date": null
+          "user_id": 123,
+          "personal": "hello@nicksingh.com",
+          "business": "nick@datalemur.com",
+          "recovery": "ns2se@virginia.edu"
         },
         {
-          "user_id": 102,
-          "open_date": null,
-          "click_date": null
+          "user_id": 234,
+          "personal": "aubrey1986@gmail.com",
+          "business": "mgmt@ovo.com",
+          "recovery": null
         },
         {
-          "user_id": 1101,
-          "open_date": null,
-          "click_date": null
+          "user_id": 789,
+          "personal": null,
+          "business": null,
+          "recovery": "cbale@edu.com"
         },
         {
-          "user_id": 1102,
-          "open_date": null,
-          "click_date": null
+          "user_id": 1001,
+          "personal": "user1001_p@example.com",
+          "business": "user1001_b@corp.com",
+          "recovery": "user1001_r@safe.com"
+        },
+        {
+          "user_id": 1002,
+          "personal": "user1002@gmail.com",
+          "business": null,
+          "recovery": null
+        },
+        {
+          "user_id": 1003,
+          "personal": null,
+          "business": "sales@startup.io",
+          "recovery": null
+        },
+        {
+          "user_id": 1004,
+          "personal": null,
+          "business": null,
+          "recovery": "backup@recovery.net"
         }
       ],
       "category": "volume"
     },
     {
       "test_case_id": "tc_3_disqualifying_rows",
-      "description": "Dataset containing disqualifying rows, edge values, and cancelled/zero records",
+      "description": "Users with unrecognized email types (e.g. newsletter, spam, secondary) yielding NULL columns",
       "input_data": {
-        "email_logs": [
+        "users": [
           {
-            "email_id": 1,
-            "user_id": 101,
-            "action_type": "sent",
-            "action_date": "01/01/2022 08:00:00"
+            "user_id": 123,
+            "email_type": "personal",
+            "email": "hello@nicksingh.com"
           },
           {
-            "email_id": 2,
-            "user_id": 101,
-            "action_type": "opened",
-            "action_date": "01/01/2022 08:05:00"
+            "user_id": 123,
+            "email_type": "business",
+            "email": "nick@datalemur.com"
           },
           {
-            "email_id": 3,
-            "user_id": 101,
-            "action_type": "clicked",
-            "action_date": "01/01/2022 08:06:00"
+            "user_id": 123,
+            "email_type": "recovery",
+            "email": "ns2se@virginia.edu"
           },
           {
-            "email_id": 4,
-            "user_id": 102,
-            "action_type": "sent",
-            "action_date": "01/02/2022 09:00:00"
+            "user_id": 234,
+            "email_type": "personal",
+            "email": "aubrey1986@gmail.com"
           },
           {
-            "email_id": 5001,
-            "user_id": 5101,
-            "action_type": "sent",
-            "action_date": "01/01/2017 08:00:00"
+            "user_id": 234,
+            "email_type": "business",
+            "email": "mgmt@ovo.com"
           },
           {
-            "email_id": 5002,
-            "user_id": 5101,
-            "action_type": "opened",
-            "action_date": "01/01/2017 08:05:00"
+            "user_id": 789,
+            "email_type": "recovery",
+            "email": "cbale@edu.com"
+          },
+          {
+            "user_id": 5001,
+            "email_type": "newsletter",
+            "email": "news@digest.com"
+          },
+          {
+            "user_id": 5002,
+            "email_type": "marketing",
+            "email": "promo@deals.com"
           }
         ]
       },
       "expected_output": [
         {
-          "user_id": 101,
-          "open_date": null,
-          "click_date": null
+          "user_id": 123,
+          "personal": "hello@nicksingh.com",
+          "business": "nick@datalemur.com",
+          "recovery": "ns2se@virginia.edu"
         },
         {
-          "user_id": 102,
-          "open_date": null,
-          "click_date": null
+          "user_id": 234,
+          "personal": "aubrey1986@gmail.com",
+          "business": "mgmt@ovo.com",
+          "recovery": null
         },
         {
-          "user_id": 5101,
-          "open_date": null,
-          "click_date": null
+          "user_id": 789,
+          "personal": null,
+          "business": null,
+          "recovery": "cbale@edu.com"
+        },
+        {
+          "user_id": 5001,
+          "personal": null,
+          "business": null,
+          "recovery": null
+        },
+        {
+          "user_id": 5002,
+          "personal": null,
+          "business": null,
+          "recovery": null
         }
       ],
       "category": "edge"
     },
     {
       "test_case_id": "tc_4_empty_result",
-      "description": "Input where no rows satisfy problem criteria, verifying empty result handling",
+      "description": "Input where no rows exist, verifying empty result handling",
       "input_data": {
-        "email_logs": []
+        "users": []
       },
       "expected_output": [],
       "category": "edge"
     },
     {
       "test_case_id": "tc_5_ties_and_nulls",
-      "description": "Tied ranking metrics, unmatched join keys, and NULL values in nullable attributes",
+      "description": "Users with NULL or empty email addresses and single email assignments",
       "input_data": {
-        "email_logs": [
+        "users": [
           {
-            "email_id": 1,
-            "user_id": 101,
-            "action_type": "sent",
-            "action_date": "01/01/2022 08:00:00"
+            "user_id": 301,
+            "email_type": "personal",
+            "email": null
           },
           {
-            "email_id": 2,
-            "user_id": 101,
-            "action_type": "opened",
-            "action_date": "01/01/2022 08:05:00"
+            "user_id": 301,
+            "email_type": "business",
+            "email": "work@biz.com"
           },
           {
-            "email_id": 3,
-            "user_id": 101,
-            "action_type": "clicked",
-            "action_date": "01/01/2022 08:06:00"
+            "user_id": 302,
+            "email_type": "personal",
+            "email": "alice@mail.com"
           },
           {
-            "email_id": 4,
-            "user_id": 102,
-            "action_type": "sent",
-            "action_date": "01/02/2022 09:00:00"
+            "user_id": 303,
+            "email_type": "business",
+            "email": "bob@mail.com"
           },
           {
-            "email_id": 9001,
-            "user_id": 9101,
-            "action_type": "sent",
-            "action_date": "01/01/2022 08:00:00"
-          },
-          {
-            "email_id": 9502,
-            "user_id": 9601,
-            "action_type": null,
-            "action_date": "01/01/2022 08:05:00"
+            "user_id": 304,
+            "email_type": "recovery",
+            "email": "carol@mail.com"
           }
         ]
       },
       "expected_output": [
         {
-          "user_id": 101,
-          "open_date": null,
-          "click_date": null
+          "user_id": 301,
+          "personal": null,
+          "business": "work@biz.com",
+          "recovery": null
         },
         {
-          "user_id": 102,
-          "open_date": null,
-          "click_date": null
+          "user_id": 302,
+          "personal": "alice@mail.com",
+          "business": null,
+          "recovery": null
         },
         {
-          "user_id": 9101,
-          "open_date": null,
-          "click_date": null
+          "user_id": 303,
+          "personal": null,
+          "business": "bob@mail.com",
+          "recovery": null
         },
         {
-          "user_id": 9601,
-          "open_date": null,
-          "click_date": null
+          "user_id": 304,
+          "personal": null,
+          "business": null,
+          "recovery": "carol@mail.com"
         }
       ],
       "category": "edge"
@@ -358,14 +426,22 @@
   "order_sensitive": true,
   "expected_output": [
     {
-      "user_id": 101,
-      "open_date": null,
-      "click_date": null
+      "user_id": 123,
+      "personal": "hello@nicksingh.com",
+      "business": "nick@datalemur.com",
+      "recovery": "ns2se@virginia.edu"
     },
     {
-      "user_id": 102,
-      "open_date": null,
-      "click_date": null
+      "user_id": 234,
+      "personal": "aubrey1986@gmail.com",
+      "business": "mgmt@ovo.com",
+      "recovery": null
+    },
+    {
+      "user_id": 789,
+      "personal": null,
+      "business": null,
+      "recovery": "cbale@edu.com"
     }
   ]
 }

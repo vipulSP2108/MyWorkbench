@@ -5,7 +5,7 @@
   "difficulty": "Medium",
   "company": "Google",
   "premium": true,
-  "question": "In consulting, 'bench time' refers to non-billable days between engagements. Calculate total bench time in days for each active consultant during 2021.\n\nAssume a full year is 365 days and consultants work on at most one engagement at a time. Order by bench days in descending order.",
+  "question": "In consulting, being “on the bench” means you have a gap between two client engagements.\n\nGoogle wants to know how many days of bench time each consultant had in 2021. Assume that each consultant is only staffed to one consulting engagement at a time.\n\nWrite a query to pull each employee ID and their total bench time in days during 2021.\n\nAssumptions:\n- All listed employees are current employees who were hired before 2021.\n- The engagements in the consulting_engagements table are complete for the year 2022.",
   "notes": [],
   "tables": [
     {
@@ -33,12 +33,20 @@
           "data_type": "INT"
         },
         {
+          "column_name": "client_id",
+          "data_type": "INT"
+        },
+        {
           "column_name": "start_date",
           "data_type": "DATE"
         },
         {
           "column_name": "end_date",
           "data_type": "DATE"
+        },
+        {
+          "column_name": "contract_amount",
+          "data_type": "INT"
         }
       ]
     }
@@ -56,40 +64,58 @@
         "job_id": 2
       },
       {
-        "employee_id": 112,
+        "employee_id": 111,
         "is_consultant": "true",
         "job_id": 3
+      },
+      {
+        "employee_id": 156,
+        "is_consultant": "true",
+        "job_id": 4
       }
     ],
     "consulting_engagements": [
       {
         "job_id": 1,
-        "start_date": "01/25/2021",
-        "end_date": "02/28/2021"
+        "client_id": 201,
+        "start_date": "2021-01-01",
+        "end_date": "2021-01-31",
+        "contract_amount": 15000
       },
       {
         "job_id": 2,
-        "start_date": "05/01/2021",
-        "end_date": "06/30/2021"
+        "client_id": 202,
+        "start_date": "2021-04-01",
+        "end_date": "2021-05-31",
+        "contract_amount": 30000
       },
       {
         "job_id": 3,
-        "start_date": "01/01/2021",
-        "end_date": "03/31/2021"
+        "client_id": 203,
+        "start_date": "2021-09-01",
+        "end_date": "2021-10-21",
+        "contract_amount": 25000
+      },
+      {
+        "job_id": 4,
+        "client_id": 204,
+        "start_date": "2021-06-01",
+        "end_date": "2021-10-05",
+        "contract_amount": 50000
       }
     ]
   },
   "sample_output": [
     {
       "employee_id": 111,
-      "bench_days": 269
+      "bench_days": 222
     },
     {
-      "employee_id": 112,
-      "bench_days": 275
+      "employee_id": 156,
+      "bench_days": 238
     }
   ],
-  "reference_sql": "SELECT s.employee_id,\n       365 - SUM(DATEDIFF(e.end_date, e.start_date) + 1) AS bench_days\nFROM staffing s\nJOIN consulting_engagements e ON s.job_id = e.job_id\nWHERE s.is_consultant = 1\nGROUP BY s.employee_id\nORDER BY s.employee_id;",
+  "reference_sql": "SELECT \n  s.employee_id,\n  365 - SUM(DATEDIFF(e.end_date, e.start_date) + 1) AS bench_days\nFROM staffing s\nJOIN consulting_engagements e ON s.job_id = e.job_id\nWHERE s.is_consultant = 1 OR s.is_consultant = 'true'\nGROUP BY s.employee_id\nORDER BY s.employee_id;",
   "tags": [
     "aggregation",
     "date-manipulation",
@@ -125,44 +151,62 @@
             "job_id": 2
           },
           {
-            "employee_id": 112,
+            "employee_id": 111,
             "is_consultant": "true",
             "job_id": 3
+          },
+          {
+            "employee_id": 156,
+            "is_consultant": "true",
+            "job_id": 4
           }
         ],
         "consulting_engagements": [
           {
             "job_id": 1,
-            "start_date": "01/25/2021",
-            "end_date": "02/28/2021"
+            "client_id": 201,
+            "start_date": "2021-01-01",
+            "end_date": "2021-01-31",
+            "contract_amount": 15000
           },
           {
             "job_id": 2,
-            "start_date": "05/01/2021",
-            "end_date": "06/30/2021"
+            "client_id": 202,
+            "start_date": "2021-04-01",
+            "end_date": "2021-05-31",
+            "contract_amount": 30000
           },
           {
             "job_id": 3,
-            "start_date": "01/01/2021",
-            "end_date": "03/31/2021"
+            "client_id": 203,
+            "start_date": "2021-09-01",
+            "end_date": "2021-10-21",
+            "contract_amount": 25000
+          },
+          {
+            "job_id": 4,
+            "client_id": 204,
+            "start_date": "2021-06-01",
+            "end_date": "2021-10-05",
+            "contract_amount": 50000
           }
         ]
       },
       "expected_output": [
         {
           "employee_id": 111,
-          "bench_days": 269
+          "bench_days": 222
         },
         {
-          "employee_id": 112,
-          "bench_days": 275
+          "employee_id": 156,
+          "bench_days": 238
         }
       ],
       "category": "normal"
     },
     {
       "test_case_id": "tc_2_high_volume",
-      "description": "Multiple entities with scaled volume and multi-group distributions",
+      "description": "Multiple consultants with multiple engagements across the year",
       "input_data": {
         "staffing": [
           {
@@ -176,82 +220,122 @@
             "job_id": 2
           },
           {
-            "employee_id": 112,
+            "employee_id": 111,
             "is_consultant": "true",
             "job_id": 3
           },
           {
-            "employee_id": 1111,
+            "employee_id": 156,
             "is_consultant": "true",
-            "job_id": 1001
+            "job_id": 4
           },
           {
             "employee_id": 1111,
             "is_consultant": "true",
-            "job_id": 1002
+            "job_id": 101
+          },
+          {
+            "employee_id": 1111,
+            "is_consultant": "true",
+            "job_id": 102
           },
           {
             "employee_id": 1112,
             "is_consultant": "true",
-            "job_id": 1003
+            "job_id": 103
+          },
+          {
+            "employee_id": 1113,
+            "is_consultant": "true",
+            "job_id": 104
           }
         ],
         "consulting_engagements": [
           {
             "job_id": 1,
-            "start_date": "01/25/2021",
-            "end_date": "02/28/2021"
+            "client_id": 201,
+            "start_date": "2021-01-01",
+            "end_date": "2021-01-31",
+            "contract_amount": 15000
           },
           {
             "job_id": 2,
-            "start_date": "05/01/2021",
-            "end_date": "06/30/2021"
+            "client_id": 202,
+            "start_date": "2021-04-01",
+            "end_date": "2021-05-31",
+            "contract_amount": 30000
           },
           {
             "job_id": 3,
-            "start_date": "01/01/2021",
-            "end_date": "03/31/2021"
+            "client_id": 203,
+            "start_date": "2021-09-01",
+            "end_date": "2021-10-21",
+            "contract_amount": 25000
           },
           {
-            "job_id": 1001,
-            "start_date": "01/28/2021",
-            "end_date": "02/28/2021"
+            "job_id": 4,
+            "client_id": 204,
+            "start_date": "2021-06-01",
+            "end_date": "2021-10-05",
+            "contract_amount": 50000
           },
           {
-            "job_id": 1002,
-            "start_date": "05/06/2021",
-            "end_date": "06/28/2021"
+            "job_id": 101,
+            "client_id": 205,
+            "start_date": "2021-02-01",
+            "end_date": "2021-03-15",
+            "contract_amount": 20000
           },
           {
-            "job_id": 1003,
-            "start_date": "01/06/2021",
-            "end_date": "03/28/2021"
+            "job_id": 102,
+            "client_id": 206,
+            "start_date": "2021-07-01",
+            "end_date": "2021-08-31",
+            "contract_amount": 35000
+          },
+          {
+            "job_id": 103,
+            "client_id": 207,
+            "start_date": "2021-01-15",
+            "end_date": "2021-06-30",
+            "contract_amount": 70000
+          },
+          {
+            "job_id": 104,
+            "client_id": 208,
+            "start_date": "2021-05-01",
+            "end_date": "2021-05-31",
+            "contract_amount": 18000
           }
         ]
       },
       "expected_output": [
         {
           "employee_id": 111,
-          "bench_days": 269
+          "bench_days": 222
         },
         {
-          "employee_id": 112,
-          "bench_days": 275
+          "employee_id": 156,
+          "bench_days": 238
         },
         {
           "employee_id": 1111,
-          "bench_days": 279
+          "bench_days": 260
         },
         {
           "employee_id": 1112,
-          "bench_days": 283
+          "bench_days": 198
+        },
+        {
+          "employee_id": 1113,
+          "bench_days": 334
         }
       ],
       "category": "volume"
     },
     {
       "test_case_id": "tc_3_disqualifying_rows",
-      "description": "Dataset containing disqualifying rows, edge values, and cancelled/zero records",
+      "description": "Dataset containing non-consultants (is_consultant is false) who must be excluded",
       "input_data": {
         "staffing": [
           {
@@ -265,51 +349,79 @@
             "job_id": 2
           },
           {
-            "employee_id": 112,
+            "employee_id": 111,
             "is_consultant": "true",
             "job_id": 3
           },
           {
-            "employee_id": 5111,
+            "employee_id": 156,
             "is_consultant": "true",
-            "job_id": 5001
+            "job_id": 4
+          },
+          {
+            "employee_id": 999,
+            "is_consultant": "false",
+            "job_id": 900
+          },
+          {
+            "employee_id": 998,
+            "is_consultant": "false",
+            "job_id": 901
           }
         ],
         "consulting_engagements": [
           {
             "job_id": 1,
-            "start_date": "01/25/2021",
-            "end_date": "02/28/2021"
+            "client_id": 201,
+            "start_date": "2021-01-01",
+            "end_date": "2021-01-31",
+            "contract_amount": 15000
           },
           {
             "job_id": 2,
-            "start_date": "05/01/2021",
-            "end_date": "06/30/2021"
+            "client_id": 202,
+            "start_date": "2021-04-01",
+            "end_date": "2021-05-31",
+            "contract_amount": 30000
           },
           {
             "job_id": 3,
-            "start_date": "01/01/2021",
-            "end_date": "03/31/2021"
+            "client_id": 203,
+            "start_date": "2021-09-01",
+            "end_date": "2021-10-21",
+            "contract_amount": 25000
           },
           {
-            "job_id": 5001,
-            "start_date": "01/25/2016",
-            "end_date": "02/28/2016"
+            "job_id": 4,
+            "client_id": 204,
+            "start_date": "2021-06-01",
+            "end_date": "2021-10-05",
+            "contract_amount": 50000
+          },
+          {
+            "job_id": 900,
+            "client_id": 299,
+            "start_date": "2021-01-01",
+            "end_date": "2021-12-31",
+            "contract_amount": 100000
+          },
+          {
+            "job_id": 901,
+            "client_id": 298,
+            "start_date": "2021-03-01",
+            "end_date": "2021-08-31",
+            "contract_amount": 80000
           }
         ]
       },
       "expected_output": [
         {
           "employee_id": 111,
-          "bench_days": 269
+          "bench_days": 222
         },
         {
-          "employee_id": 112,
-          "bench_days": 275
-        },
-        {
-          "employee_id": 5111,
-          "bench_days": 330
+          "employee_id": 156,
+          "bench_days": 238
         }
       ],
       "category": "edge"
@@ -326,93 +438,75 @@
     },
     {
       "test_case_id": "tc_5_ties_and_nulls",
-      "description": "Tied ranking metrics, unmatched join keys, and NULL values in nullable attributes",
+      "description": "Single-day engagement, full-year engagement, and tied bench time",
       "input_data": {
         "staffing": [
           {
-            "employee_id": 111,
+            "employee_id": 301,
             "is_consultant": "true",
-            "job_id": 1
+            "job_id": 301
           },
           {
-            "employee_id": 111,
+            "employee_id": 302,
             "is_consultant": "true",
-            "job_id": 2
+            "job_id": 302
           },
           {
-            "employee_id": 112,
+            "employee_id": 303,
             "is_consultant": "true",
-            "job_id": 3
-          },
-          {
-            "employee_id": 9111,
-            "is_consultant": "true",
-            "job_id": 9001
-          },
-          {
-            "employee_id": 9611,
-            "is_consultant": "true",
-            "job_id": 9502
+            "job_id": 303
           }
         ],
         "consulting_engagements": [
           {
-            "job_id": 1,
-            "start_date": "01/25/2021",
-            "end_date": "02/28/2021"
+            "job_id": 301,
+            "client_id": 300,
+            "start_date": "2021-05-10",
+            "end_date": "2021-05-10",
+            "contract_amount": 5000
           },
           {
-            "job_id": 2,
-            "start_date": "05/01/2021",
-            "end_date": "06/30/2021"
+            "job_id": 302,
+            "client_id": 300,
+            "start_date": "2021-01-01",
+            "end_date": "2021-12-31",
+            "contract_amount": 120000
           },
           {
-            "job_id": 3,
-            "start_date": "01/01/2021",
-            "end_date": "03/31/2021"
-          },
-          {
-            "job_id": 9001,
-            "start_date": "01/25/2021",
-            "end_date": "02/28/2021"
-          },
-          {
-            "job_id": 9502,
-            "start_date": "05/01/2021",
-            "end_date": "06/30/2021"
+            "job_id": 303,
+            "client_id": 300,
+            "start_date": "2021-08-15",
+            "end_date": "2021-08-15",
+            "contract_amount": 5000
           }
         ]
       },
       "expected_output": [
         {
-          "employee_id": 111,
-          "bench_days": 269
+          "employee_id": 301,
+          "bench_days": 364
         },
         {
-          "employee_id": 112,
-          "bench_days": 275
+          "employee_id": 302,
+          "bench_days": 0
         },
         {
-          "employee_id": 9111,
-          "bench_days": 330
-        },
-        {
-          "employee_id": 9611,
-          "bench_days": 304
+          "employee_id": 303,
+          "bench_days": 364
         }
       ],
       "category": "edge"
     }
   ],
-  "order_sensitive": true,
+  "order_sensitive": false,
   "expected_output": [
     {
       "employee_id": 111,
-      "bench_days": 269
+      "bench_days": 222
     },
     {
-      "employee_id": 112,
-      "bench_days": 275
+      "employee_id": 156,
+      "bench_days": 238
     }
   ]
 }

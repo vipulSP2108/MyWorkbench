@@ -274,6 +274,68 @@
         }
       ],
       "category": "edge"
+    },
+    {
+      "test_case_id": "tc_5_high_volume",
+      "description": "Multiple users with distinct signups, some in-the-moment and some delayed",
+      "input_data": {
+        "users": [
+          {
+            "user_id": 10,
+            "registration_date": "2022-05-01"
+          },
+          {
+            "user_id": 20,
+            "registration_date": "2022-05-10"
+          },
+          {
+            "user_id": 30,
+            "registration_date": "2022-05-15"
+          },
+          {
+            "user_id": 40,
+            "registration_date": "2022-05-20"
+          }
+        ],
+        "rides": [
+          {
+            "ride_id": 101,
+            "user_id": 10,
+            "ride_date": "2022-05-01"
+          },
+          {
+            "ride_id": 102,
+            "user_id": 10,
+            "ride_date": "2022-05-04"
+          },
+          {
+            "ride_id": 103,
+            "user_id": 20,
+            "ride_date": "2022-05-10"
+          },
+          {
+            "ride_id": 104,
+            "user_id": 20,
+            "ride_date": "2022-05-15"
+          },
+          {
+            "ride_id": 105,
+            "user_id": 30,
+            "ride_date": "2022-05-18"
+          },
+          {
+            "ride_id": 106,
+            "user_id": 40,
+            "ride_date": "2022-05-20"
+          }
+        ]
+      },
+      "expected_output": [
+        {
+          "avg_delay": 4.0
+        }
+      ],
+      "category": "volume"
     }
   ],
   "order_sensitive": false,
