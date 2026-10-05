@@ -317,6 +317,64 @@
       },
       "expected_output": [],
       "category": "edge"
+    },
+    {
+      "test_case_id": "tc_5_exactly_8_years_qualifies",
+      "description": "Employee with exactly 8 years experience in a single domain must qualify. Validates >= 8 not > 8.",
+      "input_data": {
+        "employee_expertise": [
+          {
+            "employee_id": 1,
+            "domain": "Finance",
+            "years_of_experience": 8
+          },
+          {
+            "employee_id": 2,
+            "domain": "HR",
+            "years_of_experience": 7
+          }
+        ]
+      },
+      "expected_output": [
+        {
+          "employee_id": 1
+        }
+      ],
+      "category": "boundary"
+    },
+    {
+      "test_case_id": "tc_6_two_domains_qualifies",
+      "description": "Employee has 5 years in domain A and 5 years in domain B (2 distinct domains). Must qualify under the multi-domain rule.",
+      "input_data": {
+        "employee_expertise": [
+          {
+            "employee_id": 3,
+            "domain": "Engineering",
+            "years_of_experience": 6
+          },
+          {
+            "employee_id": 3,
+            "domain": "Product",
+            "years_of_experience": 6
+          },
+          {
+            "employee_id": 4,
+            "domain": "Engineering",
+            "years_of_experience": 5
+          },
+          {
+            "employee_id": 4,
+            "domain": "Product",
+            "years_of_experience": 5
+          }
+        ]
+      },
+      "expected_output": [
+        {
+          "employee_id": 3
+        }
+      ],
+      "category": "boundary"
     }
   ],
   "order_sensitive": true,

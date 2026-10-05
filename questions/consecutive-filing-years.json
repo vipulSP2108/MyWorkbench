@@ -640,6 +640,75 @@
         }
       ],
       "category": "boundary"
+    },
+    {
+      "test_case_id": "tc_7_exactly_2_consecutive",
+      "description": "User filed in 2020 and 2021 (exactly 2 consecutive years). Must qualify.",
+      "input_data": {
+        "filed_taxes": [
+          {
+            "filing_id": 1,
+            "user_id": "1",
+            "filing_date": "2020-04-15"
+          },
+          {
+            "filing_id": 2,
+            "user_id": "1",
+            "filing_date": "2021-04-15"
+          },
+          {
+            "filing_id": 3,
+            "user_id": "2",
+            "filing_date": "2020-04-15"
+          }
+        ]
+      },
+      "expected_output": [],
+      "category": "boundary"
+    },
+    {
+      "test_case_id": "tc_8_gap_breaks_streak",
+      "description": "User filed in 2019, 2021, 2022 \u2014 there's a gap in 2020. The streak starting 2021-2022 has 2 years but 2019-2021 is NOT consecutive.",
+      "input_data": {
+        "filed_taxes": [
+          {
+            "filing_id": 1,
+            "user_id": "10",
+            "filing_date": "2019-04-15"
+          },
+          {
+            "filing_id": 2,
+            "user_id": "10",
+            "filing_date": "2021-04-15"
+          },
+          {
+            "filing_id": 3,
+            "user_id": "10",
+            "filing_date": "2022-04-15"
+          },
+          {
+            "filing_id": 4,
+            "user_id": "20",
+            "filing_date": "2019-04-15"
+          },
+          {
+            "filing_id": 5,
+            "user_id": "20",
+            "filing_date": "2020-04-15"
+          },
+          {
+            "filing_id": 6,
+            "user_id": "20",
+            "filing_date": "2021-04-15"
+          }
+        ]
+      },
+      "expected_output": [
+        {
+          "user_id": "20"
+        }
+      ],
+      "category": "edge"
     }
   ],
   "order_sensitive": true,

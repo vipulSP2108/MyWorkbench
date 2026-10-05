@@ -291,6 +291,70 @@
       },
       "expected_output": [],
       "category": "edge"
+    },
+    {
+      "test_case_id": "tc_5_fewer_users_than_limit",
+      "description": "Only 2 users sent messages in Aug 2022. LIMIT 2 returns both. Verifies no padding or error.",
+      "input_data": {
+        "messages": [
+          {
+            "message_id": 1,
+            "sender_id": 101,
+            "receiver_id": 201,
+            "content": "Hi",
+            "sent_date": "2022-08-05 10:00:00"
+          },
+          {
+            "message_id": 2,
+            "sender_id": 101,
+            "receiver_id": 202,
+            "content": "Hello",
+            "sent_date": "2022-08-10 10:00:00"
+          },
+          {
+            "message_id": 3,
+            "sender_id": 102,
+            "receiver_id": 201,
+            "content": "Hey",
+            "sent_date": "2022-08-15 10:00:00"
+          }
+        ]
+      },
+      "expected_output": [
+        {
+          "sender_id": 101,
+          "message_count": 2
+        },
+        {
+          "sender_id": 102,
+          "message_count": 1
+        }
+      ],
+      "category": "boundary"
+    },
+    {
+      "test_case_id": "tc_6_messages_in_wrong_year_excluded",
+      "description": "Messages exist for Aug 2021 and Aug 2023 but none for Aug 2022. Result must be empty.",
+      "input_data": {
+        "messages": [
+          {
+            "message_id": 4,
+            "sender_id": 103,
+            "receiver_id": 203,
+            "content": "Test",
+            "sent_date": "2021-08-01 10:00:00"
+          },
+          {
+            "message_id": 5,
+            "sender_id": 103,
+            "receiver_id": 204,
+            "content": "Test2",
+            "sent_date": "2023-08-01 10:00:00"
+          }
+        ]
+      },
+      "expected_output": [],
+      "category": "boundary"
     }
   ],
   "order_sensitive": true,

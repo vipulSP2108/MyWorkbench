@@ -349,6 +349,157 @@
       },
       "expected_output": [],
       "category": "edge"
+    },
+    {
+      "test_case_id": "tc_5_having_boundary",
+      "description": "Users with spend exactly $999.99 must NOT appear; user with spend exactly $1000.00 MUST appear. Tests the >= 1000 boundary of HAVING.",
+      "input_data": {
+        "user_transactions": [
+          {
+            "transaction_id": 900001,
+            "product_id": 9001,
+            "user_id": 901,
+            "spend": "999.99"
+          },
+          {
+            "transaction_id": 900002,
+            "product_id": 9002,
+            "user_id": 902,
+            "spend": "500.00"
+          },
+          {
+            "transaction_id": 900003,
+            "product_id": 9003,
+            "user_id": 902,
+            "spend": "499.99"
+          },
+          {
+            "transaction_id": 900004,
+            "product_id": 9004,
+            "user_id": 903,
+            "spend": "1000.00"
+          },
+          {
+            "transaction_id": 900005,
+            "product_id": 9005,
+            "user_id": 904,
+            "spend": "1500.00"
+          },
+          {
+            "transaction_id": 900006,
+            "product_id": 9006,
+            "user_id": 904,
+            "spend": "200.00"
+          }
+        ]
+      },
+      "expected_output": [
+        {
+          "user_id": 904,
+          "num_products": 2
+        },
+        {
+          "user_id": 903,
+          "num_products": 1
+        }
+      ],
+      "category": "boundary"
+    },
+    {
+      "test_case_id": "tc_6_limit_fewer_than_3",
+      "description": "Only 2 users meet the spend >= 1000 threshold. LIMIT 3 should return 2 rows \u2014 not error, not pad.",
+      "input_data": {
+        "user_transactions": [
+          {
+            "transaction_id": 800001,
+            "product_id": 8001,
+            "user_id": 801,
+            "spend": "1200.00"
+          },
+          {
+            "transaction_id": 800002,
+            "product_id": 8002,
+            "user_id": 802,
+            "spend": "300.00"
+          },
+          {
+            "transaction_id": 800003,
+            "product_id": 8003,
+            "user_id": 802,
+            "spend": "800.00"
+          },
+          {
+            "transaction_id": 800004,
+            "product_id": 8004,
+            "user_id": 803,
+            "spend": "999.00"
+          }
+        ]
+      },
+      "expected_output": [
+        {
+          "user_id": 802,
+          "num_products": 2
+        },
+        {
+          "user_id": 801,
+          "num_products": 1
+        }
+      ],
+      "category": "boundary"
+    },
+    {
+      "test_case_id": "tc_7_tie_break_spend_order",
+      "description": "Two users both have 2 products and spend >= 1000. The one with higher total spend must come first per tiebreak rule.",
+      "input_data": {
+        "user_transactions": [
+          {
+            "transaction_id": 700001,
+            "product_id": 7001,
+            "user_id": 701,
+            "spend": "600.00"
+          },
+          {
+            "transaction_id": 700002,
+            "product_id": 7002,
+            "user_id": 701,
+            "spend": "600.00"
+          },
+          {
+            "transaction_id": 700003,
+            "product_id": 7003,
+            "user_id": 702,
+            "spend": "700.00"
+          },
+          {
+            "transaction_id": 700004,
+            "product_id": 7004,
+            "user_id": 702,
+            "spend": "700.00"
+          },
+          {
+            "transaction_id": 700005,
+            "product_id": 7005,
+            "user_id": 703,
+            "spend": "2000.00"
+          }
+        ]
+      },
+      "expected_output": [
+        {
+          "user_id": 701,
+          "num_products": 2
+        },
+        {
+          "user_id": 702,
+          "num_products": 2
+        },
+        {
+          "user_id": 703,
+          "num_products": 1
+        }
+      ],
+      "category": "edge"
     }
   ],
   "order_sensitive": true,

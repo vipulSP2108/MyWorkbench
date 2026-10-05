@@ -279,6 +279,64 @@
         }
       ],
       "category": "edge"
+    },
+    {
+      "test_case_id": "tc_5_no_duplicates_at_all",
+      "description": "Every company has exactly one job listing. No duplicates exist. Result should be 0.",
+      "input_data": {
+        "job_listings": [
+          {
+            "job_id": 1,
+            "company_id": 10,
+            "title": "Data Analyst",
+            "description": "Analyze data"
+          },
+          {
+            "job_id": 2,
+            "company_id": 20,
+            "title": "Engineer",
+            "description": "Build systems"
+          },
+          {
+            "job_id": 3,
+            "company_id": 30,
+            "title": "Manager",
+            "description": "Manage teams"
+          }
+        ]
+      },
+      "expected_output": [
+        {
+          "duplicate_companies": 0
+        }
+      ],
+      "category": "boundary"
+    },
+    {
+      "test_case_id": "tc_6_same_title_different_desc_not_duplicate",
+      "description": "Two listings have same title but different descriptions. They are NOT duplicates. Count = 0.",
+      "input_data": {
+        "job_listings": [
+          {
+            "job_id": 10,
+            "company_id": 100,
+            "title": "Software Engineer",
+            "description": "Frontend focus"
+          },
+          {
+            "job_id": 11,
+            "company_id": 100,
+            "title": "Software Engineer",
+            "description": "Backend focus"
+          }
+        ]
+      },
+      "expected_output": [
+        {
+          "duplicate_companies": 0
+        }
+      ],
+      "category": "boundary"
     }
   ],
   "order_sensitive": false,

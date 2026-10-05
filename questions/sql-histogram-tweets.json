@@ -293,6 +293,61 @@
       },
       "expected_output": [],
       "category": "edge"
+    },
+    {
+      "test_case_id": "tc_5_tweets_outside_year_excluded",
+      "description": "All tweets are from 2021 or 2023. Since query filters YEAR = 2022, result must be empty.",
+      "input_data": {
+        "tweets": [
+          {
+            "tweet_id": 100,
+            "user_id": 1,
+            "msg": "old tweet",
+            "tweet_date": "2021-12-31 23:59:59"
+          },
+          {
+            "tweet_id": 101,
+            "user_id": 2,
+            "msg": "new tweet",
+            "tweet_date": "2023-01-01 00:00:01"
+          }
+        ]
+      },
+      "expected_output": [],
+      "category": "boundary"
+    },
+    {
+      "test_case_id": "tc_6_single_tweet_per_user",
+      "description": "Every user tweeted exactly once in 2022. All must land in bucket tweet_bucket = 1.",
+      "input_data": {
+        "tweets": [
+          {
+            "tweet_id": 200,
+            "user_id": 10,
+            "msg": "a",
+            "tweet_date": "2022-05-01 12:00:00"
+          },
+          {
+            "tweet_id": 201,
+            "user_id": 20,
+            "msg": "b",
+            "tweet_date": "2022-06-01 12:00:00"
+          },
+          {
+            "tweet_id": 202,
+            "user_id": 30,
+            "msg": "c",
+            "tweet_date": "2022-07-01 12:00:00"
+          }
+        ]
+      },
+      "expected_output": [
+        {
+          "tweet_bucket": 1,
+          "users_num": 3
+        }
+      ],
+      "category": "boundary"
     }
   ],
   "order_sensitive": false,

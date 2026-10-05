@@ -319,6 +319,54 @@
         }
       ],
       "category": "boundary"
+    },
+    {
+      "test_case_id": "tc_7_single_server_one_session",
+      "description": "One server, one start and one stop exactly 48 hours apart. Total = 2 full days.",
+      "input_data": {
+        "server_utilization": [
+          {
+            "server_id": 1,
+            "session_status": "start",
+            "status_time": "2022-01-01 00:00:00"
+          },
+          {
+            "server_id": 1,
+            "session_status": "stop",
+            "status_time": "2022-01-03 00:00:00"
+          }
+        ]
+      },
+      "expected_output": [
+        {
+          "total_uptime_days": 2
+        }
+      ],
+      "category": "boundary"
+    },
+    {
+      "test_case_id": "tc_8_fractional_days_floor",
+      "description": "Total running time is 1 day and 23 hours (164400 seconds). FLOOR should give 1, not 2.",
+      "input_data": {
+        "server_utilization": [
+          {
+            "server_id": 2,
+            "session_status": "start",
+            "status_time": "2022-02-01 00:00:00"
+          },
+          {
+            "server_id": 2,
+            "session_status": "stop",
+            "status_time": "2022-02-02 23:00:00"
+          }
+        ]
+      },
+      "expected_output": [
+        {
+          "total_uptime_days": 1
+        }
+      ],
+      "category": "boundary"
     }
   ],
   "order_sensitive": false,

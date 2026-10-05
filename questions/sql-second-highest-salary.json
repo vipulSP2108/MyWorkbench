@@ -281,6 +281,111 @@
         }
       ],
       "category": "edge"
+    },
+    {
+      "test_case_id": "tc_6_single_employee",
+      "description": "Table has exactly one employee. No second-highest salary exists. Must return NULL.",
+      "input_data": {
+        "employee": [
+          {
+            "employee_id": 1,
+            "name": "Solo Employee",
+            "salary": 5000,
+            "department_id": 1,
+            "manager_id": null
+          }
+        ]
+      },
+      "expected_output": [
+        {
+          "second_highest_salary": null
+        }
+      ],
+      "category": "boundary"
+    },
+    {
+      "test_case_id": "tc_7_all_same_salary",
+      "description": "All employees earn identical salary. No distinct second-highest. Must return NULL.",
+      "input_data": {
+        "employee": [
+          {
+            "employee_id": 1,
+            "name": "Alice",
+            "salary": 3000,
+            "department_id": 1,
+            "manager_id": null
+          },
+          {
+            "employee_id": 2,
+            "name": "Bob",
+            "salary": 3000,
+            "department_id": 1,
+            "manager_id": null
+          },
+          {
+            "employee_id": 3,
+            "name": "Carol",
+            "salary": 3000,
+            "department_id": 1,
+            "manager_id": null
+          }
+        ]
+      },
+      "expected_output": [
+        {
+          "second_highest_salary": null
+        }
+      ],
+      "category": "boundary"
+    },
+    {
+      "test_case_id": "tc_8_many_share_second_highest",
+      "description": "Multiple employees share the second-highest salary. Output must show that salary exactly once.",
+      "input_data": {
+        "employee": [
+          {
+            "employee_id": 1,
+            "name": "Top1",
+            "salary": 9000,
+            "department_id": 1,
+            "manager_id": null
+          },
+          {
+            "employee_id": 2,
+            "name": "Second1",
+            "salary": 7500,
+            "department_id": 1,
+            "manager_id": null
+          },
+          {
+            "employee_id": 3,
+            "name": "Second2",
+            "salary": 7500,
+            "department_id": 1,
+            "manager_id": null
+          },
+          {
+            "employee_id": 4,
+            "name": "Second3",
+            "salary": 7500,
+            "department_id": 1,
+            "manager_id": null
+          },
+          {
+            "employee_id": 5,
+            "name": "Third",
+            "salary": 6000,
+            "department_id": 1,
+            "manager_id": null
+          }
+        ]
+      },
+      "expected_output": [
+        {
+          "second_highest_salary": 7500
+        }
+      ],
+      "category": "edge"
     }
   ],
   "order_sensitive": false,

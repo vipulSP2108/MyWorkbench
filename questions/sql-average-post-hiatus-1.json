@@ -300,6 +300,39 @@
       },
       "expected_output": [],
       "category": "edge"
+    },
+    {
+      "test_case_id": "tc_5_user_with_only_one_post_in_2021",
+      "description": "A user has exactly 1 post in 2021. They cannot have a hiatus between posts. Must be excluded from results.",
+      "input_data": {
+        "posts": [
+          {
+            "user_id": 1,
+            "post_id": 101,
+            "post_date": "2021-03-15",
+            "post_content": "Hello World"
+          },
+          {
+            "user_id": 2,
+            "post_id": 102,
+            "post_date": "2021-01-01",
+            "post_content": "First post"
+          },
+          {
+            "user_id": 2,
+            "post_id": 103,
+            "post_date": "2021-08-20",
+            "post_content": "Second post"
+          }
+        ]
+      },
+      "expected_output": [
+        {
+          "user_id": 2,
+          "days_between": 231
+        }
+      ],
+      "category": "boundary"
     }
   ],
   "order_sensitive": false,

@@ -686,6 +686,84 @@
         }
       ],
       "category": "edge"
+    },
+    {
+      "test_case_id": "tc_6_sessions_outside_date_range",
+      "description": "Sessions exist before 2020-01-01 and after 2020-02-01. Only sessions within range count. If a user's only session is outside range, they should not appear.",
+      "input_data": {
+        "sessions": [
+          {
+            "user_id": 1,
+            "session_type": "view",
+            "start_date": "2019-12-31 23:59:00",
+            "duration": 999
+          },
+          {
+            "user_id": 2,
+            "session_type": "view",
+            "start_date": "2020-01-15 10:00:00",
+            "duration": 100
+          },
+          {
+            "user_id": 3,
+            "session_type": "view",
+            "start_date": "2020-02-01 00:01:00",
+            "duration": 200
+          }
+        ]
+      },
+      "expected_output": [
+        {
+          "user_id": 2,
+          "session_type": "view",
+          "ranking": 1
+        }
+      ],
+      "category": "boundary"
+    },
+    {
+      "test_case_id": "tc_7_tied_rank_gap",
+      "description": "Two users have identical total duration for same session_type. RANK() gives both rank=1, next gets rank=3 (gap). DENSE_RANK would give 1,1,2.",
+      "input_data": {
+        "sessions": [
+          {
+            "user_id": 10,
+            "session_type": "send",
+            "start_date": "2020-01-10 10:00:00",
+            "duration": 300
+          },
+          {
+            "user_id": 20,
+            "session_type": "send",
+            "start_date": "2020-01-11 10:00:00",
+            "duration": 300
+          },
+          {
+            "user_id": 30,
+            "session_type": "send",
+            "start_date": "2020-01-12 10:00:00",
+            "duration": 100
+          }
+        ]
+      },
+      "expected_output": [
+        {
+          "user_id": 10,
+          "session_type": "send",
+          "ranking": 1
+        },
+        {
+          "user_id": 20,
+          "session_type": "send",
+          "ranking": 1
+        },
+        {
+          "user_id": 30,
+          "session_type": "send",
+          "ranking": 3
+        }
+      ],
+      "category": "edge"
     }
   ],
   "order_sensitive": true,

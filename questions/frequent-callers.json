@@ -312,6 +312,45 @@
         }
       ],
       "category": "edge"
+    },
+    {
+      "test_case_id": "tc_5_caller_just_below_threshold",
+      "description": "One caller has count = threshold - 1 (excluded), another has count = threshold (included). Validates HAVING precisely.",
+      "input_data": {
+        "callers": [
+          {
+            "policy_holder_id": 101,
+            "case_id": "c1",
+            "call_received": "2022-03-01 09:00:00"
+          },
+          {
+            "policy_holder_id": 101,
+            "case_id": "c2",
+            "call_received": "2022-03-02 09:00:00"
+          },
+          {
+            "policy_holder_id": 102,
+            "case_id": "c3",
+            "call_received": "2022-03-01 09:00:00"
+          },
+          {
+            "policy_holder_id": 102,
+            "case_id": "c4",
+            "call_received": "2022-03-02 09:00:00"
+          },
+          {
+            "policy_holder_id": 102,
+            "case_id": "c5",
+            "call_received": "2022-03-03 09:00:00"
+          }
+        ]
+      },
+      "expected_output": [
+        {
+          "policy_holder_count": 1
+        }
+      ],
+      "category": "boundary"
     }
   ],
   "order_sensitive": false,

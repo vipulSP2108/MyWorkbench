@@ -341,6 +341,96 @@
       },
       "expected_output": [],
       "category": "edge"
+    },
+    {
+      "test_case_id": "tc_5_only_2_drugs",
+      "description": "Table has only 2 drugs. LIMIT 3 should return both without error.",
+      "input_data": {
+        "pharmacy_sales": [
+          {
+            "product_id": 1,
+            "units_sold": 100,
+            "total_sales": 5000,
+            "cogs": 2000,
+            "drug": "DrugA",
+            "manufacturer": "MfgX"
+          },
+          {
+            "product_id": 2,
+            "units_sold": 80,
+            "total_sales": 4000,
+            "cogs": 3500,
+            "drug": "DrugB",
+            "manufacturer": "MfgY"
+          }
+        ]
+      },
+      "expected_output": [
+        {
+          "drug": "DrugA",
+          "total_profit": 3000
+        },
+        {
+          "drug": "DrugB",
+          "total_profit": 500
+        }
+      ],
+      "category": "boundary"
+    },
+    {
+      "test_case_id": "tc_6_negative_profit_drug",
+      "description": "Some drugs have COGS > total_sales (negative profit). They must appear LAST in descending profit order.",
+      "input_data": {
+        "pharmacy_sales": [
+          {
+            "product_id": 10,
+            "units_sold": 200,
+            "total_sales": 10000,
+            "cogs": 3000,
+            "drug": "TopDrug",
+            "manufacturer": "MfgA"
+          },
+          {
+            "product_id": 11,
+            "units_sold": 50,
+            "total_sales": 2000,
+            "cogs": 1500,
+            "drug": "MidDrug",
+            "manufacturer": "MfgA"
+          },
+          {
+            "product_id": 12,
+            "units_sold": 20,
+            "total_sales": 500,
+            "cogs": 800,
+            "drug": "LossDrug",
+            "manufacturer": "MfgA"
+          },
+          {
+            "product_id": 13,
+            "units_sold": 30,
+            "total_sales": 1000,
+            "cogs": 600,
+            "drug": "OkDrug",
+            "manufacturer": "MfgA"
+          }
+        ]
+      },
+      "expected_output": [
+        {
+          "drug": "TopDrug",
+          "total_profit": 7000
+        },
+        {
+          "drug": "MidDrug",
+          "total_profit": 500
+        },
+        {
+          "drug": "OkDrug",
+          "total_profit": 400
+        }
+      ],
+      "category": "edge"
     }
   ],
   "order_sensitive": true,

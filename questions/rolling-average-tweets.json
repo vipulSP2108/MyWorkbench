@@ -449,6 +449,50 @@
         }
       ],
       "category": "edge"
+    },
+    {
+      "test_case_id": "tc_6_single_user_all_days",
+      "description": "One user tweets on 3 consecutive days. The 3-day rolling average for day 3 must equal the mean of all 3 days.",
+      "input_data": {
+        "tweets": [
+          {
+            "tweet_id": 1,
+            "user_id": 99,
+            "tweet_date": "2022-07-01",
+            "tweet_count": 6
+          },
+          {
+            "tweet_id": 2,
+            "user_id": 99,
+            "tweet_date": "2022-07-02",
+            "tweet_count": 3
+          },
+          {
+            "tweet_id": 3,
+            "user_id": 99,
+            "tweet_date": "2022-07-03",
+            "tweet_count": 9
+          }
+        ]
+      },
+      "expected_output": [
+        {
+          "tweet_date": "2022-07-01",
+          "user_id": 99,
+          "rolling_avg_3d": 6.0
+        },
+        {
+          "tweet_date": "2022-07-02",
+          "user_id": 99,
+          "rolling_avg_3d": 4.5
+        },
+        {
+          "tweet_date": "2022-07-03",
+          "user_id": 99,
+          "rolling_avg_3d": 6.0
+        }
+      ],
+      "category": "boundary"
     }
   ],
   "order_sensitive": false,

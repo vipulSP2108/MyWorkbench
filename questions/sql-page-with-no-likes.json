@@ -276,6 +276,65 @@
       },
       "expected_output": [],
       "category": "edge"
+    },
+    {
+      "test_case_id": "tc_5_all_pages_have_likes",
+      "description": "Every page in the pages table has at least one like. Result must be empty.",
+      "input_data": {
+        "pages": [
+          {
+            "page_id": 1,
+            "page_name": "Page A"
+          },
+          {
+            "page_id": 2,
+            "page_name": "Page B"
+          }
+        ],
+        "page_likes": [
+          {
+            "user_id": 10,
+            "page_id": 1,
+            "liked_date": "2022-01-01"
+          },
+          {
+            "user_id": 11,
+            "page_id": 2,
+            "liked_date": "2022-01-02"
+          }
+        ]
+      },
+      "expected_output": [],
+      "category": "boundary"
+    },
+    {
+      "test_case_id": "tc_6_page_not_in_likes_table",
+      "description": "A page_id exists in pages but is completely absent from page_likes. Must appear in output.",
+      "input_data": {
+        "pages": [
+          {
+            "page_id": 100,
+            "page_name": "Orphan Page"
+          },
+          {
+            "page_id": 101,
+            "page_name": "Liked Page"
+          }
+        ],
+        "page_likes": [
+          {
+            "user_id": 50,
+            "page_id": 101,
+            "liked_date": "2022-06-01"
+          }
+        ]
+      },
+      "expected_output": [
+        {
+          "page_id": 100
+        }
+      ],
+      "category": "edge"
     }
   ],
   "order_sensitive": true,

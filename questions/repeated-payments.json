@@ -457,6 +457,97 @@
         }
       ],
       "category": "boundary"
+    },
+    {
+      "test_case_id": "tc_7_exactly_10_min_boundary",
+      "description": "Two transactions are exactly 10 minutes apart (not 9:59, not 10:01). The condition is <= 10 so this MUST count as a repeated payment.",
+      "input_data": {
+        "transactions": [
+          {
+            "transaction_id": 5001,
+            "merchant_id": 501,
+            "credit_card_id": 50,
+            "amount": 100,
+            "transaction_timestamp": "2022-11-01 09:00:00"
+          },
+          {
+            "transaction_id": 5002,
+            "merchant_id": 501,
+            "credit_card_id": 50,
+            "amount": 100,
+            "transaction_timestamp": "2022-11-01 09:10:00"
+          }
+        ]
+      },
+      "expected_output": [
+        {
+          "payment_count": 1
+        }
+      ],
+      "category": "boundary"
+    },
+    {
+      "test_case_id": "tc_8_just_over_10_min",
+      "description": "Two transactions are exactly 11 minutes apart. Must NOT be counted as repeated payment.",
+      "input_data": {
+        "transactions": [
+          {
+            "transaction_id": 6001,
+            "merchant_id": 601,
+            "credit_card_id": 60,
+            "amount": 200,
+            "transaction_timestamp": "2022-11-01 09:00:00"
+          },
+          {
+            "transaction_id": 6002,
+            "merchant_id": 601,
+            "credit_card_id": 60,
+            "amount": 200,
+            "transaction_timestamp": "2022-11-01 09:11:00"
+          }
+        ]
+      },
+      "expected_output": [
+        {
+          "payment_count": 0
+        }
+      ],
+      "category": "boundary"
+    },
+    {
+      "test_case_id": "tc_9_triple_repeat_chain",
+      "description": "Three transactions within 10 minutes of each other (T1\u2192T2\u2192T3 all <= 10 min apart). Should count 2 repeated payments (T2 and T3 are both repeats).",
+      "input_data": {
+        "transactions": [
+          {
+            "transaction_id": 7001,
+            "merchant_id": 701,
+            "credit_card_id": 70,
+            "amount": 50,
+            "transaction_timestamp": "2022-11-01 10:00:00"
+          },
+          {
+            "transaction_id": 7002,
+            "merchant_id": 701,
+            "credit_card_id": 70,
+            "amount": 50,
+            "transaction_timestamp": "2022-11-01 10:05:00"
+          },
+          {
+            "transaction_id": 7003,
+            "merchant_id": 701,
+            "credit_card_id": 70,
+            "amount": 50,
+            "transaction_timestamp": "2022-11-01 10:09:00"
+          }
+        ]
+      },
+      "expected_output": [
+        {
+          "payment_count": 2
+        }
+      ],
+      "category": "edge"
     }
   ],
   "order_sensitive": false,

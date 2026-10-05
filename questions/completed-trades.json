@@ -651,6 +651,69 @@
       },
       "expected_output": [],
       "category": "edge"
+    },
+    {
+      "test_case_id": "tc_5_fewer_cities_than_limit",
+      "description": "Only 2 cities have completed trades. LIMIT 3 returns 2 rows \u2014 not 3.",
+      "input_data": {
+        "trades": [
+          {
+            "order_id": 1,
+            "user_id": 101,
+            "price": 100,
+            "quantity": 2,
+            "status": "Completed",
+            "timestamp": "2022-06-01 10:00:00"
+          },
+          {
+            "order_id": 2,
+            "user_id": 102,
+            "price": 200,
+            "quantity": 1,
+            "status": "Completed",
+            "timestamp": "2022-06-02 10:00:00"
+          },
+          {
+            "order_id": 3,
+            "user_id": 103,
+            "price": 300,
+            "quantity": 3,
+            "status": "Cancelled",
+            "timestamp": "2022-06-03 10:00:00"
+          }
+        ],
+        "users": [
+          {
+            "user_id": 101,
+            "city": "New York",
+            "email": "a@a.com",
+            "signup_date": "2020-01-01"
+          },
+          {
+            "user_id": 102,
+            "city": "San Francisco",
+            "email": "b@b.com",
+            "signup_date": "2020-02-01"
+          },
+          {
+            "user_id": 103,
+            "city": "Chicago",
+            "email": "c@c.com",
+            "signup_date": "2020-03-01"
+          }
+        ]
+      },
+      "expected_output": [
+        {
+          "city": "New York",
+          "total_orders": 1
+        },
+        {
+          "city": "San Francisco",
+          "total_orders": 1
+        }
+      ],
+      "category": "boundary"
     }
   ],
   "order_sensitive": true,

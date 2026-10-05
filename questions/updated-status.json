@@ -303,6 +303,84 @@
         }
       ],
       "category": "edge"
+    },
+    {
+      "test_case_id": "tc_5_all_states_present",
+      "description": "One user per state transition: NEW (not in advertiser), CHURN (in advertiser but no payment), RESURRECT (was CHURN, now paid), EXISTING (was active, still paying).",
+      "input_data": {
+        "advertiser": [
+          {
+            "user_id": "A",
+            "status": "CHURN"
+          },
+          {
+            "user_id": "B",
+            "status": "EXISTING"
+          },
+          {
+            "user_id": "C",
+            "status": "NEW"
+          }
+        ],
+        "daily_pay": [
+          {
+            "user_id": "A",
+            "paid": 100
+          },
+          {
+            "user_id": "B",
+            "paid": 200
+          },
+          {
+            "user_id": "D",
+            "paid": 150
+          }
+        ]
+      },
+      "expected_output": [
+        {
+          "user_id": "A",
+          "new_status": "RESURRECT"
+        },
+        {
+          "user_id": "B",
+          "new_status": "EXISTING"
+        },
+        {
+          "user_id": "C",
+          "new_status": "CHURN"
+        },
+        {
+          "user_id": "D",
+          "new_status": "NEW"
+        }
+      ],
+      "category": "boundary"
+    },
+    {
+      "test_case_id": "tc_6_churn_user_zero_paid",
+      "description": "A user is in CHURN state and pays 0 this period. Zero-payment should NOT trigger RESURRECT.",
+      "input_data": {
+        "advertiser": [
+          {
+            "user_id": "X",
+            "status": "CHURN"
+          }
+        ],
+        "daily_pay": [
+          {
+            "user_id": "X",
+            "paid": 0
+          }
+        ]
+      },
+      "expected_output": [
+        {
+          "user_id": "X",
+          "new_status": "EXISTING"
+        }
+      ],
+      "category": "boundary"
     }
   ],
   "order_sensitive": true,

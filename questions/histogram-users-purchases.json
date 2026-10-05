@@ -419,6 +419,90 @@
         }
       ],
       "category": "edge"
+    },
+    {
+      "test_case_id": "tc_6_all_same_date_single_purchase",
+      "description": "Every user has exactly one transaction, all on the same date. Each user's most recent date is identical. Output must include all users ordered by user_id.",
+      "input_data": {
+        "user_transactions": [
+          {
+            "product_id": 1001,
+            "user_id": 10,
+            "spend": "50.00",
+            "transaction_date": "2022-08-01 12:00:00"
+          },
+          {
+            "product_id": 1002,
+            "user_id": 20,
+            "spend": "75.00",
+            "transaction_date": "2022-08-01 12:00:00"
+          },
+          {
+            "product_id": 1003,
+            "user_id": 30,
+            "spend": "100.00",
+            "transaction_date": "2022-08-01 12:00:00"
+          }
+        ]
+      },
+      "expected_output": [
+        {
+          "transaction_date": "2022-08-01",
+          "user_id": 10,
+          "purchase_count": 1
+        },
+        {
+          "transaction_date": "2022-08-01",
+          "user_id": 20,
+          "purchase_count": 1
+        },
+        {
+          "transaction_date": "2022-08-01",
+          "user_id": 30,
+          "purchase_count": 1
+        }
+      ],
+      "category": "boundary"
+    },
+    {
+      "test_case_id": "tc_7_user_multiple_dates_only_latest_counted",
+      "description": "A user bought 3 products on 3 different days. Only products from the MOST RECENT date must be counted in purchase_count.",
+      "input_data": {
+        "user_transactions": [
+          {
+            "product_id": 2001,
+            "user_id": 200,
+            "spend": "10.00",
+            "transaction_date": "2022-01-01 12:00:00"
+          },
+          {
+            "product_id": 2002,
+            "user_id": 200,
+            "spend": "20.00",
+            "transaction_date": "2022-03-15 12:00:00"
+          },
+          {
+            "product_id": 2003,
+            "user_id": 200,
+            "spend": "30.00",
+            "transaction_date": "2022-06-20 12:00:00"
+          },
+          {
+            "product_id": 2004,
+            "user_id": 200,
+            "spend": "40.00",
+            "transaction_date": "2022-06-20 12:00:00"
+          }
+        ]
+      },
+      "expected_output": [
+        {
+          "transaction_date": "2022-06-20",
+          "user_id": 200,
+          "purchase_count": 2
+        }
+      ],
+      "category": "edge"
     }
   ],
   "order_sensitive": true,
