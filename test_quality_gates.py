@@ -5,7 +5,7 @@ import json
 import re
 from typing import Dict, Any, List
 
-QUESTIONS_DIR = os.path.join(os.path.dirname(__file__), "..", "sql_practice", "questions")
+QUESTIONS_DIR = os.path.join(os.path.dirname(__file__), "questions")
 
 VALID_MYSQL_TYPES = {
     "INT", "BIGINT", "TINYINT", "SMALLINT", "MEDIUMINT",

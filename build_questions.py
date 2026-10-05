@@ -5,11 +5,18 @@ import os
 import json
 import decimal
 from typing import Any
-from sql_practice.ingest.deduplicator import build_unified_questions
-from sql_practice.generate.sql_writer import REFERENCE_QUERIES
-from sql_practice.generate.data_generator import generate_test_cases_for_question
-from sql_practice.generate.output_deriver import derive_outputs_for_question
-from sql_practice.engine.runner import SQLRunner
+try:
+    from MyWorkbench.ingest.deduplicator import build_unified_questions
+    from MyWorkbench.generate.sql_writer import REFERENCE_QUERIES
+    from MyWorkbench.generate.data_generator import generate_test_cases_for_question
+    from MyWorkbench.generate.output_deriver import derive_outputs_for_question
+    from MyWorkbench.engine.runner import SQLRunner
+except ImportError:
+    from ingest.deduplicator import build_unified_questions
+    from generate.sql_writer import REFERENCE_QUERIES
+    from generate.data_generator import generate_test_cases_for_question
+    from generate.output_deriver import derive_outputs_for_question
+    from engine.runner import SQLRunner
 
 
 import datetime
@@ -62,7 +69,7 @@ def is_query_order_sensitive(query: str, question_statement: str) -> bool:
     return False
 
 
-def build_all_questions(output_dir: str = "sql_practice/questions") -> int:
+def build_all_questions(output_dir: str = "MyWorkbench/questions") -> int:
     """Builds and writes all 100 question JSONs."""
     os.makedirs(output_dir, exist_ok=True)
     runner = SQLRunner()

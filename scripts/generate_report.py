@@ -2,7 +2,9 @@ import json
 import os
 
 def generate():
-    with open('sql_practice/scripts/audit_summary.json') as f:
+    script_dir = os.path.dirname(__file__)
+    summary_path = os.path.join(script_dir, 'audit_summary.json')
+    with open(summary_path) as f:
         rows = json.load(f)
 
     artifact_path = '/Users/aai/.gemini/antigravity-ide/brain/aebb1612-8f40-4c9d-bc49-275378dacdc2/datalemur_pdf_audit_and_improvements.md'
@@ -80,7 +82,7 @@ def generate():
     lines.append("|---|---|---|---|---|---|---|---|---|")
 
     for r in rows:
-        lines.append(f"| {r['num']} | {r['title']} | {r['company']} | {r['diff']} | [`{r['slug']}`](file:///Users/aai/Desktop/kit/sql_practice/questions/{r['slug']}.json) | {r['tc_count']} | {r['cats']} | {r['order_sensitive']} | {r['match_type']} |")
+        lines.append(f"| {r['num']} | {r['title']} | {r['company']} | {r['diff']} | [`{r['slug']}`](file:///Users/aai/Desktop/kit/MyWorkbench/questions/{r['slug']}.json) | {r['tc_count']} | {r['cats']} | {r['order_sensitive']} | {r['match_type']} |")
 
     lines.append("\n---\n")
     lines.append("## Future Improvements & Recommendations\n")
