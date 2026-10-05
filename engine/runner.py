@@ -61,6 +61,14 @@ class SQLRunner:
             if re.match(r"^\d{4}-\d{2}-\d{2}", s):
                 return s
             return None
+        if "BOOL" in t_upper:
+            if isinstance(val, bool):
+                return val
+            if s_val.lower() in ("true", "t", "1", "yes"):
+                return True
+            if s_val.lower() in ("false", "f", "0", "no"):
+                return False
+            return None
         return str(val)
 
     def _execute_duckdb(
@@ -74,8 +82,19 @@ class SQLRunner:
             # Create tables and insert data
             for tbl in tables:
                 tbl_name = tbl["table_name"]
-                cols = tbl["columns"]
+                cols = [dict(c) for c in tbl.get("columns", [])]
                 
+                # Auto-include any extra columns present in input_data rows but omitted from table definition
+                existing_cols = {c["column_name"].lower() for c in cols}
+                rows = input_data.get(tbl_name, [])
+                for r in rows:
+                    for k in r:
+                        if k.lower() not in existing_cols:
+                            raw_val = r[k]
+                            inferred_type = "INT" if isinstance(raw_val, int) or (isinstance(raw_val, str) and raw_val.strip().isdigit()) else "VARCHAR(255)"
+                            cols.append({"column_name": k, "data_type": inferred_type})
+                            existing_cols.add(k.lower())
+
                 # Build CREATE TABLE
                 col_defs = []
                 for c in cols:
@@ -125,6 +144,19 @@ class SQLRunner:
                             row_vals.append(self._prepare_val(val, c["data_type"]))
                         param_rows.append(row_vals)
                     con.executemany(insert_sql, param_rows)
+
+            # Create aliases for common synonym tables so queries with either name succeed
+            synonyms = [
+                ("place_info", "places"),
+                ("maps_ugc_review", "ugc")
+            ]
+            for s1, s2 in synonyms:
+                has_s1 = any(tbl["table_name"].lower() == s1 for tbl in tables)
+                has_s2 = any(tbl["table_name"].lower() == s2 for tbl in tables)
+                if has_s1 and not has_s2:
+                    con.execute(f'CREATE VIEW "{s2}" AS SELECT * FROM "{s1}";')
+                elif has_s2 and not has_s1:
+                    con.execute(f'CREATE VIEW "{s1}" AS SELECT * FROM "{s2}";')
 
             # Transpile MySQL query to DuckDB dialect if needed
             clean_q = query.strip().rstrip(";")

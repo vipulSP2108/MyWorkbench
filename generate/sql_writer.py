@@ -449,14 +449,20 @@ LEFT JOIN texts t ON e.email_id = t.email_id AND t.signup_action = 'Confirmed';
 
     # 42. Fill Missing Client Data (Accenture, Medium)
     "fill-missing-product": """
-WITH filled AS (
+WITH grouped AS (
   SELECT 
     product_id,
-    COALESCE(category, FIRST_VALUE(category) OVER (ORDER BY product_id)) AS category,
-    name
+    category,
+    name,
+    COUNT(NULLIF(category, '')) OVER (ORDER BY product_id) AS grp
   FROM products
 )
-SELECT product_id, category, name FROM filled ORDER BY product_id;
+SELECT 
+  product_id,
+  MAX(NULLIF(category, '')) OVER (PARTITION BY grp) AS category,
+  name
+FROM grouped
+ORDER BY product_id;
 """,
 
     # 43. Spotify Streaming History (Spotify, Medium)
@@ -504,7 +510,7 @@ ORDER BY manufacturer, rn;
     "frequently-purchased-pairs": """
 SELECT a.product_name AS product1, b.product_name AS product2
 FROM products a
-JOIN products b ON a.user_id = b.user_id AND a.product_id < b.product_id
+JOIN products b ON a.transaction_id = b.transaction_id AND a.product_id < b.product_id
 GROUP BY a.product_name, b.product_name
 ORDER BY a.product_name, b.product_name;
 """,
@@ -652,13 +658,23 @@ ORDER BY transaction_date, user_id;
 
     # 56. Google Maps Flagged UGC (Google, Medium)
     "off-topic-maps-ugc": """
-SELECT p.place_name, COUNT(u.content_id) AS off_topic_count
-FROM places p
-JOIN ugc u ON p.place_id = u.place_id
-WHERE u.content_tag = 'Off-topic'
-GROUP BY p.place_name
-ORDER BY off_topic_count DESC, p.place_name
-LIMIT 1;
+WITH reviews AS (
+  SELECT place.place_category,
+         COUNT(ugc.content_id) AS content_count
+  FROM place_info place
+  JOIN maps_ugc_review ugc ON place.place_id = ugc.place_id
+  WHERE LOWER(ugc.content_tag) = 'off-topic'
+  GROUP BY place.place_category
+),
+top_place_category AS (
+  SELECT place_category, content_count,
+         DENSE_RANK() OVER (ORDER BY content_count DESC) AS top_place
+  FROM reviews
+)
+SELECT place_category AS off_topic_places
+FROM top_place_category
+WHERE top_place = 1
+ORDER BY place_category ASC;
 """,
 
     # 57. Compressed Mode (Alibaba, Medium)
@@ -744,11 +760,12 @@ WHERE rn = 1 AND spend >= 50;
     "email-table-transformation": """
 SELECT 
   user_id,
-  MAX(CASE WHEN action_type = 'open' THEN action_date END) AS open_date,
-  MAX(CASE WHEN action_type = 'click' THEN action_date END) AS click_date
-FROM email_logs
+  MAX(CASE WHEN email_type = 'personal' THEN email END) AS personal,
+  MAX(CASE WHEN email_type = 'business' THEN email END) AS business,
+  MAX(CASE WHEN email_type = 'recovery' THEN email END) AS recovery
+FROM users
 GROUP BY user_id
-ORDER BY user_id;
+ORDER BY user_id ASC;
 """,
 
     # 66. Photoshop Revenue Analysis (Adobe, Medium)
@@ -764,11 +781,12 @@ ORDER BY customer_id;
 
     # 67. Consulting Bench Time (Google, Medium)
     "consulting-bench-time": """
-SELECT s.employee_id,
-       365 - SUM(DATEDIFF(e.end_date, e.start_date) + 1) AS bench_days
+SELECT 
+  s.employee_id,
+  365 - SUM(DATEDIFF(e.end_date, e.start_date) + 1) AS bench_days
 FROM staffing s
 JOIN consulting_engagements e ON s.job_id = e.job_id
-WHERE s.is_consultant = 1
+WHERE s.is_consultant = 1 OR s.is_consultant = 'true'
 GROUP BY s.employee_id
 ORDER BY s.employee_id;
 """,

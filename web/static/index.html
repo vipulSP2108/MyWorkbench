@@ -11,7 +11,7 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/codemirror.min.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/addon/hint/show-hint.min.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/theme/dracula.min.css">
-  <link rel="stylesheet" href="style.css?v=2.7">
+  <link rel="stylesheet" href="style.css?v=3.0">
 </head>
 <body>
   <!-- Top Navigation Bar (NxtWave / Modern LeetCode Style) -->
@@ -1156,33 +1156,231 @@
             </div>
           </div>
 
-          <!-- Data & Progress Management -->
+          <!-- Browser Storage & Health -->
           <div class="settings-card">
             <div class="settings-card-header">
-              <h3 style="display: flex; align-items: center; gap: 8px;">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 12H2"/><path d="M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"/><line x1="6" y1="16" x2="6.01" y2="16"/><line x1="10" y1="16" x2="10.01" y2="16"/></svg>
-                <span>Local Data & Progress</span>
-              </h3>
-              <p>Your solved progress, drafts, stars, and notes are saved locally in your browser.</p>
+              <div style="display: flex; justify-content: space-between; align-items: center;">
+                <h3 style="display: flex; align-items: center; gap: 8px;">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 12H2"/><path d="M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"/><line x1="6" y1="16" x2="6.01" y2="16"/><line x1="10" y1="16" x2="10.01" y2="16"/></svg>
+                  <span>Browser Storage & Health</span>
+                </h3>
+                <span id="storage-status-badge" class="badge-tag-rec" style="font-size: 11px;">Healthy</span>
+              </div>
+              <p>Live measurement of browser LocalStorage consumed by your saved SQL drafts, notes, and progress.</p>
             </div>
             <div class="settings-card-body">
-              <div class="setting-row">
-                <div class="setting-info">
-                  <span>Export Progress & Notes</span>
-                  <span class="setting-desc">Download a backup JSON of all your solved questions, stars, and personal notes.</span>
+              <!-- Visual Storage Bar -->
+              <div class="storage-meter-section">
+                <div class="storage-meter-header">
+                  <span class="storage-meter-title">Browser LocalStorage Quota Allocation</span>
+                  <span class="storage-meter-values">
+                    <span style="color: #38bdf8; font-weight: 500;">Used: <strong id="storage-used-text">0.0 KB</strong> (<span id="storage-used-pct">0.0%</span>)</span>
+                    <span style="margin: 0 6px; opacity: 0.35;">•</span>
+                    <span style="color: #10b981; font-weight: 500;">Free: <strong id="storage-free-text">5.0 MB</strong> (<span id="storage-free-pct-head">100.0%</span>)</span>
+                    <span style="margin: 0 6px; opacity: 0.35;">•</span>
+                    <span style="color: var(--text-dark-muted);">Total Quota: <strong>5.0 MB</strong></span>
+                  </span>
                 </div>
-                <div class="setting-control">
-                  <button id="btn-export-data" class="btn-sm btn-secondary">Export JSON</button>
+                <div class="storage-meter-bar-wrap">
+                  <div class="storage-meter-bar" id="storage-meter-bar">
+                    <div class="storage-meter-seg storage-seg-drafts" id="seg-drafts" title="SQL Query Drafts" style="width: 0%;"></div>
+                    <div class="storage-meter-seg storage-seg-notes" id="seg-notes" title="Personal Notes" style="width: 0%;"></div>
+                    <div class="storage-meter-seg storage-seg-progress" id="seg-progress" title="Progress & History" style="width: 0%;"></div>
+                    <div class="storage-meter-seg storage-seg-cache" id="seg-cache" title="Offline Questions Cache" style="width: 0%;"></div>
+                    <div class="storage-meter-seg storage-seg-settings" id="seg-settings" title="Settings & UI" style="width: 0%;"></div>
+                    <div class="storage-meter-seg storage-seg-free" id="seg-free" title="Available Free Space" style="width: 100%;"></div>
+                  </div>
                 </div>
               </div>
 
+              <!-- Storage Breakdown Cards -->
+              <div class="storage-breakdown-grid">
+                <div class="storage-breakdown-card">
+                  <div class="storage-card-header">
+                    <span class="storage-card-dot dot-drafts"></span>
+                    <span class="storage-card-title">SQL Query Drafts</span>
+                  </div>
+                  <div class="storage-card-metric" id="storage-drafts-size">0.0 KB</div>
+                  <div class="storage-card-sub" id="storage-drafts-count">0 drafts saved</div>
+                </div>
+
+                <div class="storage-breakdown-card">
+                  <div class="storage-card-header">
+                    <span class="storage-card-dot dot-notes"></span>
+                    <span class="storage-card-title">Personal Notes</span>
+                  </div>
+                  <div class="storage-card-metric" id="storage-notes-size">0.0 KB</div>
+                  <div class="storage-card-sub" id="storage-notes-count">0 problem notes</div>
+                </div>
+
+                <div class="storage-breakdown-card">
+                  <div class="storage-card-header">
+                    <span class="storage-card-dot dot-progress"></span>
+                    <span class="storage-card-title">Solved, Attempted & Starred</span>
+                  </div>
+                  <div class="storage-card-metric" id="storage-progress-size">0.0 KB</div>
+                  <div class="storage-card-sub" id="storage-progress-count">0 solved, 0 attempted • 0 starred</div>
+                </div>
+
+                <div class="storage-breakdown-card">
+                  <div class="storage-card-header">
+                    <span class="storage-card-dot dot-cache"></span>
+                    <span class="storage-card-title">Offline Cache</span>
+                  </div>
+                  <div class="storage-card-metric" id="storage-cache-size">0.0 KB</div>
+                  <div class="storage-card-sub" id="storage-cache-count">0 questions cached</div>
+                </div>
+
+                <div class="storage-breakdown-card">
+                  <div class="storage-card-header">
+                    <span class="storage-card-dot dot-settings"></span>
+                    <span class="storage-card-title">Settings & UI State</span>
+                  </div>
+                  <div class="storage-card-metric" id="storage-settings-size">0.0 KB</div>
+                  <div class="storage-card-sub">Preferences & themes</div>
+                </div>
+
+                <!-- Free / Available Space Card -->
+                <div class="storage-breakdown-card storage-card-free-highlight">
+                  <div class="storage-card-header">
+                    <span class="storage-card-dot dot-free"></span>
+                    <span class="storage-card-title">Available Free Space</span>
+                  </div>
+                  <div class="storage-card-metric" id="storage-free-size" style="color: #10b981;">5.0 MB</div>
+                  <div class="storage-card-sub" id="storage-free-sub">100% remaining</div>
+                </div>
+              </div>
+
+              <!-- Explainer Banner for Browser Quota & IndexedDB -->
+              <div class="storage-quota-explainer">
+                <div style="display: flex; gap: 10px; align-items: flex-start;">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink: 0; color: #38bdf8; margin-top: 1px;"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+                  <div style="font-size: 12px; line-height: 1.5; color: var(--text-dark-muted);">
+                    <strong style="color: var(--text-dark-main);">Why is LocalStorage capped at 5.0 MB?</strong>
+                    Standard web browsers (Chrome, Safari, Firefox) hard-cap synchronous <code>localStorage</code> at <strong>5 MB per domain</strong> to keep tab execution smooth. Your personal SQL drafts, notes, and progress only take <strong>~25 KB (&lt;1%)</strong>. If you clear the offline question schemas from LocalStorage, you will instantly reclaim <strong>~2.5 MB</strong> of free space!
+                  </div>
+                </div>
+              </div>
+
+              <div class="setting-row" style="margin-top: 8px; border-bottom: none; padding-bottom: 4px;">
+                <div class="setting-info">
+                  <span>Storage Diagnostics & Controls</span>
+                  <span class="setting-desc">Re-evaluate storage, pre-load questions, or purge offline cache to reclaim 2.5 MB.</span>
+                </div>
+                <div class="setting-control" style="gap: 8px; flex-wrap: wrap;">
+                  <button id="btn-free-cache" class="btn-sm btn-ghost text-warning" title="Purge offline question cache from LocalStorage to reclaim ~2.5 MB">
+                    Reclaim Cache (~2.5 MB)
+                  </button>
+                  <button id="btn-precache-offline" class="btn-sm btn-secondary" title="Cache all 100 questions locally in browser">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 4px; vertical-align: -2px;"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                    Pre-cache All 100 Questions
+                  </button>
+                  <button id="btn-refresh-storage" class="btn-sm btn-ghost" title="Re-calculate local storage usage">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 4px; vertical-align: -2px;"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
+                    Refresh
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Backup & Data Portability (100% Client-Side) -->
+          <div class="settings-card">
+            <div class="settings-card-header">
+              <h3 style="display: flex; align-items: center; gap: 8px;">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+                <span>Backup & Data Portability</span>
+              </h3>
+              <p>Everything you create is stored on your device. Export complete backups or restore to continue practicing on another device.</p>
+            </div>
+            <div class="settings-card-body">
+              <!-- Privacy Guarantee Banner -->
+              <div class="privacy-guarantee-banner">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink: 0; color: #10b981;"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><polyline points="9 12 11 14 15 10"/></svg>
+                <div>
+                  <strong style="color: var(--text-dark-main);">100% Client-Side Privacy Guarantee</strong>
+                  <p style="margin: 2px 0 0 0; font-size: 12px; color: var(--text-dark-muted); line-height: 1.4;">All your SQL code drafts, personal notes, and solved questions live strictly in your browser's local storage. Nothing is ever tracked, uploaded, or sent to external servers.</p>
+                </div>
+              </div>
+
+              <!-- Interactive Backup Dropzone (Drag & Drop or Click to Upload) -->
+              <div class="backup-dropzone" id="backup-dropzone">
+                <div class="backup-dropzone-icon">
+                  <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                </div>
+                <div class="backup-dropzone-content">
+                  <div class="backup-dropzone-title">Upload & Restore SQLMaster Backup (.json)</div>
+                  <div class="backup-dropzone-subtitle">Drag and drop your backup file here, or click anywhere to choose from computer</div>
+                  <div class="backup-dropzone-note">
+                    <span class="badge-tag-rec" style="font-size: 10px; padding: 2px 7px;">Instant Restore</span>
+                    <span>Restores all SQL query drafts, notes, stars, and solved progress directly into this browser.</span>
+                  </div>
+                </div>
+                <button type="button" class="btn-sm btn-secondary" id="btn-browse-backup" style="flex-shrink: 0;">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 4px; vertical-align: -2px;"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                  Browse File...
+                </button>
+              </div>
+
+              <!-- Inline Dropzone File Info / Quick Restore Feedback Card -->
+              <div id="dropzone-file-info" class="dropzone-file-info" style="display: none;"></div>
+
+              <!-- Full Backup Row -->
               <div class="setting-row">
                 <div class="setting-info">
-                  <span>Reset All Progress</span>
-                  <span class="setting-desc">Clear solved checklist and restart practice from 0/100.</span>
+                  <div style="display: flex; align-items: center; gap: 6px;">
+                    <span style="font-weight: 600;">Download Full Backup (JSON)</span>
+                    <span class="badge-tag-rec">Recommended</span>
+                  </div>
+                  <span class="setting-desc">Saves EVERYTHING: all your written SQL query drafts for each question, personal notes, solved status, attempted list, bookmarks, submissions counter, and settings.</span>
                 </div>
                 <div class="setting-control">
-                  <button id="btn-reset-progress" class="btn-sm btn-ghost text-danger">Reset Solved</button>
+                  <button id="btn-export-full" class="btn-sm btn-primary">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 5px; vertical-align: -2px;"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                    Full Backup (with Drafts)
+                  </button>
+                </div>
+              </div>
+
+              <!-- Compact Progress Backup Row -->
+              <div class="setting-row">
+                <div class="setting-info">
+                  <div style="display: flex; align-items: center; gap: 6px;">
+                    <span style="font-weight: 600;">Download Compact Progress Only</span>
+                    <span class="badge-tag-subtle">Lightweight</span>
+                  </div>
+                  <span class="setting-desc">Exports solved status, attempted list, bookmarks, notes, and settings without query drafts (compatible with legacy sqlmaster_backup_YYYY-MM-DD.json).</span>
+                </div>
+                <div class="setting-control">
+                  <button id="btn-export-compact" class="btn-sm btn-secondary">Quick Progress (JSON)</button>
+                </div>
+              </div>
+
+              <!-- Restore from Backup Row -->
+              <div class="setting-row">
+                <div class="setting-info">
+                  <span style="font-weight: 600;">Restore / Import from Backup</span>
+                  <span class="setting-desc">Load any previous backup file (Full or Compact). You will preview the contents before confirming. Supports merge or replace.</span>
+                </div>
+                <div class="setting-control">
+                  <button id="btn-trigger-import" class="btn-sm btn-secondary">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 5px; vertical-align: -2px;"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                    Restore from File...
+                  </button>
+                  <input type="file" id="input-import-backup" accept=".json,application/json" style="display: none;" />
+                </div>
+              </div>
+
+              <!-- Selective Storage Maintenance Row -->
+              <div class="setting-row">
+                <div class="setting-info">
+                  <span style="font-weight: 600;">Storage Maintenance & Clear</span>
+                  <span class="setting-desc">Clear drafts to free storage, reset practice checklist, or factory reset all data.</span>
+                </div>
+                <div class="setting-control" style="display: flex; flex-wrap: wrap; gap: 8px;">
+                  <button id="btn-clear-drafts" class="btn-sm btn-ghost text-warning" title="Delete all saved SQL query drafts to free browser storage">Clear Drafts Only</button>
+                  <button id="btn-reset-progress" class="btn-sm btn-ghost text-danger" title="Reset solved and attempted checklist to 0">Reset Solved</button>
+                  <button id="btn-factory-reset" class="btn-sm btn-danger" title="Completely erase all local data and reset app">Factory Reset</button>
                 </div>
               </div>
             </div>
@@ -1193,16 +1391,93 @@
 
   </div>
 
+  <!-- Restore Confirmation Modal -->
+  <div id="restore-modal" class="modal-backdrop" style="display: none;">
+    <div class="modal-card restore-modal-card">
+      <div class="modal-header">
+        <div class="modal-title-wrap">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+          <h3 style="margin: 0; font-size: 16px; font-weight: 600;">Restore from Backup</h3>
+        </div>
+        <button id="btn-close-restore-modal" class="btn-close-modal" aria-label="Close">&times;</button>
+      </div>
+      <div class="modal-body" style="padding: 18px 20px;">
+        <div class="restore-meta-banner">
+          <div>
+            <div class="restore-file-name" id="restore-file-name">backup.json</div>
+            <div class="restore-file-date" id="restore-file-date">Exported: Oct 5, 2026</div>
+          </div>
+          <span class="badge-tag-rec" id="restore-file-type">Full Backup</span>
+        </div>
+
+        <h4 style="margin: 16px 0 8px 0; font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text-dark-muted);">Backup Contents</h4>
+        <div class="restore-stats-grid">
+          <div class="restore-stat-item">
+            <span class="restore-stat-num" id="restore-count-solved">0</span>
+            <span class="restore-stat-lbl">Solved</span>
+          </div>
+          <div class="restore-stat-item">
+            <span class="restore-stat-num" id="restore-count-attempted">0</span>
+            <span class="restore-stat-lbl">Attempted</span>
+          </div>
+          <div class="restore-stat-item">
+            <span class="restore-stat-num" id="restore-count-starred">0</span>
+            <span class="restore-stat-lbl">Starred</span>
+          </div>
+          <div class="restore-stat-item">
+            <span class="restore-stat-num" id="restore-count-notes">0</span>
+            <span class="restore-stat-lbl">Notes</span>
+          </div>
+          <div class="restore-stat-item">
+            <span class="restore-stat-num" id="restore-count-drafts">0</span>
+            <span class="restore-stat-lbl">SQL Drafts</span>
+          </div>
+        </div>
+
+        <h4 style="margin: 20px 0 8px 0; font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text-dark-muted);">Restoration Strategy</h4>
+        <div class="restore-mode-options">
+          <label class="restore-radio-label">
+            <input type="radio" name="restore-mode" value="merge" checked>
+            <div class="restore-radio-text">
+              <strong style="display: block; font-size: 13px; color: var(--text-dark-main);">Merge with current data (Safe & Recommended)</strong>
+              <span style="font-size: 12px; color: var(--text-dark-muted);">Keep existing drafts, notes, and solved questions, and add any new items from the backup file.</span>
+            </div>
+          </label>
+          <label class="restore-radio-label">
+            <input type="radio" name="restore-mode" value="replace">
+            <div class="restore-radio-text">
+              <strong style="display: block; font-size: 13px; color: var(--text-dark-main);">Replace all local data</strong>
+              <span style="font-size: 12px; color: var(--text-dark-muted);">Overwrite your browser storage completely with the contents of this backup file.</span>
+            </div>
+          </label>
+        </div>
+      </div>
+      <div class="modal-footer" style="padding: 12px 20px; display: flex; justify-content: flex-end; gap: 10px; border-top: 1px solid var(--border-light);">
+        <button id="btn-cancel-restore" class="btn-sm btn-secondary">Cancel</button>
+        <button id="btn-apply-restore" class="btn-sm btn-primary">Apply Restore</button>
+      </div>
+    </div>
+  </div>
+
   <!-- Toast Notification -->
   <div id="toast-notification" class="toast" style="display: none;"></div>
 
   <!-- Autocomplete Suggestion Popup -->
   <div id="editor-autocomplete-popup" class="editor-autocomplete-popup" style="display: none;"></div>
 
+  <!-- Global Drag and Drop Overlay -->
+  <div id="global-drag-overlay" class="global-drag-overlay" style="display: none;">
+    <div class="global-drag-box">
+      <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#38bdf8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin: 0 auto 12px auto; display: block;"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+      <h3 style="margin: 0 0 6px 0; font-size: 18px; font-weight: 600; color: #ffffff;">Drop SQLMaster Backup (.json) Here</h3>
+      <p style="margin: 0; font-size: 13px; color: #94a3b8;">Release to instantly restore all query drafts, notes, stars, and solved progress</p>
+    </div>
+  </div>
+
   <!-- Scripts -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/codemirror.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/mode/sql/sql.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/addon/hint/show-hint.min.js"></script>
-  <script src="app.js?v=2.7"></script>
+  <script src="app.js?v=3.2"></script>
 </body>
 </html>

@@ -712,7 +712,7 @@
     "tc_count": 5,
     "cats": "1N, 3E, 0B, 1V",
     "order_sensitive": "\u2713 True",
-    "match_type": "UNVERIFIED"
+    "match_type": "EXACT"
   },
   {
     "num": 66,
@@ -734,7 +734,7 @@
     "tc_count": 5,
     "cats": "1N, 3E, 0B, 1V",
     "order_sensitive": "\u2713 True",
-    "match_type": "UNVERIFIED"
+    "match_type": "EXACT"
   },
   {
     "num": 68,

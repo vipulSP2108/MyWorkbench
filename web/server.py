@@ -54,6 +54,8 @@ class SQLPracticeHandler(SimpleHTTPRequestHandler):
 
         if path == "/api/questions":
             self.handle_get_questions()
+        elif path == "/api/questions-all":
+            self.handle_get_all_questions_detail()
         elif path.startswith("/api/questions/"):
             slug = path[len("/api/questions/"):]
             self.handle_get_question_detail(slug)
@@ -147,6 +149,41 @@ class SQLPracticeHandler(SimpleHTTPRequestHandler):
             "test_cases": public_test_cases
         }
         self.send_json(detail)
+    
+    def handle_get_all_questions_detail(self):
+        questions = load_all_questions()
+        all_details = {}
+        for q in questions:
+            slug = q.get("slug")
+            if not slug:
+                continue
+            public_test_cases = []
+            for tc in q.get("test_cases", []):
+                public_test_cases.append({
+                    "test_case_id": tc.get("test_case_id"),
+                    "description": tc.get("description", ""),
+                    "category": tc.get("category", "normal"),
+                    "input_data": tc.get("input_data", {}),
+                    "expected_output": tc.get("expected_output", [])
+                })
+            all_details[slug] = {
+                "question_id": q.get("question_id"),
+                "slug": slug,
+                "title": q.get("title"),
+                "difficulty": q.get("difficulty", "Easy"),
+                "company": q.get("company", ""),
+                "question": q.get("question", ""),
+                "notes": q.get("notes", []),
+                "tables": q.get("tables", []),
+                "sample_data": q.get("sample_data", {}),
+                "expected_output": q.get("expected_output") or q.get("sample_output") or [],
+                "tags": q.get("tags", []),
+                "order_sensitive": q.get("order_sensitive", False),
+                "reference_sql": q.get("reference_sql", ""),
+                "test_case_count": len(q.get("test_cases", [])),
+                "test_cases": public_test_cases
+            }
+        self.send_json(all_details)
 
     def handle_get_stats(self):
         questions = load_all_questions()

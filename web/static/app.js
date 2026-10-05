@@ -563,6 +563,9 @@ function switchView(viewName, updateHash = true) {
   el("nav-btn-settings")?.classList.toggle("active", viewName === "settings");
 
   closeDrawer();
+  try {
+    localStorage.setItem("sqlmaster_current_view", viewName);
+  } catch (e) {}
 
   if (updateHash) {
     if (viewName === "practice" && state.currentQuestion) {
@@ -570,7 +573,7 @@ function switchView(viewName, updateHash = true) {
         window.location.hash = state.currentQuestion.slug;
       }
     } else if (viewName === "home") {
-      if (window.location.hash !== "#home") {
+      if (window.location.hash !== "#home" && window.location.hash !== "") {
         window.location.hash = "home";
       }
     } else if (viewName === "notes") {
@@ -585,9 +588,6 @@ function switchView(viewName, updateHash = true) {
   }
 
   if (viewName === "practice") {
-    if (!state.currentQuestion && state.questions && state.questions.length > 0) {
-      loadQuestionDetail(state.questions[0].slug);
-    }
     if (state.editor) {
       setTimeout(() => state.editor.refresh(), 50);
     }
@@ -595,6 +595,8 @@ function switchView(viewName, updateHash = true) {
     renderHomeDashboard();
   } else if (viewName === "notes") {
     renderNotesHub();
+  } else if (viewName === "settings") {
+    updateStorageUsageUI();
   }
 }
 
@@ -840,7 +842,20 @@ function getAutocompletePrefix(cm) {
     startCh--;
   }
   const prefix = line.slice(startCh, cur.ch);
-  return { prefix, startCh, endCh: cur.ch, line: cur.line };
+
+  // Check if preceded by a dot and table/alias qualifier: e.g. "e." or "employee."
+  let qualifier = null;
+  if (startCh > 0 && line.charAt(startCh - 1) === ".") {
+    let qStart = startCh - 1;
+    while (qStart > 0 && /[a-zA-Z0-9_]/.test(line.charAt(qStart - 1))) {
+      qStart--;
+    }
+    if (qStart < startCh - 1) {
+      qualifier = line.slice(qStart, startCh - 1);
+    }
+  }
+
+  return { prefix, startCh, endCh: cur.ch, line: cur.line, qualifier };
 }
 
 function scoreAutocompleteMatch(target, query, freq = 0) {
@@ -851,45 +866,48 @@ function scoreAutocompleteMatch(target, query, freq = 0) {
   // 1. Exact match
   if (t === q) return 1000 + freq * 30;
 
-  // 2. Exact prefix match (e.g. "can" -> "candidate_id")
+  // 2. Exact prefix match (e.g. "can" -> "candidate_id", "s" -> "salary")
   if (t.startsWith(q)) {
     return 800 + (60 - Math.min(50, t.length)) + freq * 35;
   }
 
-  // 3. Exact substring match (e.g. "id" -> "candidate_id")
-  if (t.includes(q)) {
-    return 600 + (40 - Math.min(30, t.indexOf(q))) + freq * 25;
+  // 3. Exact substring match (e.g. "id" -> "candidate_id") - ONLY for query length >= 2
+  if (q.length >= 2 && t.includes(q)) {
+    return 500 + (30 - Math.min(25, t.indexOf(q))) + freq * 20;
   }
 
   // 4. Repeated character typo tolerance (e.g. "candii" -> "candi", "candid" matches "candidate_id")
   const dedupQ = q.replace(/(.)\1+/g, "$1");
   if (dedupQ.length >= 2 && t.startsWith(dedupQ)) {
-    return 550 + (50 - Math.min(40, t.length)) + freq * 30;
+    return 450 + (40 - Math.min(30, t.length)) + freq * 25;
   }
   if (dedupQ.length >= 2 && t.includes(dedupQ)) {
-    return 480 + freq * 25;
+    return 400 + freq * 20;
   }
 
-  // 5. One character edit distance against prefix of length q.length
-  // (e.g. "candii" length 6 vs "candid" length 6 -> distance = 1!)
-  const tPrefix = t.slice(0, Math.min(t.length, q.length));
-  let diff = 0;
-  for (let i = 0; i < Math.min(tPrefix.length, q.length); i++) {
-    if (tPrefix[i] !== q[i]) diff++;
-  }
-  diff += Math.abs(tPrefix.length - q.length);
-  if (diff <= 1 && t.length >= q.length - 1) {
-    return 450 + freq * 25;
+  // 5. One character edit distance against prefix - ONLY for query length >= 3
+  if (q.length >= 3) {
+    const tPrefix = t.slice(0, Math.min(t.length, q.length));
+    let diff = 0;
+    for (let i = 0; i < Math.min(tPrefix.length, q.length); i++) {
+      if (tPrefix[i] !== q[i]) diff++;
+    }
+    diff += Math.abs(tPrefix.length - q.length);
+    if (diff <= 1 && t.length >= q.length - 1) {
+      return 350 + freq * 20;
+    }
   }
 
-  // 6. Subsequence match (all query characters appear in order in target)
-  let ti = 0, qi = 0;
-  while (ti < t.length && qi < q.length) {
-    if (t[ti] === q[qi]) qi++;
-    ti++;
-  }
-  if (qi === q.length) {
-    return 350 + freq * 20;
+  // 6. Subsequence match - ONLY for query length >= 3
+  if (q.length >= 3) {
+    let ti = 0, qi = 0;
+    while (ti < t.length && qi < q.length) {
+      if (t[ti] === q[qi]) qi++;
+      ti++;
+    }
+    if (qi === q.length) {
+      return 300 + freq * 15;
+    }
   }
 
   return 0;
@@ -937,15 +955,63 @@ function highlightAutocompleteMatch(target, query) {
   return escapeSqlHint(t);
 }
 
-function getAutocompleteSuggestions(cm, prefix, isManualTrigger) {
-  const mode = state.settings.autocompleteMode || "standard";
-  if (mode === "off") return [];
+function resolveTableForQualifier(qualifier, editorContent, tables) {
+  if (!qualifier || !tables || tables.length === 0) return null;
+  const qLower = qualifier.toLowerCase();
 
-  const lowerPrefix = (prefix || "").toLowerCase();
+  // 1. Direct table name match: e.g. "employee_pay."
+  for (const tbl of tables) {
+    if (tbl.table_name && tbl.table_name.toLowerCase() === qLower) {
+      return tbl;
+    }
+  }
+
+  // 2. Look for SQL aliases in editor content: FROM tbl [AS] alias or JOIN tbl [AS] alias
+  const aliasRegex = /(?:FROM|JOIN)\s+([a-zA-Z0-9_]+)(?:\s+AS)?\s+([a-zA-Z0-9_]+)/gi;
+  let match;
+  while ((match = aliasRegex.exec(editorContent)) !== null) {
+    const rawTbl = match[1].toLowerCase();
+    const rawAlias = match[2].toLowerCase();
+    if (["on", "where", "join", "left", "right", "inner", "cross", "group", "order", "limit"].includes(rawAlias)) {
+      continue;
+    }
+    if (rawAlias === qLower) {
+      const found = tables.find(t => t.table_name && t.table_name.toLowerCase() === rawTbl);
+      if (found) return found;
+    }
+  }
+
+  // 3. Prefix or initials match: e.g. "e" matches "employee_pay", "ep" matches "employee_pay"
+  for (const tbl of tables) {
+    const tName = (tbl.table_name || "").toLowerCase();
+    if (tName.startsWith(qLower)) return tbl;
+    const initials = tName.split("_").map(part => part[0]).join("");
+    if (initials === qLower) return tbl;
+  }
+
+  // 4. If single table in question, default to that table
+  if (tables.length === 1) {
+    return tables[0];
+  }
+
+  return null;
+}
+
+function getAutocompleteSuggestions(cm, prefixInfo, isManualTrigger) {
+  const info = typeof prefixInfo === "string" ? { prefix: prefixInfo } : (prefixInfo || {});
+  const prefix = info.prefix || "";
+  const qualifier = info.qualifier || null;
+  const lowerPrefix = prefix.toLowerCase();
+
+  // Determine if in test / exam mode: Plain Mode (ON) or Autocomplete Mode = "editor_only"
+  const isTestMode = state.plainMode || state.settings.autocompleteMode === "editor_only";
+  const isOff = state.settings.autocompleteMode === "off";
+  if (isOff) return [];
+
   const suggestions = [];
   const seenTexts = new Set();
 
-  // Frequency tracking from current editor content
+  // Extract all words from current editor buffer
   const editorContent = cm.getValue();
   const allWords = editorContent.match(/[a-zA-Z_][a-zA-Z0-9_]*/g) || [];
   const wordFrequency = {};
@@ -954,12 +1020,16 @@ function getAutocompleteSuggestions(cm, prefix, isManualTrigger) {
     wordFrequency[w.toLowerCase()] = (wordFrequency[w.toLowerCase()] || 0) + 1;
   }
 
-  // Mode 2: "editor_only" (OA & Online Assessment Exam Mode)
-  // ONLY suggest words that the user has actually typed in the code editor buffer
-  if (mode === "editor_only") {
+  // =========================================================================
+  // TEST / EXAM MODE (Plain Mode or OA Exam Mode):
+  // STRICTLY ONLY suggest words that the user has actually typed in editor buffer!
+  // NO database schema leaks, NO external SQL function cheating!
+  // =========================================================================
+  if (isTestMode) {
     const uniqueWords = Array.from(new Set(allWords));
     for (const w of uniqueWords) {
       if (w.toLowerCase() === lowerPrefix && w.length === lowerPrefix.length) continue;
+      if (qualifier && w.toLowerCase() === qualifier.toLowerCase()) continue;
       const freq = wordFrequency[w] || 1;
       const score = scoreAutocompleteMatch(w, prefix, freq);
       if (score > 0) {
@@ -968,7 +1038,7 @@ function getAutocompleteSuggestions(cm, prefix, isManualTrigger) {
           insert: w,
           type: "editor",
           typeIcon: "abc",
-          badge: "", // Clean Image 3 aesthetic
+          badge: "",
           highlightedHtml: highlightAutocompleteMatch(w, prefix),
           score: score
         });
@@ -979,7 +1049,46 @@ function getAutocompleteSuggestions(cm, prefix, isManualTrigger) {
     return suggestions.slice(0, 15);
   }
 
-  // Mode 1: "standard"
+  // =========================================================================
+  // OPEN / PRACTICE MODE (Standard):
+  // =========================================================================
+
+  // Case A: User typed a table/alias dot qualifier (e.g. "e." or "e.s")
+  // Show ONLY columns belonging to that table!
+  if (qualifier && state.currentQuestion) {
+    const tables = state.currentQuestion.tables || [];
+    const matchedTable = resolveTableForQualifier(qualifier, editorContent, tables);
+    const targetTables = matchedTable ? [matchedTable] : tables;
+
+    for (const tbl of targetTables) {
+      for (const col of (tbl.columns || [])) {
+        const colName = col.column_name;
+        if (!colName || seenTexts.has(colName.toLowerCase())) continue;
+        const freq = wordFrequency[colName.toLowerCase()] || 0;
+        // If prefix is empty (user just typed "e."), suggest all columns of this table
+        const score = !prefix ? 900 : scoreAutocompleteMatch(colName, prefix, freq) + 50;
+        if (score > 0) {
+          suggestions.push({
+            text: colName,
+            insert: colName,
+            type: "column",
+            typeIcon: "abc",
+            badge: "COL",
+            highlightedHtml: highlightAutocompleteMatch(colName, prefix),
+            score: score
+          });
+          seenTexts.add(colName.toLowerCase());
+        }
+      }
+    }
+
+    if (suggestions.length > 0) {
+      suggestions.sort((a, b) => b.score - a.score || a.text.localeCompare(b.text));
+      return suggestions.slice(0, 15);
+    }
+  }
+
+  // Case B: General Standard Autocomplete (No dot qualifier)
   // 1. SQL Functions
   for (const fn of SQL_AUTOCOMPLETE_FUNCTIONS) {
     const nameOnly = fn.text.replace(/\(.*$/, "");
@@ -1006,7 +1115,7 @@ function getAutocompleteSuggestions(cm, prefix, isManualTrigger) {
     const tables = state.currentQuestion.tables || [];
     for (const tbl of tables) {
       const tblName = tbl.table_name;
-      if (tblName) {
+      if (tblName && !seenTexts.has(tblName.toLowerCase())) {
         const freq = wordFrequency[tblName.toLowerCase()] || 0;
         const score = scoreAutocompleteMatch(tblName, prefix, freq) + 15;
         if (score > 15) {
@@ -1024,7 +1133,7 @@ function getAutocompleteSuggestions(cm, prefix, isManualTrigger) {
       }
       for (const col of (tbl.columns || [])) {
         const colName = col.column_name;
-        if (colName) {
+        if (colName && !seenTexts.has(colName.toLowerCase())) {
           const freq = wordFrequency[colName.toLowerCase()] || 0;
           const score = scoreAutocompleteMatch(colName, prefix, freq) + 15;
           if (score > 15) {
@@ -1046,7 +1155,7 @@ function getAutocompleteSuggestions(cm, prefix, isManualTrigger) {
 
   // 3. SQL Keywords
   for (const kw of SQL_AUTOCOMPLETE_KEYWORDS) {
-    if (!seenTexts.has(kw)) {
+    if (!seenTexts.has(kw) && !seenTexts.has(kw.toLowerCase())) {
       const freq = wordFrequency[kw.toLowerCase()] || 0;
       const score = scoreAutocompleteMatch(kw, prefix, freq);
       if (score > 0) {
@@ -1116,7 +1225,7 @@ function renderAutocompletePopup(cm, suggestions, prefixInfo) {
   autocompleteState.selectedIndex = 0;
 
   popup.innerHTML = "";
-  const mode = state.settings.autocompleteMode || "standard";
+  const isTestMode = state.plainMode || state.settings.autocompleteMode === "editor_only";
   suggestions.forEach((item, index) => {
     const itemEl = document.createElement("div");
     itemEl.className = `autocomplete-item${index === 0 ? " active" : ""}`;
@@ -1124,7 +1233,7 @@ function renderAutocompletePopup(cm, suggestions, prefixInfo) {
 
     const iconHtml = `<span class="ac-icon">${escapeSqlHint(item.typeIcon || "abc")}</span>`;
     const textHtml = `<span class="autocomplete-item-text">${item.highlightedHtml || escapeSqlHint(item.text)}</span>`;
-    const badgeHtml = item.badge && mode !== "editor_only" ? `<span class="autocomplete-badge badge-${item.type}">${escapeSqlHint(item.badge)}</span>` : "";
+    const badgeHtml = item.badge && !isTestMode ? `<span class="autocomplete-badge badge-${item.type}">${escapeSqlHint(item.badge)}</span>` : "";
 
     itemEl.innerHTML = `
       <div class="autocomplete-item-main">
@@ -1207,11 +1316,11 @@ function handleAutocompleteInput(cm) {
     return;
   }
   const prefixInfo = getAutocompletePrefix(cm);
-  if (!prefixInfo.prefix || prefixInfo.prefix.length === 0) {
+  if (!prefixInfo.prefix && !prefixInfo.qualifier) {
     closeAutocompletePopup();
     return;
   }
-  const suggestions = getAutocompleteSuggestions(cm, prefixInfo.prefix, false);
+  const suggestions = getAutocompleteSuggestions(cm, prefixInfo, false);
   if (suggestions.length === 0) {
     closeAutocompletePopup();
     return;
@@ -1230,9 +1339,12 @@ function triggerAutocomplete(cm, isManual) {
   }
 
   const prefixInfo = getAutocompletePrefix(cm);
-  const suggestions = getAutocompleteSuggestions(cm, prefixInfo.prefix, isManual);
+  const suggestions = getAutocompleteSuggestions(cm, prefixInfo, isManual);
   if (suggestions.length === 0) {
-    if (isManual) showToast(state.settings.autocompleteMode === "editor_only" ? "No words in editor buffer match" : "No suggestions match");
+    if (isManual) {
+      const isTest = state.plainMode || state.settings.autocompleteMode === "editor_only";
+      showToast(isTest ? "No words in editor buffer match" : "No suggestions match");
+    }
     closeAutocompletePopup();
     return;
   }
@@ -1324,7 +1436,7 @@ function initEditor() {
       if (posEl) posEl.textContent = `Ln ${pos.line + 1}, Col ${pos.ch + 1}`;
       if (isAutocompleteOpen()) {
         const prefixInfo = getAutocompletePrefix(state.editor);
-        if (!prefixInfo.prefix) {
+        if (!prefixInfo.prefix && !prefixInfo.qualifier) {
           closeAutocompletePopup();
         }
       }
@@ -1479,60 +1591,101 @@ function formatEditorSQL() {
 // Data Loading & API
 // ============================================================================
 async function loadQuestions() {
+  let data = null;
   try {
     const res = await fetch("/api/questions");
-    const data = await res.json();
-    state.questions = data;
-
-    const countBadge = el("question-count-badge");
-    if (countBadge) countBadge.textContent = data.length;
-
-    // Populate drawer company dropdown
-    const companySelect = el("company-select");
-    if (companySelect) {
-      companySelect.innerHTML = `<option value="all">All Companies</option>`;
-      const companies = Array.from(new Set(data.map(q => q.company).filter(Boolean))).sort();
-      companies.forEach(c => {
-        const opt = document.createElement("option");
-        opt.value = c;
-        opt.textContent = c;
-        companySelect.appendChild(opt);
-      });
+    if (res.ok) {
+      data = await res.json();
+      try {
+        localStorage.setItem("sqlmaster_cached_questions", JSON.stringify(data));
+      } catch (e) {}
     }
-
-    // Populate home sheet company dropdown
-    const homeCompanySelect = el("home-sheet-company-select");
-    if (homeCompanySelect) {
-      homeCompanySelect.innerHTML = `<option value="all">Company: All</option>`;
-      const companies = Array.from(new Set(data.map(q => q.company).filter(Boolean))).sort();
-      companies.forEach(c => {
-        const opt = document.createElement("option");
-        opt.value = c;
-        opt.textContent = c;
-        homeCompanySelect.appendChild(opt);
-      });
-    }
-
-    filterAndSortQuestions();
-
-    // Determine initial route from URL hash
-    handleHashNavigation();
   } catch (err) {
-    console.error("Failed to load questions:", err);
-    showToast("Failed to load questions from server");
+    console.warn("Could not fetch questions over network, trying offline cache:", err);
+  }
+
+  // Graceful offline fallback
+  if (!data || !Array.isArray(data) || data.length === 0) {
+    const cached = localStorage.getItem("sqlmaster_cached_questions");
+    if (cached) {
+      try {
+        data = JSON.parse(cached);
+        showToast("Loaded 100 questions from local offline cache");
+      } catch (e) {}
+    }
+  }
+
+  if (!data || !Array.isArray(data) || data.length === 0) {
+    console.error("Failed to load questions from network or cache");
+    showToast("Failed to load questions. Please check connection.");
+    return;
+  }
+
+  state.questions = data;
+
+  const countBadge = el("question-count-badge");
+  if (countBadge) countBadge.textContent = data.length;
+
+  // Populate drawer company dropdown
+  const companySelect = el("company-select");
+  if (companySelect) {
+    companySelect.innerHTML = `<option value="all">All Companies</option>`;
+    const companies = Array.from(new Set(data.map(q => q.company).filter(Boolean))).sort();
+    companies.forEach(c => {
+      const opt = document.createElement("option");
+      opt.value = c;
+      opt.textContent = c;
+      companySelect.appendChild(opt);
+    });
+  }
+
+  // Populate home sheet company dropdown
+  const homeCompanySelect = el("home-sheet-company-select");
+  if (homeCompanySelect) {
+    homeCompanySelect.innerHTML = `<option value="all">Company: All</option>`;
+    const companies = Array.from(new Set(data.map(q => q.company).filter(Boolean))).sort();
+    companies.forEach(c => {
+      const opt = document.createElement("option");
+      opt.value = c;
+      opt.textContent = c;
+      homeCompanySelect.appendChild(opt);
+    });
+  }
+
+  filterAndSortQuestions();
+
+  // Determine initial route from URL hash
+  handleHashNavigation();
+
+  // Background precache for full offline support if idle
+  if ("requestIdleCallback" in window) {
+    requestIdleCallback(() => {
+      if (!localStorage.getItem("sqlmaster_cached_all_questions")) {
+        precacheAllQuestionsForOffline(false);
+      }
+    });
   }
 }
 
 function handleHashNavigation() {
-  const hash = window.location.hash.replace(/^#/, "");
-  if (!hash || hash === "home") {
+  const rawHash = (window.location.hash || "").replace(/^#/, "").trim();
+  if (!rawHash || rawHash === "home") {
     switchView("home", false);
-  } else if (hash === "notes") {
+    return;
+  }
+  if (rawHash === "notes") {
     switchView("notes", false);
-  } else if (hash === "settings") {
+    return;
+  }
+  if (rawHash === "settings") {
     switchView("settings", false);
-  } else if (hash === "practice") {
-    const target = state.currentQuestion || state.questions[0];
+    return;
+  }
+  if (rawHash === "practice") {
+    const savedSlug = localStorage.getItem("sqlmaster_current_slug");
+    const target = (savedSlug && state.questions.find(item => item.slug === savedSlug)) || 
+                   state.currentQuestion || 
+                   state.questions[0];
     if (target) {
       switchView("practice", false);
       if (!state.currentQuestion || state.currentQuestion.slug !== target.slug) {
@@ -1541,33 +1694,76 @@ function handleHashNavigation() {
     } else {
       switchView("home", false);
     }
+    return;
+  }
+
+  // Question slug in URL hash
+  const q = state.questions.find(item => item.slug === rawHash);
+  if (q) {
+    switchView("practice", false);
+    loadQuestionDetail(q.slug, false);
   } else {
-    const q = state.questions.find(item => item.slug === hash);
-    if (q) {
-      switchView("practice", false);
-      loadQuestionDetail(q.slug, false);
-    } else {
-      switchView("home", false);
-    }
+    // Unrecognized hash - stay on home
+    switchView("home", false);
   }
 }
 
 async function loadQuestionDetail(slug, updateHash = true) {
   try {
-    const res = await fetch(`/api/questions/${slug}`);
-    if (!res.ok) {
-      throw new Error(`HTTP error ${res.status}`);
-    }
-    const q = await res.json();
-    q.original_test_cases = JSON.parse(JSON.stringify(q.test_cases || []));
-    state.currentQuestion = q;
-    state.editingTestCaseIndex = null;
-    if (updateHash && state.currentView === "practice") {
-      window.location.hash = slug;
+    let q = null;
+    try {
+      const res = await fetch(`/api/questions/${slug}`);
+      if (res.ok) {
+        q = await res.json();
+        try {
+          localStorage.setItem(`sqlmaster_cached_q_${slug}`, JSON.stringify(q));
+        } catch (e) {}
+      }
+    } catch (err) {
+      console.warn(`Fetch for question ${slug} failed, checking offline cache:`, err);
     }
 
-    renderQuestionDetail(q);
-    renderQuestionList();
+  // Offline fallback
+  if (!q) {
+    const cached = localStorage.getItem(`sqlmaster_cached_q_${slug}`);
+    if (cached) {
+      try {
+        q = JSON.parse(cached);
+      } catch (e) {}
+    }
+    if (!q) {
+      const allCached = localStorage.getItem("sqlmaster_cached_all_questions");
+      if (allCached) {
+        try {
+          const allObj = JSON.parse(allCached);
+          if (allObj[slug]) q = allObj[slug];
+        } catch (e) {}
+      }
+    }
+  }
+
+  if (!q) {
+    showToast(`Could not load details for '${slug}'`);
+    return;
+  }
+
+  q.original_test_cases = JSON.parse(JSON.stringify(q.test_cases || []));
+  state.currentQuestion = q;
+  state.editingTestCaseIndex = null;
+
+  try {
+    localStorage.setItem("sqlmaster_current_slug", slug);
+    localStorage.setItem("sqlmaster_current_view", "practice");
+  } catch (e) {}
+
+  if (updateHash && state.currentView === "practice") {
+    if (window.location.hash !== `#${slug}`) {
+      window.location.hash = slug;
+    }
+  }
+
+  renderQuestionDetail(q);
+  renderQuestionList();
 
     // Restore draft or starter template
     const savedDraft = localStorage.getItem(`sqlmaster_draft_${slug}`);
@@ -1860,7 +2056,7 @@ function renderQuestionDetail(q) {
 
   const editorialApproach = el("editorial-approach-content");
   if (editorialApproach) {
-    const tableNames = (q.tables || []).map(t => `<code>${escapeHTML(t.table_name)}</code>`).join(", ");
+    const tableNames = (q.tables || []).map(t => `<span class="table-badge subtle" style="padding: 1px 7px; font-size: 0.82em;"><code class="table-name-code">${escapeHTML(t.table_name)}</code></span>`).join(", ");
     let notesSummary = "";
     if (q.notes && q.notes.length > 0) {
       notesSummary = `
@@ -1894,7 +2090,15 @@ function renderContinuousTables(q) {
     const sampleRows = (q.sample_data && q.sample_data[tbl.table_name]) || [];
 
     tableBlock.innerHTML = `
-      <h3 class="flow-heading">Table: <code>${escapeHTML(tbl.table_name)}</code></h3>
+      <h3 class="flow-heading flow-header-row">
+        <span class="flow-label">Table:</span>
+        <span class="table-badge">
+          <svg class="table-badge-icon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 3v18"/><rect width="18" height="18" x="3" y="3" rx="2"/><path d="M3 9h18"/><path d="M3 15h18"/>
+          </svg>
+          <code class="table-name-code">${escapeHTML(tbl.table_name)}</code>
+        </span>
+      </h3>
       <div class="table-container">
         <table class="data-table">
           <thead>
@@ -1906,7 +2110,7 @@ function renderContinuousTables(q) {
           <tbody>
             ${tbl.columns.map(c => `
               <tr>
-                <td><strong>${escapeHTML(c.column_name)}</strong></td>
+                <td><strong class="col-name">${escapeHTML(c.column_name)}</strong></td>
                 <td><span class="data-type-label">${escapeHTML(c.data_type)}</span></td>
               </tr>
             `).join("")}
@@ -1914,7 +2118,15 @@ function renderContinuousTables(q) {
         </table>
       </div>
 
-      <h4 class="flow-subheading">Example Input: <code>${escapeHTML(tbl.table_name)}</code></h4>
+      <h4 class="flow-subheading flow-header-row sub">
+        <span class="flow-label">Example Input:</span>
+        <span class="table-badge subtle">
+          <svg class="table-badge-icon" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 3v18"/><rect width="18" height="18" x="3" y="3" rx="2"/><path d="M3 9h18"/><path d="M3 15h18"/>
+          </svg>
+          <code class="table-name-code">${escapeHTML(tbl.table_name)}</code>
+        </span>
+      </h4>
       <div class="table-container">
         ${createTableHTML(sampleRows)}
       </div>
@@ -4137,7 +4349,9 @@ function setupEventListeners() {
 
   // Home Dashboard Hero Buttons
   el("home-btn-resume")?.addEventListener("click", () => {
-    const target = state.questions.find(q => isQuestionAttempted(q.slug)) || 
+    const savedSlug = localStorage.getItem("sqlmaster_current_slug");
+    const target = (savedSlug && state.questions.find(q => q.slug === savedSlug)) ||
+                   state.questions.find(q => isQuestionAttempted(q.slug)) || 
                    state.questions.find(q => !isQuestionSolved(q.slug)) || 
                    state.questions[0];
     if (target) {
@@ -4385,7 +4599,93 @@ function setupEventListeners() {
   el("btn-bottom-run")?.addEventListener("click", handleEditorPreview);
   el("btn-bottom-submit")?.addEventListener("click", handleEditorRun);
 
-  el("btn-export-data")?.addEventListener("click", exportUserData);
+  // Storage & Backup Event Listeners
+  el("btn-export-full")?.addEventListener("click", exportFullBackup);
+  el("btn-export-compact")?.addEventListener("click", exportCompactBackup);
+  el("btn-export-data")?.addEventListener("click", exportCompactBackup);
+  el("btn-trigger-import")?.addEventListener("click", () => el("input-import-backup")?.click());
+  el("btn-browse-backup")?.addEventListener("click", (e) => {
+    e.stopPropagation();
+    el("input-import-backup")?.click();
+  });
+  el("input-import-backup")?.addEventListener("change", handleImportFileSelect);
+
+  const dropzone = el("backup-dropzone");
+  if (dropzone) {
+    dropzone.addEventListener("click", (e) => {
+      if (e.target.id !== "btn-browse-backup" && !e.target.closest("#btn-browse-backup")) {
+        el("input-import-backup")?.click();
+      }
+    });
+    dropzone.addEventListener("dragover", (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      dropzone.classList.add("dragover");
+    });
+    dropzone.addEventListener("dragleave", (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      dropzone.classList.remove("dragover");
+    });
+    dropzone.addEventListener("drop", (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      dropzone.classList.remove("dragover");
+      if (e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+        handleImportFileSelect({ target: { files: e.dataTransfer.files } });
+      }
+    });
+  }
+
+  // Global window-level drag-and-drop: drop backup anywhere on screen
+  let windowDragCounter = 0;
+  window.addEventListener("dragenter", (e) => {
+    e.preventDefault();
+    windowDragCounter++;
+    const overlay = el("global-drag-overlay");
+    if (overlay) overlay.style.display = "flex";
+  });
+  window.addEventListener("dragleave", (e) => {
+    e.preventDefault();
+    windowDragCounter--;
+    if (windowDragCounter <= 0) {
+      windowDragCounter = 0;
+      const overlay = el("global-drag-overlay");
+      if (overlay) overlay.style.display = "none";
+    }
+  });
+  window.addEventListener("dragover", (e) => {
+    e.preventDefault();
+  });
+  window.addEventListener("drop", (e) => {
+    e.preventDefault();
+    windowDragCounter = 0;
+    const overlay = el("global-drag-overlay");
+    if (overlay) overlay.style.display = "none";
+    if (e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+      const file = e.dataTransfer.files[0];
+      if (file.name.toLowerCase().endsWith(".json")) {
+        handleImportFileSelect({ target: { files: [file] } });
+      } else {
+        showToast("Please drop a valid .json SQLMaster backup file");
+      }
+    }
+  });
+
+  el("btn-close-restore-modal")?.addEventListener("click", closeRestoreModal);
+  el("btn-cancel-restore")?.addEventListener("click", closeRestoreModal);
+  el("btn-apply-restore")?.addEventListener("click", handleApplyRestore);
+  el("restore-modal")?.addEventListener("click", (e) => {
+    if (e.target.id === "restore-modal") closeRestoreModal();
+  });
+  el("btn-clear-drafts")?.addEventListener("click", clearDraftsOnly);
+  el("btn-factory-reset")?.addEventListener("click", factoryResetAll);
+  el("btn-refresh-storage")?.addEventListener("click", () => {
+    updateStorageUsageUI();
+    showToast("Storage stats recalculated");
+  });
+  el("btn-free-cache")?.addEventListener("click", freeOfflineCache);
+  el("btn-precache-offline")?.addEventListener("click", () => precacheAllQuestionsForOffline(true));
 
   const handleResetProgress = () => {
     if (confirm("Are you sure you want to reset all solved and attempted progress? (Stars and notes will be preserved)")) {
@@ -4399,6 +4699,7 @@ function setupEventListeners() {
       if (state.currentQuestion) renderQuestionDetail(state.currentQuestion);
       renderHomeProblemsTable();
       renderHomeDashboard();
+      updateStorageUsageUI();
       showToast("Practice progress reset to 0/100");
     }
   };
@@ -4424,10 +4725,16 @@ function setupEventListeners() {
     const tag = (e.target.tagName || "").toLowerCase();
     const isInput = tag === "input" || tag === "textarea";
 
-    // Escape closes drawer
-    if (e.key === "Escape" && state.drawerOpen) {
-      closeDrawer();
-      return;
+    // Escape closes drawer or restore modal
+    if (e.key === "Escape") {
+      if (el("restore-modal") && el("restore-modal").style.display === "flex") {
+        closeRestoreModal();
+        return;
+      }
+      if (state.drawerOpen) {
+        closeDrawer();
+        return;
+      }
     }
 
     // Global Run Shortcut: Cmd+Enter / Ctrl+Enter
@@ -4485,12 +4792,275 @@ function saveSettings() {
   localStorage.setItem("sqlmaster_settings", JSON.stringify(state.settings));
 }
 
-function exportUserData() {
+// ============================================================================
+// Storage Usage, Backup & Offline Persistence (100% Client-Side)
+// ============================================================================
+
+function formatBytes(bytes) {
+  if (bytes < 1024) return bytes + " B";
+  if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + " KB";
+  return (bytes / (1024 * 1024)).toFixed(2) + " MB";
+}
+
+function calculateStorageUsage() {
+  let totalBytes = 0;
+  const categories = {
+    drafts: { count: 0, bytes: 0 },
+    notes: { count: 0, bytes: 0 },
+    progress: { count: 0, bytes: 0 },
+    cache: { count: 0, bytes: 0 },
+    settings: { bytes: 0 },
+    other: { bytes: 0 }
+  };
+
+  try {
+    for (let i = 0; i < localStorage.length; i++) {
+      const key = localStorage.key(i);
+      if (!key) continue;
+      const val = localStorage.getItem(key) || "";
+      // In JS, localStorage strings are UTF-16, roughly 2 bytes per char
+      const itemBytes = (key.length + val.length) * 2;
+      totalBytes += itemBytes;
+
+      if (key.startsWith("sqlmaster_draft_")) {
+        categories.drafts.count++;
+        categories.drafts.bytes += itemBytes;
+      } else if (key === "sqlmaster_user_notes" || key === "sqlmaster_notes") {
+        try {
+          const notesObj = JSON.parse(val);
+          categories.notes.count = Object.keys(notesObj).length;
+        } catch (e) {
+          categories.notes.count = 1;
+        }
+        categories.notes.bytes += itemBytes;
+      } else if (
+        key === "sqlmaster_solved" ||
+        key === "sqlmaster_attempted" ||
+        key === "sqlmaster_starred" ||
+        key === "sqlmaster_total_submissions"
+      ) {
+        categories.progress.bytes += itemBytes;
+      } else if (key.startsWith("sqlmaster_cached_") || key.startsWith("sqlmaster_qdetail_")) {
+        categories.cache.count++;
+        categories.cache.bytes += itemBytes;
+      } else if (
+        key.startsWith("sqlmaster_settings") ||
+        key.startsWith("sqlmaster_theme") ||
+        key.startsWith("sqlmaster_code_theme") ||
+        key.startsWith("sqlmaster_plain_mode") ||
+        key.startsWith("sqlmaster_sort") ||
+        key.startsWith("sqlmaster_desc_") ||
+        key.startsWith("sqlmaster_editor_") ||
+        key.startsWith("sqlmaster_testcase_")
+      ) {
+        categories.settings.bytes += itemBytes;
+      } else if (key.startsWith("sqlmaster_")) {
+        categories.other.bytes += itemBytes;
+      }
+    }
+  } catch (err) {
+    console.warn("Storage inspection error:", err);
+  }
+
+  const quotaBytes = 5 * 1024 * 1024; // 5 MB typical browser quota
+  const percentUsed = Math.min(100, (totalBytes / quotaBytes) * 100);
+
+  return { totalBytes, quotaBytes, percentUsed, categories };
+}
+
+function updateStorageUsageUI() {
+  const usage = calculateStorageUsage();
+  const quota = usage.quotaBytes; // 5 * 1024 * 1024
+  const freeBytes = Math.max(0, quota - usage.totalBytes);
+  const freePct = Math.max(0, (freeBytes / quota) * 100);
+
+  const usedText = el("storage-used-text");
+  if (usedText) usedText.textContent = formatBytes(usage.totalBytes);
+
+  const pctText = el("storage-used-pct");
+  if (pctText) pctText.textContent = `${usage.percentUsed.toFixed(2)}%`;
+
+  const freeText = el("storage-free-text");
+  if (freeText) freeText.textContent = formatBytes(freeBytes);
+
+  const freePctHead = el("storage-free-pct-head");
+  if (freePctHead) freePctHead.textContent = `${freePct.toFixed(1)}%`;
+
+  // Scale every segment against the FULL 5.0 MB QUOTA so free space is accurately visible!
+  const getSegPctOfQuota = (bytes) => ((bytes / quota) * 100).toFixed(2) + "%";
+
+  const segDrafts = el("seg-drafts");
+  if (segDrafts) segDrafts.style.width = getSegPctOfQuota(usage.categories.drafts.bytes);
+
+  const segNotes = el("seg-notes");
+  if (segNotes) segNotes.style.width = getSegPctOfQuota(usage.categories.notes.bytes);
+
+  const segProgress = el("seg-progress");
+  if (segProgress) segProgress.style.width = getSegPctOfQuota(usage.categories.progress.bytes);
+
+  const segCache = el("seg-cache");
+  if (segCache) segCache.style.width = getSegPctOfQuota(usage.categories.cache.bytes);
+
+  const segSettings = el("seg-settings");
+  if (segSettings) segSettings.style.width = getSegPctOfQuota(usage.categories.settings.bytes);
+
+  const segFree = el("seg-free");
+  if (segFree) {
+    segFree.style.width = `${freePct.toFixed(2)}%`;
+    segFree.title = `Available Free Space: ${formatBytes(freeBytes)} (${freePct.toFixed(1)}%)`;
+  }
+
+  // Cards
+  const draftsSize = el("storage-drafts-size");
+  if (draftsSize) draftsSize.textContent = formatBytes(usage.categories.drafts.bytes);
+
+  const draftsCount = el("storage-drafts-count");
+  if (draftsCount) draftsCount.textContent = `${usage.categories.drafts.count} drafts saved`;
+
+  const notesSize = el("storage-notes-size");
+  if (notesSize) notesSize.textContent = formatBytes(usage.categories.notes.bytes);
+
+  const notesCount = el("storage-notes-count");
+  if (notesCount) notesCount.textContent = `${usage.categories.notes.count} problem notes`;
+
+  const progressSize = el("storage-progress-size");
+  if (progressSize) progressSize.textContent = formatBytes(usage.categories.progress.bytes);
+
+  const progressCount = el("storage-progress-count");
+  if (progressCount) {
+    progressCount.textContent = `${state.solvedSlugs.size} solved, ${state.attemptedSlugs.size} attempted • ${state.starredSlugs.size} starred`;
+  }
+
+  const cacheSize = el("storage-cache-size");
+  if (cacheSize) cacheSize.textContent = formatBytes(usage.categories.cache.bytes);
+
+  const cacheCount = el("storage-cache-count");
+  if (cacheCount) {
+    const hasAll = !!localStorage.getItem("sqlmaster_cached_all_questions");
+    cacheCount.textContent = hasAll ? "100 / 100 offline ready" : `${usage.categories.cache.count} cached`;
+  }
+
+  const settingsSize = el("storage-settings-size");
+  if (settingsSize) settingsSize.textContent = formatBytes(usage.categories.settings.bytes);
+
+  // Free Space Card
+  const freeSize = el("storage-free-size");
+  if (freeSize) freeSize.textContent = formatBytes(freeBytes);
+
+  const freeSub = el("storage-free-sub");
+  if (freeSub) freeSub.textContent = `${freePct.toFixed(1)}% remaining`;
+
+  // Status Badge
+  const statusBadge = el("storage-status-badge");
+  if (statusBadge) {
+    if (usage.percentUsed > 85) {
+      statusBadge.textContent = "High Usage";
+      statusBadge.style.background = "rgba(239, 68, 68, 0.15)";
+      statusBadge.style.color = "#ef4444";
+      statusBadge.style.borderColor = "rgba(239, 68, 68, 0.3)";
+    } else if (usage.percentUsed > 50) {
+      statusBadge.textContent = "Moderate";
+      statusBadge.style.background = "rgba(245, 158, 11, 0.15)";
+      statusBadge.style.color = "#f59e0b";
+      statusBadge.style.borderColor = "rgba(245, 158, 11, 0.3)";
+    } else {
+      statusBadge.textContent = "Healthy";
+      statusBadge.style.background = "rgba(16, 185, 129, 0.12)";
+      statusBadge.style.color = "#10b981";
+      statusBadge.style.borderColor = "rgba(16, 185, 129, 0.25)";
+    }
+  }
+}
+
+function exportFullBackup() {
+  const drafts = {};
+  for (let i = 0; i < localStorage.length; i++) {
+    const key = localStorage.key(i);
+    if (key && key.startsWith("sqlmaster_draft_")) {
+      const slug = key.replace("sqlmaster_draft_", "");
+      drafts[slug] = localStorage.getItem(key);
+    }
+  }
+
+  const subCount = getSubmissionCount();
+  localStorage.setItem("sqlmaster_total_submissions", String(subCount));
+
+  const starredList = Array.from(state.starredSlugs);
+  const starredDetails = starredList.map(slug => {
+    const q = state.questions.find(item => item.slug === slug);
+    return {
+      slug: slug,
+      title: q?.title || slug,
+      difficulty: q?.difficulty || "Medium",
+      company: q?.company || ""
+    };
+  });
+
+  const data = {
+    version: 2,
+    backup_type: "full",
+    app: "SQLMaster / MyWorkbench",
+    exported_at: new Date().toISOString(),
+    summary: {
+      solved_count: state.solvedSlugs.size,
+      attempted_count: state.attemptedSlugs.size,
+      starred_count: state.starredSlugs.size,
+      starred_slugs: starredList,
+      starred_details: starredDetails,
+      notes_count: Object.keys(state.userNotes || {}).length,
+      drafts_count: Object.keys(drafts).length,
+      total_submissions: subCount
+    },
+    solved: Array.from(state.solvedSlugs),
+    attempted: Array.from(state.attemptedSlugs),
+    starred: starredList,
+    starred_details: starredDetails,
+    notes: state.userNotes,
+    drafts: drafts,
+    submissions: subCount,
+    settings: state.settings,
+    ui_preferences: {
+      theme: localStorage.getItem("sqlmaster_theme") || "light",
+      codeTheme: localStorage.getItem("sqlmaster_code_theme") || "leetcode",
+      plainMode: localStorage.getItem("sqlmaster_plain_mode") === "true",
+      sort: localStorage.getItem("sqlmaster_sort") || "default",
+      descWidth: localStorage.getItem("sqlmaster_desc_width"),
+      editorHeight: localStorage.getItem("sqlmaster_editor_height")
+    }
+  };
+
+  const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = `sqlmaster_full_backup_${new Date().toISOString().slice(0, 10)}.json`;
+  a.click();
+  URL.revokeObjectURL(url);
+  showToast(`Full Backup downloaded (${Object.keys(drafts).length} drafts, ${state.solvedSlugs.size} solved)`);
+}
+
+function exportCompactBackup() {
+  const subCount = getSubmissionCount();
+  localStorage.setItem("sqlmaster_total_submissions", String(subCount));
+
+  const starredList = Array.from(state.starredSlugs);
+  const starredDetails = starredList.map(slug => {
+    const q = state.questions.find(item => item.slug === slug);
+    return {
+      slug: slug,
+      title: q?.title || slug,
+      difficulty: q?.difficulty || "Medium",
+      company: q?.company || ""
+    };
+  });
+
   const data = {
     solved: Array.from(state.solvedSlugs),
     attempted: Array.from(state.attemptedSlugs),
-    starred: Array.from(state.starredSlugs),
+    starred: starredList,
+    starred_details: starredDetails,
     notes: state.userNotes,
+    submissions: subCount,
     settings: state.settings,
     exported_at: new Date().toISOString()
   };
@@ -4499,10 +5069,417 @@ function exportUserData() {
   const url = URL.createObjectURL(blob);
   const a = document.createElement("a");
   a.href = url;
-  a.download = `sqlmaster_backup_${new Date().toISOString().slice(0, 10)}.json`;
+  a.download = `sqlmaster_compact_backup_${new Date().toISOString().slice(0, 10)}.json`;
   a.click();
   URL.revokeObjectURL(url);
-  showToast("Export downloaded");
+  showToast("Compact Backup downloaded");
+}
+
+let pendingRestoreData = null;
+
+function handleImportFileSelect(e) {
+  const file = e.target?.files?.[0] || e.dataTransfer?.files?.[0];
+  if (!file) return;
+
+  showToast(`📂 Reading backup file: ${file.name}...`);
+
+  const reader = new FileReader();
+  reader.onload = (event) => {
+    try {
+      const data = JSON.parse(event.target.result);
+      if (!data || typeof data !== "object") {
+        throw new Error("File content is not a valid JSON object");
+      }
+
+      pendingRestoreData = { file, data, fileName: file.name };
+
+      const isFull = !!(data.drafts || data.backup_type === "full");
+      const solvedList = Array.isArray(data.solved) ? data.solved : (Array.isArray(data.summary?.solved_slugs) ? data.summary.solved_slugs : []);
+      const attemptedList = Array.isArray(data.attempted) ? data.attempted : (Array.isArray(data.summary?.attempted_slugs) ? data.summary.attempted_slugs : []);
+      const starredList = Array.isArray(data.starred) 
+        ? data.starred 
+        : (data.summary && Array.isArray(data.summary.starred_slugs))
+          ? data.summary.starred_slugs
+          : (data.summary && Array.isArray(data.summary.starred_details))
+            ? data.summary.starred_details
+            : [];
+      const notesObj = data.notes || data.userNotes || {};
+      const draftsObj = data.drafts || {};
+
+      const solvedCount = solvedList.length;
+      const attemptedCount = attemptedList.length;
+      const starredCount = starredList.length;
+      const notesCount = Object.keys(notesObj).length;
+      const draftsCount = Object.keys(draftsObj).length;
+
+      const fileNameEl = el("restore-file-name");
+      if (fileNameEl) fileNameEl.textContent = file.name;
+
+      const fileTypeEl = el("restore-file-type");
+      if (fileTypeEl) {
+        fileTypeEl.textContent = isFull ? "Full Backup (v2)" : "Compact Progress Backup";
+        fileTypeEl.className = isFull ? "badge-tag-rec" : "badge-tag-subtle";
+      }
+
+      const fileDateEl = el("restore-file-date");
+      if (fileDateEl) {
+        fileDateEl.textContent = data.exported_at
+          ? "Exported: " + new Date(data.exported_at).toLocaleString()
+          : "Export date: Unknown";
+      }
+
+      const countSolvedEl = el("restore-count-solved");
+      if (countSolvedEl) countSolvedEl.textContent = solvedCount;
+
+      const countAttemptedEl = el("restore-count-attempted");
+      if (countAttemptedEl) countAttemptedEl.textContent = attemptedCount;
+
+      const countStarredEl = el("restore-count-starred");
+      if (countStarredEl) countStarredEl.textContent = starredCount;
+
+      const countNotesEl = el("restore-count-notes");
+      if (countNotesEl) countNotesEl.textContent = notesCount;
+
+      const countDraftsEl = el("restore-count-drafts");
+      if (countDraftsEl) countDraftsEl.textContent = draftsCount;
+
+      // Update inline dropzone feedback card
+      const dropInfo = el("dropzone-file-info");
+      if (dropInfo) {
+        dropInfo.style.display = "flex";
+        dropInfo.innerHTML = `
+          <div class="dropzone-file-meta">
+            <div class="dropzone-file-title">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+              <span>Ready to Restore: <strong>${escapeHTML(file.name)}</strong> (${formatBytes(file.size)})</span>
+            </div>
+            <div class="dropzone-file-badges">
+              <span class="badge-tag-rec">${isFull ? "Full Backup" : "Compact Progress"}</span>
+              <span class="badge-tag-subtle">${solvedCount} Solved</span>
+              <span class="badge-tag-subtle">${draftsCount} Drafts</span>
+              <span class="badge-tag-subtle">${starredCount} Starred</span>
+              <span class="badge-tag-subtle">${notesCount} Notes</span>
+            </div>
+          </div>
+          <div class="dropzone-actions">
+            <button id="btn-quick-restore-merge" class="btn-sm btn-primary">Restore (Merge)</button>
+            <button id="btn-quick-restore-replace" class="btn-sm btn-ghost text-danger">Replace All</button>
+            <button id="btn-open-restore-preview" class="btn-sm btn-secondary">Review Dialog</button>
+          </div>
+        `;
+
+        el("btn-quick-restore-merge")?.addEventListener("click", () => {
+          applyRestoreData(data, "merge");
+        });
+        el("btn-quick-restore-replace")?.addEventListener("click", () => {
+          if (confirm("Replace all local data with this backup? Current unsaved drafts will be overwritten.")) {
+            applyRestoreData(data, "replace");
+          }
+        });
+        el("btn-open-restore-preview")?.addEventListener("click", () => {
+          const m = el("restore-modal");
+          if (m) {
+            m.classList.add("active");
+            m.style.display = "flex";
+          }
+        });
+      }
+
+      // Open restore modal dialog
+      const modal = el("restore-modal");
+      if (modal) {
+        modal.classList.add("active");
+        modal.style.display = "flex";
+      }
+
+      showToast(`Backup loaded: ${file.name} (${solvedCount} solved, ${draftsCount} drafts). Click 'Apply Restore' to confirm.`);
+    } catch (err) {
+      console.error("Backup parse error:", err);
+      showToast("Error reading backup file: " + err.message);
+    } finally {
+      if (e.target && "value" in e.target) {
+        e.target.value = "";
+      }
+    }
+  };
+  reader.readAsText(file);
+}
+
+function closeRestoreModal() {
+  const modal = el("restore-modal");
+  if (modal) {
+    modal.classList.remove("active");
+    modal.style.display = "none";
+  }
+}
+
+function handleApplyRestore() {
+  if (!pendingRestoreData) {
+    showToast("No backup file loaded to restore");
+    return;
+  }
+  const mode = document.querySelector('input[name="restore-mode"]:checked')?.value || "merge";
+  applyRestoreData(pendingRestoreData.data, mode);
+  closeRestoreModal();
+}
+
+function applyRestoreData(data, mode) {
+  try {
+    if (!data || typeof data !== "object") {
+      throw new Error("Invalid backup data format");
+    }
+
+    const isReplace = mode === "replace";
+
+    // 1. Solved
+    const solvedList = Array.isArray(data.solved) 
+      ? data.solved 
+      : Array.isArray(data.solvedSlugs) 
+        ? data.solvedSlugs 
+        : Array.isArray(data.summary?.solved_slugs) 
+          ? data.summary.solved_slugs 
+          : [];
+    if (isReplace) state.solvedSlugs.clear();
+    solvedList.forEach(s => {
+      const slug = (typeof s === "object" && s?.slug) ? s.slug : s;
+      if (typeof slug === "string") state.solvedSlugs.add(slug);
+    });
+    localStorage.setItem("sqlmaster_solved", JSON.stringify(Array.from(state.solvedSlugs)));
+
+    // 2. Attempted
+    const attemptedList = Array.isArray(data.attempted) 
+      ? data.attempted 
+      : Array.isArray(data.attemptedSlugs) 
+        ? data.attemptedSlugs 
+        : Array.isArray(data.summary?.attempted_slugs) 
+          ? data.summary.attempted_slugs 
+          : [];
+    if (isReplace) state.attemptedSlugs.clear();
+    attemptedList.forEach(s => {
+      const slug = (typeof s === "object" && s?.slug) ? s.slug : s;
+      if (typeof slug === "string") state.attemptedSlugs.add(slug);
+    });
+    localStorage.setItem("sqlmaster_attempted", JSON.stringify(Array.from(state.attemptedSlugs)));
+
+    // 3. Starred
+    const starredList = Array.isArray(data.starred)
+      ? data.starred
+      : Array.isArray(data.starredSlugs)
+        ? data.starredSlugs
+        : (data.summary && Array.isArray(data.summary.starred_slugs))
+          ? data.summary.starred_slugs
+          : (data.summary && Array.isArray(data.summary.starred_details))
+            ? data.summary.starred_details
+            : [];
+    if (isReplace) state.starredSlugs.clear();
+    starredList.forEach(s => {
+      const slug = (typeof s === "object" && s?.slug) ? s.slug : s;
+      if (typeof slug === "string") state.starredSlugs.add(slug);
+    });
+    localStorage.setItem("sqlmaster_starred", JSON.stringify(Array.from(state.starredSlugs)));
+
+    // 4. Notes
+    const notes = data.notes || data.userNotes || data.user_notes;
+    if (notes && typeof notes === "object") {
+      if (isReplace) state.userNotes = {};
+      state.userNotes = { ...state.userNotes, ...notes };
+      localStorage.setItem("sqlmaster_user_notes", JSON.stringify(state.userNotes));
+    }
+
+    // 5. Drafts
+    if (isReplace) {
+      const toRemove = [];
+      for (let i = 0; i < localStorage.length; i++) {
+        const k = localStorage.key(i);
+        if (k && k.startsWith("sqlmaster_draft_")) toRemove.push(k);
+      }
+      toRemove.forEach(k => localStorage.removeItem(k));
+    }
+
+    let restoredDraftsCount = 0;
+    if (data.drafts && typeof data.drafts === "object") {
+      for (const [slug, sql] of Object.entries(data.drafts)) {
+        if (typeof sql === "string" && sql.trim().length > 0) {
+          localStorage.setItem(`sqlmaster_draft_${slug}`, sql);
+          state.attemptedSlugs.add(slug);
+          restoredDraftsCount++;
+        }
+      }
+      localStorage.setItem("sqlmaster_attempted", JSON.stringify(Array.from(state.attemptedSlugs)));
+    }
+
+    // 6. Submissions
+    const subVal = data.submissions ?? data.total_submissions ?? data.summary?.total_submissions;
+    if (subVal !== undefined && subVal !== null) {
+      const sub = parseInt(subVal, 10);
+      if (!isNaN(sub) && sub > 0) {
+        const current = getSubmissionCount();
+        const finalSub = isReplace ? sub : Math.max(current, sub);
+        localStorage.setItem("sqlmaster_total_submissions", String(finalSub));
+      }
+    }
+
+    // 7. Settings
+    if (data.settings && typeof data.settings === "object") {
+      state.settings = { ...state.settings, ...data.settings };
+      localStorage.setItem("sqlmaster_settings", JSON.stringify(state.settings));
+      applySettingsToEditor();
+    }
+
+    // 8. UI Preferences
+    if (data.ui_preferences && typeof data.ui_preferences === "object") {
+      if (data.ui_preferences.theme) applyTheme(data.ui_preferences.theme);
+      if (data.ui_preferences.codeTheme) applyCodeTheme(data.ui_preferences.codeTheme);
+      if (data.ui_preferences.plainMode !== undefined && state.plainMode !== data.ui_preferences.plainMode) {
+        state.plainMode = data.ui_preferences.plainMode;
+        localStorage.setItem("sqlmaster_plain_mode", String(state.plainMode));
+        applyCodeTheme(state.codeTheme, state.plainMode);
+      }
+    }
+
+    // 9. If current question is active, refresh editor and notes
+    if (state.currentQuestion) {
+      const curSlug = state.currentQuestion.slug;
+      const draft = localStorage.getItem(`sqlmaster_draft_${curSlug}`);
+      if (draft !== null && state.editor) {
+        state.editor.setValue(draft);
+      }
+      loadPersonalNote(curSlug);
+    }
+
+    // 10. Update all UI representations
+    updateProgressUI();
+    renderHomeProblemsTable();
+    renderHomeDashboard();
+    renderQuestionList();
+    updateStorageUsageUI();
+    updateNotesCountBadge();
+
+    // 11. Update dropzone feedback card with confirmed success state
+    const dropInfo = el("dropzone-file-info");
+    if (dropInfo) {
+      dropInfo.style.display = "flex";
+      dropInfo.innerHTML = `
+        <div class="dropzone-file-meta">
+          <div class="dropzone-file-title" style="color: #10b981;">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+            <span>Restore Complete! (${state.solvedSlugs.size} Solved, ${restoredDraftsCount} Drafts, ${state.starredSlugs.size} Starred)</span>
+          </div>
+          <div style="font-size: 12px; color: var(--text-dark-muted); margin-top: 2px;">
+            All progress, drafts, and notes from <strong>${escapeHTML(pendingRestoreData?.fileName || "backup")}</strong> have been restored directly into this browser.
+          </div>
+        </div>
+        <div class="dropzone-actions">
+          <button class="btn-sm btn-secondary" onclick="switchView('home')">Go to Dashboard →</button>
+        </div>
+      `;
+    }
+
+    showToast(`🎉 Restore successful: ${state.solvedSlugs.size} solved, ${restoredDraftsCount} drafts, ${state.starredSlugs.size} starred`);
+  } catch (err) {
+    console.error("Apply restore error:", err);
+    showToast("Error applying restore: " + err.message);
+  }
+}
+
+function clearDraftsOnly() {
+  const draftKeys = [];
+  for (let i = 0; i < localStorage.length; i++) {
+    const key = localStorage.key(i);
+    if (key && key.startsWith("sqlmaster_draft_")) {
+      draftKeys.push(key);
+    }
+  }
+
+  if (draftKeys.length === 0) {
+    showToast("No saved SQL drafts found to clear");
+    return;
+  }
+
+  if (confirm(`Are you sure you want to clear ${draftKeys.length} saved SQL drafts? Your solved/attempted counts, stars, and notes will NOT be affected.`)) {
+    draftKeys.forEach(k => localStorage.removeItem(k));
+    if (state.currentQuestion && state.editor) {
+      state.editor.setValue("");
+    }
+    updateStorageUsageUI();
+    showToast(`Cleared ${draftKeys.length} saved SQL drafts from storage`);
+  }
+}
+
+function factoryResetAll() {
+  const code = prompt('WARNING: This will completely erase ALL solved questions, notes, drafts, and preferences.\n\nType "RESET" to confirm:');
+  if (code === "RESET") {
+    const keysToRemove = [];
+    for (let i = 0; i < localStorage.length; i++) {
+      const key = localStorage.key(i);
+      if (key && key.startsWith("sqlmaster_")) {
+        keysToRemove.push(key);
+      }
+    }
+    keysToRemove.forEach(k => localStorage.removeItem(k));
+    state.solvedSlugs.clear();
+    state.attemptedSlugs.clear();
+    state.starredSlugs.clear();
+    state.userNotes = {};
+    if (state.editor) state.editor.setValue("");
+    updateProgressUI();
+    renderHomeProblemsTable();
+    renderHomeDashboard();
+    renderQuestionList();
+    updateStorageUsageUI();
+    showToast("Factory reset complete. All local data cleared.");
+  }
+}
+
+function freeOfflineCache() {
+  const cacheKeys = [];
+  for (let i = 0; i < localStorage.length; i++) {
+    const key = localStorage.key(i);
+    if (key && (key.startsWith("sqlmaster_cached_") || key.startsWith("sqlmaster_qdetail_"))) {
+      cacheKeys.push(key);
+    }
+  }
+
+  if (cacheKeys.length === 0) {
+    showToast("No offline question cache in LocalStorage to clear");
+    return;
+  }
+
+  if (confirm(`Remove offline question cache (${cacheKeys.length} items, ~2.5 MB) from LocalStorage to reclaim space?\n\nYour SQL query drafts, personal notes, and solved progress will remain 100% safe.`)) {
+    cacheKeys.forEach(k => localStorage.removeItem(k));
+    updateStorageUsageUI();
+    showToast("Reclaimed ~2.5 MB of LocalStorage!");
+  }
+}
+
+async function precacheAllQuestionsForOffline(showFeedback = true) {
+  try {
+    if (showFeedback) showToast("Caching all 100 questions locally for offline practice...");
+    const res = await fetch("/api/questions-all");
+    if (!res.ok) throw new Error(`HTTP error ${res.status}`);
+    const allData = await res.json();
+
+    // Store the master object efficiently without duplicate per-question keys
+    localStorage.setItem("sqlmaster_cached_all_questions", JSON.stringify(allData));
+    localStorage.setItem("sqlmaster_cached_all_time", new Date().toISOString());
+
+    // Clean up any old duplicate per-question keys to keep LocalStorage lean
+    const dupes = [];
+    for (let i = 0; i < localStorage.length; i++) {
+      const k = localStorage.key(i);
+      if (k && k.startsWith("sqlmaster_cached_q_")) dupes.push(k);
+    }
+    dupes.forEach(k => localStorage.removeItem(k));
+
+    const count = Object.keys(allData).length;
+    updateStorageUsageUI();
+    if (showFeedback) {
+      showToast(`Success! All ${count} questions & schemas cached offline.`);
+    }
+  } catch (err) {
+    console.error("Precache failed:", err);
+    if (showFeedback) showToast("Precache failed: " + err.message);
+  }
 }
 
 // Start application
