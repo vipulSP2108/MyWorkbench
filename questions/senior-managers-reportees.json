@@ -1,0 +1,331 @@
+{
+  "question_id": "q_086_senior_managers_reportees",
+  "slug": "senior-managers-reportees",
+  "title": "Senior Managers",
+  "difficulty": "Hard",
+  "company": "Google",
+  "premium": false,
+  "question": "Given a table of Google employees and their managers: a manager is an employee with at least one direct report. A senior manager is an employee who manages at least one manager, and none of whose direct reports is itself a senior manager.\n\nWrite a query that returns each senior manager's name and the count of their direct reports (the managers reporting to them). The senior manager with the most direct reports comes first.\n\nAssumption: an employee can report to two senior managers.",
+  "notes": [],
+  "tables": [
+    {
+      "table_name": "employees",
+      "columns": [
+        {
+          "column_name": "emp_id",
+          "data_type": "INT"
+        },
+        {
+          "column_name": "manager_id",
+          "data_type": "INT"
+        },
+        {
+          "column_name": "manager_name",
+          "data_type": "VARCHAR(255)"
+        }
+      ]
+    }
+  ],
+  "sample_data": {
+    "employees": [
+      {
+        "emp_id": 1,
+        "manager_id": 101,
+        "manager_name": "Duyen"
+      },
+      {
+        "emp_id": 101,
+        "manager_id": 1001,
+        "manager_name": "Rick"
+      },
+      {
+        "emp_id": 103,
+        "manager_id": 1001,
+        "manager_name": "Rick"
+      },
+      {
+        "emp_id": 1001,
+        "manager_id": 1008,
+        "manager_name": "John"
+      }
+    ]
+  },
+  "sample_output": [
+    {
+      "manager_name": "Rick",
+      "direct_reportees": 1
+    }
+  ],
+  "reference_sql": "WITH managers AS (\n  SELECT DISTINCT manager_id\n  FROM employees\n  WHERE manager_id IS NOT NULL\n),\nmgr_reports AS (\n  SELECT e.manager_id, e.manager_name, e.emp_id\n  FROM employees e\n  WHERE e.emp_id IN (SELECT manager_id FROM managers)\n),\nsenior_mgr_candidates AS (\n  SELECT manager_id, manager_name, COUNT(DISTINCT emp_id) AS direct_reportees\n  FROM mgr_reports\n  GROUP BY manager_id, manager_name\n)\nSELECT manager_name, direct_reportees\nFROM senior_mgr_candidates\nWHERE manager_id NOT IN (\n  SELECT mr.manager_id\n  FROM mgr_reports mr\n  WHERE mr.emp_id IN (SELECT manager_id FROM senior_mgr_candidates)\n)\nORDER BY direct_reportees DESC, manager_name;",
+  "tags": [
+    "aggregation",
+    "cte",
+    "google",
+    "hard",
+    "hr",
+    "join",
+    "self-join"
+  ],
+  "related_questions": [],
+  "sources": [
+    [
+      "DataLemur page (free)",
+      "https://datalemur.com/questions/senior-managers-reportees"
+    ],
+    [
+      "DataLemur PDF",
+      "Page 90"
+    ]
+  ],
+  "test_cases": [
+    {
+      "test_case_id": "tc_1_baseline",
+      "description": "Baseline: Rick manages 1 manager (101), Rick does not report to a senior manager -> direct_reportees = 1",
+      "input_data": {
+        "employees": [
+          {
+            "emp_id": 1,
+            "manager_id": 101,
+            "manager_name": "Duyen"
+          },
+          {
+            "emp_id": 101,
+            "manager_id": 1001,
+            "manager_name": "Rick"
+          },
+          {
+            "emp_id": 103,
+            "manager_id": 1001,
+            "manager_name": "Rick"
+          },
+          {
+            "emp_id": 1001,
+            "manager_id": 1008,
+            "manager_name": "John"
+          }
+        ]
+      },
+      "expected_output": [
+        {
+          "manager_name": "Rick",
+          "direct_reportees": 1
+        }
+      ],
+      "category": "normal"
+    },
+    {
+      "test_case_id": "tc_2_multiple_senior_managers",
+      "description": "Tests multiple senior managers (Sarah with 2 direct manager reports, Mike with 1)",
+      "input_data": {
+        "employees": [
+          {
+            "emp_id": 1,
+            "manager_id": 10,
+            "manager_name": "Lead A"
+          },
+          {
+            "emp_id": 2,
+            "manager_id": 10,
+            "manager_name": "Lead A"
+          },
+          {
+            "emp_id": 3,
+            "manager_id": 20,
+            "manager_name": "Lead B"
+          },
+          {
+            "emp_id": 10,
+            "manager_id": 100,
+            "manager_name": "Sarah"
+          },
+          {
+            "emp_id": 20,
+            "manager_id": 100,
+            "manager_name": "Sarah"
+          },
+          {
+            "emp_id": 30,
+            "manager_id": 100,
+            "manager_name": "Sarah"
+          },
+          {
+            "emp_id": 4,
+            "manager_id": 40,
+            "manager_name": "Lead C"
+          },
+          {
+            "emp_id": 40,
+            "manager_id": 200,
+            "manager_name": "Mike"
+          }
+        ]
+      },
+      "expected_output": [
+        {
+          "manager_name": "Sarah",
+          "direct_reportees": 2
+        },
+        {
+          "manager_name": "Mike",
+          "direct_reportees": 1
+        }
+      ],
+      "category": "edge"
+    },
+    {
+      "test_case_id": "tc_3_director_excluded",
+      "description": "Edge case: Director managing another senior manager is excluded from senior manager tier",
+      "category": "edge",
+      "input_data": {
+        "employees": [
+          {
+            "emp_id": 1,
+            "manager_id": 10,
+            "manager_name": "Lead A"
+          },
+          {
+            "emp_id": 10,
+            "manager_id": 100,
+            "manager_name": "Senior Manager S"
+          },
+          {
+            "emp_id": 100,
+            "manager_id": 1000,
+            "manager_name": "Director D"
+          },
+          {
+            "emp_id": 2,
+            "manager_id": 20,
+            "manager_name": "Lead B"
+          },
+          {
+            "emp_id": 20,
+            "manager_id": 100,
+            "manager_name": "Senior Manager S"
+          }
+        ]
+      },
+      "expected_output": [
+        {
+          "manager_name": "Senior Manager S",
+          "direct_reportees": 2
+        }
+      ]
+    },
+    {
+      "test_case_id": "tc_4_descending_order_volume",
+      "description": "Volume & Ordering: 3 senior managers with 3, 2, and 1 direct reports to enforce ORDER BY direct_reportees DESC",
+      "category": "volume",
+      "input_data": {
+        "employees": [
+          {
+            "emp_id": 1,
+            "manager_id": 11,
+            "manager_name": "Lead 1"
+          },
+          {
+            "emp_id": 11,
+            "manager_id": 101,
+            "manager_name": "Manager Few"
+          },
+          {
+            "emp_id": 2,
+            "manager_id": 21,
+            "manager_name": "Lead 2A"
+          },
+          {
+            "emp_id": 3,
+            "manager_id": 22,
+            "manager_name": "Lead 2B"
+          },
+          {
+            "emp_id": 4,
+            "manager_id": 23,
+            "manager_name": "Lead 2C"
+          },
+          {
+            "emp_id": 21,
+            "manager_id": 201,
+            "manager_name": "Manager Most"
+          },
+          {
+            "emp_id": 22,
+            "manager_id": 201,
+            "manager_name": "Manager Most"
+          },
+          {
+            "emp_id": 23,
+            "manager_id": 201,
+            "manager_name": "Manager Most"
+          },
+          {
+            "emp_id": 5,
+            "manager_id": 31,
+            "manager_name": "Lead 3A"
+          },
+          {
+            "emp_id": 6,
+            "manager_id": 32,
+            "manager_name": "Lead 3B"
+          },
+          {
+            "emp_id": 31,
+            "manager_id": 301,
+            "manager_name": "Manager Med"
+          },
+          {
+            "emp_id": 32,
+            "manager_id": 301,
+            "manager_name": "Manager Med"
+          }
+        ]
+      },
+      "expected_output": [
+        {
+          "manager_name": "Manager Most",
+          "direct_reportees": 3
+        },
+        {
+          "manager_name": "Manager Med",
+          "direct_reportees": 2
+        },
+        {
+          "manager_name": "Manager Few",
+          "direct_reportees": 1
+        }
+      ]
+    },
+    {
+      "test_case_id": "tc_5_flat_hierarchy_none_qualify",
+      "description": "Edge case: Flat team structure where managers do not manage other managers (0 senior managers)",
+      "category": "edge",
+      "input_data": {
+        "employees": [
+          {
+            "emp_id": 1,
+            "manager_id": 10,
+            "manager_name": "Direct Manager"
+          },
+          {
+            "emp_id": 2,
+            "manager_id": 10,
+            "manager_name": "Direct Manager"
+          },
+          {
+            "emp_id": 3,
+            "manager_id": 10,
+            "manager_name": "Direct Manager"
+          }
+        ]
+      },
+      "expected_output": []
+    }
+  ],
+  "order_sensitive": true,
+  "expected_output": [
+    {
+      "manager_name": "Rick",
+      "direct_reportees": 1
+    }
+  ]
+}

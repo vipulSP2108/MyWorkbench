@@ -1,0 +1,289 @@
+{
+  "question_id": "q_014_click_through_rate",
+  "slug": "click-through-rate",
+  "title": "App Click-through Rate (CTR)",
+  "difficulty": "Easy",
+  "company": "Facebook",
+  "premium": false,
+  "question": "Assume you have an events table on Facebook app analytics. Write a query to calculate the click-through rate (CTR) for the app in 2022 and round the results to 2 decimal places.\n\nDefinition and note:",
+  "notes": [
+    "Percentage of click-through rate (CTR) = 100.0 * Number of clicks / Number of impressions",
+    "To avoid integer division, multiply the CTR by 100.0, not 100.",
+    "Let's consider an example of App 123. This app has a click-through rate (CTR) of 50.00% because out of the 2 impressions it received, it got 1 click.",
+    "To calculate the CTR, we divide the number of clicks by the number of impressions, and then multiply the result by 100.0 to express it as a percentage. In this case, 1 divided by 2 equals 0.5, and when multiplied by 100.0, it becomes 50.00%. So, the CTR of App 123 is 50.00%.",
+    "The dataset you are querying against may have different input & output - this is just an example!"
+  ],
+  "tables": [
+    {
+      "table_name": "events",
+      "columns": [
+        {
+          "column_name": "app_id",
+          "data_type": "INT"
+        },
+        {
+          "column_name": "event_type",
+          "data_type": "VARCHAR(255)"
+        },
+        {
+          "column_name": "timestamp",
+          "data_type": "DATETIME"
+        }
+      ]
+    }
+  ],
+  "sample_data": {
+    "events": [
+      {
+        "app_id": "123",
+        "event_type": "impression",
+        "timestamp": "07/18/2022 11:36:12"
+      },
+      {
+        "app_id": "123",
+        "event_type": "impression",
+        "timestamp": "07/18/2022 11:37:12"
+      },
+      {
+        "app_id": "123",
+        "event_type": "click",
+        "timestamp": "07/18/2022 11:37:42"
+      },
+      {
+        "app_id": "234",
+        "event_type": "impression",
+        "timestamp": "07/18/2022 14:15:12"
+      },
+      {
+        "app_id": "234",
+        "event_type": "click",
+        "timestamp": "07/18/2022 14:16:12"
+      }
+    ]
+  },
+  "sample_output": [
+    {
+      "app_id": "123",
+      "ctr": "50.00"
+    },
+    {
+      "app_id": "234",
+      "ctr": "100.00"
+    }
+  ],
+  "reference_sql": "SELECT \n  app_id,\n  ROUND(100.0 * SUM(CASE WHEN event_type = 'click' THEN 1 ELSE 0 END) / NULLIF(SUM(CASE WHEN event_type = 'impression' THEN 1 ELSE 0 END), 0), 2) AS ctr\nFROM events\nWHERE YEAR(timestamp) = 2022\nGROUP BY app_id\nORDER BY app_id;",
+  "tags": [
+    "easy",
+    "facebook",
+    "math",
+    "social-media"
+  ],
+  "related_questions": [],
+  "sources": [
+    [
+      "DataLemur page (free)",
+      "https://datalemur.com/questions/click-through-rate"
+    ],
+    [
+      "DataLemur PDF",
+      "Page 18"
+    ]
+  ],
+  "test_cases": [
+    {
+      "test_case_id": "tc_1_baseline",
+      "description": "Baseline sample input data from problem description",
+      "input_data": {
+        "events": [
+          {
+            "app_id": "123",
+            "event_type": "impression",
+            "timestamp": "07/18/2022 11:36:12"
+          },
+          {
+            "app_id": "123",
+            "event_type": "impression",
+            "timestamp": "07/18/2022 11:37:12"
+          },
+          {
+            "app_id": "123",
+            "event_type": "click",
+            "timestamp": "07/18/2022 11:37:42"
+          },
+          {
+            "app_id": "234",
+            "event_type": "impression",
+            "timestamp": "07/18/2022 14:15:12"
+          },
+          {
+            "app_id": "234",
+            "event_type": "click",
+            "timestamp": "07/18/2022 14:16:12"
+          }
+        ]
+      },
+      "expected_output": [
+        {
+          "app_id": 123,
+          "ctr": 50.0
+        },
+        {
+          "app_id": 234,
+          "ctr": 100.0
+        }
+      ],
+      "category": "normal"
+    },
+    {
+      "test_case_id": "tc_2_high_volume",
+      "description": "Multiple entities with scaled volume and multi-group distributions",
+      "input_data": {
+        "events": [
+          {
+            "app_id": "123",
+            "event_type": "impression",
+            "timestamp": "07/18/2022 11:36:12"
+          },
+          {
+            "app_id": "123",
+            "event_type": "impression",
+            "timestamp": "07/18/2022 11:37:12"
+          },
+          {
+            "app_id": "123",
+            "event_type": "click",
+            "timestamp": "07/18/2022 11:37:42"
+          },
+          {
+            "app_id": "234",
+            "event_type": "impression",
+            "timestamp": "07/18/2022 14:15:12"
+          },
+          {
+            "app_id": "234",
+            "event_type": "click",
+            "timestamp": "07/18/2022 14:16:12"
+          },
+          {
+            "app_id": 1123,
+            "event_type": "impression",
+            "timestamp": "07/23/2022 11:36:12"
+          },
+          {
+            "app_id": 1123,
+            "event_type": "impression",
+            "timestamp": "07/23/2022 11:37:12"
+          },
+          {
+            "app_id": 1123,
+            "event_type": "click",
+            "timestamp": "07/23/2022 11:37:42"
+          },
+          {
+            "app_id": 1234,
+            "event_type": "impression",
+            "timestamp": "07/23/2022 14:15:12"
+          },
+          {
+            "app_id": 1234,
+            "event_type": "click",
+            "timestamp": "07/23/2022 14:16:12"
+          }
+        ]
+      },
+      "expected_output": [
+        {
+          "app_id": 123,
+          "ctr": 50.0
+        },
+        {
+          "app_id": 234,
+          "ctr": 100.0
+        },
+        {
+          "app_id": 1123,
+          "ctr": 50.0
+        },
+        {
+          "app_id": 1234,
+          "ctr": 100.0
+        }
+      ],
+      "category": "volume"
+    },
+    {
+      "test_case_id": "tc_3_disqualifying_rows",
+      "description": "Dataset containing disqualifying rows, edge values, and cancelled/zero records",
+      "input_data": {
+        "events": [
+          {
+            "app_id": "123",
+            "event_type": "impression",
+            "timestamp": "07/18/2022 11:36:12"
+          },
+          {
+            "app_id": "123",
+            "event_type": "impression",
+            "timestamp": "07/18/2022 11:37:12"
+          },
+          {
+            "app_id": "123",
+            "event_type": "click",
+            "timestamp": "07/18/2022 11:37:42"
+          },
+          {
+            "app_id": "234",
+            "event_type": "impression",
+            "timestamp": "07/18/2022 14:15:12"
+          },
+          {
+            "app_id": "234",
+            "event_type": "click",
+            "timestamp": "07/18/2022 14:16:12"
+          },
+          {
+            "app_id": 5123,
+            "event_type": "impression",
+            "timestamp": "07/18/2017 11:36:12"
+          },
+          {
+            "app_id": 5123,
+            "event_type": "impression",
+            "timestamp": "07/18/2017 11:37:12"
+          }
+        ]
+      },
+      "expected_output": [
+        {
+          "app_id": 123,
+          "ctr": 50.0
+        },
+        {
+          "app_id": 234,
+          "ctr": 100.0
+        }
+      ],
+      "category": "edge"
+    },
+    {
+      "test_case_id": "tc_4_empty_result",
+      "description": "Input where no rows satisfy problem criteria, verifying empty result handling",
+      "input_data": {
+        "events": []
+      },
+      "expected_output": [],
+      "category": "edge"
+    }
+  ],
+  "order_sensitive": false,
+  "expected_output": [
+    {
+      "app_id": 123,
+      "ctr": 50.0
+    },
+    {
+      "app_id": 234,
+      "ctr": 100.0
+    }
+  ]
+}

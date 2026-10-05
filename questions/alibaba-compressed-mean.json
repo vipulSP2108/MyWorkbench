@@ -1,0 +1,214 @@
+{
+  "question_id": "q_018_alibaba_compressed_mean",
+  "slug": "alibaba-compressed-mean",
+  "title": "Compressed Mean",
+  "difficulty": "Easy",
+  "company": "Alibaba",
+  "premium": false,
+  "question": "You're trying to find the mean number of items per order on Alibaba, rounded to 1 decimal place using tables which includes information on the count of items in each order (item_count table) and the corresponding number of orders for each item count (order_occurrences table).",
+  "notes": [
+    "There are a total of 500 orders with one item per order, 1000 orders with two items per order, and 800 orders with three items per order.\"",
+    "Let's calculate the arithmetic average:",
+    "Total items = (1*500) + (2*1000) + (3*800) + (4*1000) = 8900",
+    "Total orders = 500 + 1000 + 800 + 1000 = 3300",
+    "Mean = 8900 / 3300 = 2.7",
+    "The dataset you are querying against may have different input & output - this is just an example!"
+  ],
+  "tables": [
+    {
+      "table_name": "items_per_order",
+      "columns": [
+        {
+          "column_name": "item_count",
+          "data_type": "INT"
+        },
+        {
+          "column_name": "order_occurrences",
+          "data_type": "INT"
+        }
+      ]
+    }
+  ],
+  "sample_data": {
+    "items_per_order": [
+      {
+        "item_count": "1",
+        "order_occurrences": "500"
+      },
+      {
+        "item_count": "2",
+        "order_occurrences": "1000"
+      },
+      {
+        "item_count": "3",
+        "order_occurrences": "800"
+      },
+      {
+        "item_count": "4",
+        "order_occurrences": "1000"
+      }
+    ]
+  },
+  "sample_output": [
+    {
+      "mean": "2.7"
+    }
+  ],
+  "reference_sql": "SELECT \n  ROUND(SUM(item_count * order_occurrences) / SUM(order_occurrences), 1) AS mean\nFROM items_per_order;",
+  "tags": [
+    "aggregation",
+    "alibaba",
+    "easy",
+    "ecommerce",
+    "math"
+  ],
+  "related_questions": [
+    "alibaba-compressed-mode",
+    "alibaba-compressed-median"
+  ],
+  "sources": [
+    [
+      "DataLemur page (free)",
+      "https://datalemur.com/questions/alibaba-compressed-mean"
+    ],
+    [
+      "DataLemur PDF",
+      "Page 22"
+    ]
+  ],
+  "test_cases": [
+    {
+      "test_case_id": "tc_1_baseline",
+      "description": "Baseline sample input data from problem description",
+      "input_data": {
+        "items_per_order": [
+          {
+            "item_count": "1",
+            "order_occurrences": "500"
+          },
+          {
+            "item_count": "2",
+            "order_occurrences": "1000"
+          },
+          {
+            "item_count": "3",
+            "order_occurrences": "800"
+          },
+          {
+            "item_count": "4",
+            "order_occurrences": "1000"
+          }
+        ]
+      },
+      "expected_output": [
+        {
+          "mean": 2.7
+        }
+      ],
+      "category": "normal"
+    },
+    {
+      "test_case_id": "tc_2_high_volume",
+      "description": "Multiple entities with scaled volume and multi-group distributions",
+      "input_data": {
+        "items_per_order": [
+          {
+            "item_count": "1",
+            "order_occurrences": "500"
+          },
+          {
+            "item_count": "2",
+            "order_occurrences": "1000"
+          },
+          {
+            "item_count": "3",
+            "order_occurrences": "800"
+          },
+          {
+            "item_count": "4",
+            "order_occurrences": "1000"
+          },
+          {
+            "item_count": "1",
+            "order_occurrences": "500"
+          },
+          {
+            "item_count": "2",
+            "order_occurrences": "1000"
+          },
+          {
+            "item_count": "3",
+            "order_occurrences": "800"
+          },
+          {
+            "item_count": "4",
+            "order_occurrences": "1000"
+          }
+        ]
+      },
+      "expected_output": [
+        {
+          "mean": 2.7
+        }
+      ],
+      "category": "volume"
+    },
+    {
+      "test_case_id": "tc_3_disqualifying_rows",
+      "description": "Dataset containing disqualifying rows, edge values, and cancelled/zero records",
+      "input_data": {
+        "items_per_order": [
+          {
+            "item_count": "1",
+            "order_occurrences": "500"
+          },
+          {
+            "item_count": "2",
+            "order_occurrences": "1000"
+          },
+          {
+            "item_count": "3",
+            "order_occurrences": "800"
+          },
+          {
+            "item_count": "4",
+            "order_occurrences": "1000"
+          },
+          {
+            "item_count": "1",
+            "order_occurrences": "500"
+          },
+          {
+            "item_count": "2",
+            "order_occurrences": "1000"
+          }
+        ]
+      },
+      "expected_output": [
+        {
+          "mean": 2.4
+        }
+      ],
+      "category": "edge"
+    },
+    {
+      "test_case_id": "tc_4_empty_result",
+      "description": "Input where no rows satisfy problem criteria, verifying empty result handling",
+      "input_data": {
+        "items_per_order": []
+      },
+      "expected_output": [
+        {
+          "mean": null
+        }
+      ],
+      "category": "edge"
+    }
+  ],
+  "order_sensitive": false,
+  "expected_output": [
+    {
+      "mean": 2.7
+    }
+  ]
+}

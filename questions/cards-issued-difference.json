@@ -1,0 +1,375 @@
+{
+  "question_id": "q_017_cards_issued_difference",
+  "slug": "cards-issued-difference",
+  "title": "Cards Issued Difference",
+  "difficulty": "Easy",
+  "company": "JPMorgan",
+  "premium": false,
+  "question": "Your team at JPMorgan Chase is preparing to launch a new credit card, and to gain some insights, you're analyzing how many credit cards were issued each month.\n\nWrite a query that outputs the name of each credit card and the difference in the number of issued cards between the month with the highest issuance cards and the lowest issuance. Arrange the results based on the largest disparity.",
+  "notes": [
+    "Chase Freedom Flex's best month was 70k cards issued and the worst month was 55k cards, so the difference is 15k cards.",
+    "Chase Sapphire Reserve\u2019s best month was 180k cards issued and the worst month was 170k cards, so the difference is 10k cards.",
+    "The dataset you are querying against may have different input & output - this is just an example!"
+  ],
+  "tables": [
+    {
+      "table_name": "monthly_cards_issued",
+      "columns": [
+        {
+          "column_name": "card_name",
+          "data_type": "VARCHAR(255)"
+        },
+        {
+          "column_name": "issued_amount",
+          "data_type": "INT"
+        },
+        {
+          "column_name": "issue_month",
+          "data_type": "INT"
+        },
+        {
+          "column_name": "issue_year",
+          "data_type": "INT"
+        }
+      ]
+    }
+  ],
+  "sample_data": {
+    "monthly_cards_issued": [
+      {
+        "card_name": "Chase Freedom Flex",
+        "issued_amount": "55000",
+        "issue_month": "1",
+        "issue_year": "2021"
+      },
+      {
+        "card_name": "Chase Freedom Flex",
+        "issued_amount": "60000",
+        "issue_month": "2",
+        "issue_year": "2021"
+      },
+      {
+        "card_name": "Chase Freedom Flex",
+        "issued_amount": "65000",
+        "issue_month": "3",
+        "issue_year": "2021"
+      },
+      {
+        "card_name": "Chase Freedom Flex",
+        "issued_amount": "70000",
+        "issue_month": "4",
+        "issue_year": "2021"
+      },
+      {
+        "card_name": "Chase Sapphire Reserve",
+        "issued_amount": "170000",
+        "issue_month": "1",
+        "issue_year": "2021"
+      },
+      {
+        "card_name": "Chase Sapphire Reserve",
+        "issued_amount": "175000",
+        "issue_month": "2",
+        "issue_year": "2021"
+      },
+      {
+        "card_name": "Chase Sapphire Reserve",
+        "issued_amount": "180000",
+        "issue_month": "3",
+        "issue_year": "2021"
+      }
+    ]
+  },
+  "sample_output": [
+    {
+      "card_name": "Chase Freedom Flex",
+      "difference": "15000"
+    },
+    {
+      "card_name": "Chase Sapphire Reserve",
+      "difference": "10000"
+    }
+  ],
+  "reference_sql": "SELECT \n  card_name,\n  MAX(issued_amount) - MIN(issued_amount) AS difference\nFROM monthly_cards_issued\nGROUP BY card_name\nORDER BY difference DESC, card_name ASC;",
+  "tags": [
+    "date-manipulation",
+    "easy",
+    "jpmorgan"
+  ],
+  "related_questions": [],
+  "sources": [
+    [
+      "DataLemur page (free)",
+      "https://datalemur.com/questions/cards-issued-difference"
+    ],
+    [
+      "DataLemur PDF",
+      "Page 21"
+    ]
+  ],
+  "test_cases": [
+    {
+      "test_case_id": "tc_1_baseline",
+      "description": "Baseline sample input data from problem description",
+      "input_data": {
+        "monthly_cards_issued": [
+          {
+            "card_name": "Chase Freedom Flex",
+            "issued_amount": "55000",
+            "issue_month": "1",
+            "issue_year": "2021"
+          },
+          {
+            "card_name": "Chase Freedom Flex",
+            "issued_amount": "60000",
+            "issue_month": "2",
+            "issue_year": "2021"
+          },
+          {
+            "card_name": "Chase Freedom Flex",
+            "issued_amount": "65000",
+            "issue_month": "3",
+            "issue_year": "2021"
+          },
+          {
+            "card_name": "Chase Freedom Flex",
+            "issued_amount": "70000",
+            "issue_month": "4",
+            "issue_year": "2021"
+          },
+          {
+            "card_name": "Chase Sapphire Reserve",
+            "issued_amount": "170000",
+            "issue_month": "1",
+            "issue_year": "2021"
+          },
+          {
+            "card_name": "Chase Sapphire Reserve",
+            "issued_amount": "175000",
+            "issue_month": "2",
+            "issue_year": "2021"
+          },
+          {
+            "card_name": "Chase Sapphire Reserve",
+            "issued_amount": "180000",
+            "issue_month": "3",
+            "issue_year": "2021"
+          }
+        ]
+      },
+      "expected_output": [
+        {
+          "card_name": "Chase Freedom Flex",
+          "difference": 15000
+        },
+        {
+          "card_name": "Chase Sapphire Reserve",
+          "difference": 10000
+        }
+      ],
+      "category": "normal"
+    },
+    {
+      "test_case_id": "tc_2_high_volume",
+      "description": "Multiple entities with scaled volume and multi-group distributions",
+      "input_data": {
+        "monthly_cards_issued": [
+          {
+            "card_name": "Chase Freedom Flex",
+            "issued_amount": "55000",
+            "issue_month": "1",
+            "issue_year": "2021"
+          },
+          {
+            "card_name": "Chase Freedom Flex",
+            "issued_amount": "60000",
+            "issue_month": "2",
+            "issue_year": "2021"
+          },
+          {
+            "card_name": "Chase Freedom Flex",
+            "issued_amount": "65000",
+            "issue_month": "3",
+            "issue_year": "2021"
+          },
+          {
+            "card_name": "Chase Freedom Flex",
+            "issued_amount": "70000",
+            "issue_month": "4",
+            "issue_year": "2021"
+          },
+          {
+            "card_name": "Chase Sapphire Reserve",
+            "issued_amount": "170000",
+            "issue_month": "1",
+            "issue_year": "2021"
+          },
+          {
+            "card_name": "Chase Sapphire Reserve",
+            "issued_amount": "175000",
+            "issue_month": "2",
+            "issue_year": "2021"
+          },
+          {
+            "card_name": "Chase Sapphire Reserve",
+            "issued_amount": "180000",
+            "issue_month": "3",
+            "issue_year": "2021"
+          },
+          {
+            "card_name": "Chase Freedom Flex",
+            "issued_amount": 82500.0,
+            "issue_month": "1",
+            "issue_year": "2021"
+          },
+          {
+            "card_name": "Chase Freedom Flex",
+            "issued_amount": 90000.0,
+            "issue_month": "2",
+            "issue_year": "2021"
+          },
+          {
+            "card_name": "Chase Freedom Flex",
+            "issued_amount": 97500.0,
+            "issue_month": "3",
+            "issue_year": "2021"
+          },
+          {
+            "card_name": "Chase Freedom Flex",
+            "issued_amount": 105000.0,
+            "issue_month": "4",
+            "issue_year": "2021"
+          },
+          {
+            "card_name": "Chase Sapphire Reserve",
+            "issued_amount": 255000.0,
+            "issue_month": "1",
+            "issue_year": "2021"
+          },
+          {
+            "card_name": "Chase Sapphire Reserve",
+            "issued_amount": 262500.0,
+            "issue_month": "2",
+            "issue_year": "2021"
+          },
+          {
+            "card_name": "Chase Sapphire Reserve",
+            "issued_amount": 270000.0,
+            "issue_month": "3",
+            "issue_year": "2021"
+          }
+        ]
+      },
+      "expected_output": [
+        {
+          "card_name": "Chase Sapphire Reserve",
+          "difference": 100000
+        },
+        {
+          "card_name": "Chase Freedom Flex",
+          "difference": 50000
+        }
+      ],
+      "category": "volume"
+    },
+    {
+      "test_case_id": "tc_3_disqualifying_rows",
+      "description": "Dataset containing disqualifying rows, edge values, and cancelled/zero records",
+      "input_data": {
+        "monthly_cards_issued": [
+          {
+            "card_name": "Chase Freedom Flex",
+            "issued_amount": "55000",
+            "issue_month": "1",
+            "issue_year": "2021"
+          },
+          {
+            "card_name": "Chase Freedom Flex",
+            "issued_amount": "60000",
+            "issue_month": "2",
+            "issue_year": "2021"
+          },
+          {
+            "card_name": "Chase Freedom Flex",
+            "issued_amount": "65000",
+            "issue_month": "3",
+            "issue_year": "2021"
+          },
+          {
+            "card_name": "Chase Freedom Flex",
+            "issued_amount": "70000",
+            "issue_month": "4",
+            "issue_year": "2021"
+          },
+          {
+            "card_name": "Chase Sapphire Reserve",
+            "issued_amount": "170000",
+            "issue_month": "1",
+            "issue_year": "2021"
+          },
+          {
+            "card_name": "Chase Sapphire Reserve",
+            "issued_amount": "175000",
+            "issue_month": "2",
+            "issue_year": "2021"
+          },
+          {
+            "card_name": "Chase Sapphire Reserve",
+            "issued_amount": "180000",
+            "issue_month": "3",
+            "issue_year": "2021"
+          },
+          {
+            "card_name": "Chase Freedom Flex",
+            "issued_amount": 0,
+            "issue_month": "1",
+            "issue_year": "2021"
+          },
+          {
+            "card_name": "Chase Freedom Flex",
+            "issued_amount": 0,
+            "issue_month": "2",
+            "issue_year": "2021"
+          },
+          {
+            "card_name": "Chase Freedom Flex",
+            "issued_amount": 0,
+            "issue_month": "3",
+            "issue_year": "2021"
+          }
+        ]
+      },
+      "expected_output": [
+        {
+          "card_name": "Chase Freedom Flex",
+          "difference": 70000
+        },
+        {
+          "card_name": "Chase Sapphire Reserve",
+          "difference": 10000
+        }
+      ],
+      "category": "edge"
+    },
+    {
+      "test_case_id": "tc_4_empty_result",
+      "description": "Input where no rows satisfy problem criteria, verifying empty result handling",
+      "input_data": {
+        "monthly_cards_issued": []
+      },
+      "expected_output": [],
+      "category": "edge"
+    }
+  ],
+  "order_sensitive": false,
+  "expected_output": [
+    {
+      "card_name": "Chase Freedom Flex",
+      "difference": 15000
+    },
+    {
+      "card_name": "Chase Sapphire Reserve",
+      "difference": 10000
+    }
+  ]
+}

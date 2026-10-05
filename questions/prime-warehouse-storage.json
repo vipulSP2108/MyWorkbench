@@ -1,0 +1,455 @@
+{
+  "question_id": "q_076_prime_warehouse_storage",
+  "slug": "prime-warehouse-storage",
+  "title": "Maximize Prime Item Inventory",
+  "difficulty": "Hard",
+  "company": "Amazon",
+  "premium": false,
+  "question": "*Effective April 3rd 2024, we have updated the problem statement to provide additional clarity.*\n\nAmazon wants to maximize the storage capacity of its 500,000 square-foot warehouse by prioritizing a specific batch of prime items. The specific prime product batch detailed in the inventory table must be maintained.\n\nSo, if the prime product batch specified in the item_category column included 1 laptop and 1 side table, that would be the base batch. We could not add another laptop without also adding a side table; they come all together as a batch set.\n\nAfter prioritizing the maximum number of prime batches, any remaining square footage will be utilized to stock non-prime batches, which also come in batch sets and cannot be separated into individual items.\n\nWrite a query to find the maximum number of prime and non-prime batches that can be stored in the 500,000 square feet warehouse based on the following criteria:\n\nOutput the item_type with prime_eligible first followed by not_prime, along with the maximum number of batches that can be stocked.\n\nAssumptions:",
+  "notes": [
+    "Prioritize stocking prime batches",
+    "After accommodating prime items, allocate any remaining space to non-prime batches",
+    "Again, products must be stocked in batches, so we want to find the largest available quantity of prime batches, and then the largest available quantity of non-prime batches",
+    "Non-prime items must always be available in stock to meet customer demand, so the non-prime item count should never be zero.",
+    "Item count should be whole numbers (integers).",
+    "The dataset you are querying against may have different input & output - this is just an example!"
+  ],
+  "tables": [
+    {
+      "table_name": "inventory",
+      "columns": [
+        {
+          "column_name": "item_id",
+          "data_type": "INT"
+        },
+        {
+          "column_name": "item_type",
+          "data_type": "VARCHAR(255)"
+        },
+        {
+          "column_name": "item_category",
+          "data_type": "VARCHAR(255)"
+        },
+        {
+          "column_name": "square_footage",
+          "data_type": "DECIMAL(10,2)"
+        }
+      ]
+    }
+  ],
+  "sample_data": {
+    "inventory": [
+      {
+        "item_id": "1374",
+        "item_type": "prime_eligible",
+        "item_category": "mini refrigerator",
+        "square_footage": "68.00"
+      },
+      {
+        "item_id": "4245",
+        "item_type": "not_prime",
+        "item_category": "standing lamp",
+        "square_footage": "26.40"
+      },
+      {
+        "item_id": "2452",
+        "item_type": "prime_eligible",
+        "item_category": "television",
+        "square_footage": "85.00"
+      },
+      {
+        "item_id": "3255",
+        "item_type": "not_prime",
+        "item_category": "side table",
+        "square_footage": "22.60"
+      },
+      {
+        "item_id": "1672",
+        "item_type": "prime_eligible",
+        "item_category": "laptop",
+        "square_footage": "8.50"
+      }
+    ]
+  },
+  "sample_output": [
+    {
+      "item_type": "prime_eligible",
+      "item_count": "9285"
+    },
+    {
+      "item_type": "not_prime",
+      "item_count": "6"
+    }
+  ],
+  "reference_sql": "WITH summary AS (\n  SELECT \n    item_type,\n    SUM(square_footage) AS total_sqft,\n    COUNT(item_id) AS item_count\n  FROM inventory\n  GROUP BY item_type\n),\nprime_calc AS (\n  SELECT \n    'prime_eligible' AS item_type,\n    FLOOR(500000 / total_sqft) * item_count AS total_items,\n    FLOOR(500000 / total_sqft) * total_sqft AS total_sqft_used\n  FROM summary\n  WHERE item_type = 'prime_eligible'\n),\nnot_prime_calc AS (\n  SELECT \n    'not_prime' AS item_type,\n    FLOOR((500000 - p.total_sqft_used) / s.total_sqft) * s.item_count AS total_items\n  FROM summary s\n  CROSS JOIN prime_calc p\n  WHERE s.item_type = 'not_prime'\n)\nSELECT item_type, total_items FROM prime_calc\nUNION ALL\nSELECT item_type, total_items FROM not_prime_calc;",
+  "tags": [
+    "aggregation",
+    "amazon",
+    "date-manipulation",
+    "ecommerce",
+    "finance",
+    "hard"
+  ],
+  "related_questions": [],
+  "sources": [
+    [
+      "DataLemur page (free)",
+      "https://datalemur.com/questions/prime-warehouse-storage"
+    ],
+    [
+      "DataLemur PDF",
+      "Page 80"
+    ]
+  ],
+  "test_cases": [
+    {
+      "test_case_id": "tc_1_baseline",
+      "description": "Baseline sample input data from problem description",
+      "input_data": {
+        "inventory": [
+          {
+            "item_id": "1374",
+            "item_type": "prime_eligible",
+            "item_category": "mini refrigerator",
+            "square_footage": "68.00"
+          },
+          {
+            "item_id": "4245",
+            "item_type": "not_prime",
+            "item_category": "standing lamp",
+            "square_footage": "26.40"
+          },
+          {
+            "item_id": "2452",
+            "item_type": "prime_eligible",
+            "item_category": "television",
+            "square_footage": "85.00"
+          },
+          {
+            "item_id": "3255",
+            "item_type": "not_prime",
+            "item_category": "side table",
+            "square_footage": "22.60"
+          },
+          {
+            "item_id": "1672",
+            "item_type": "prime_eligible",
+            "item_category": "laptop",
+            "square_footage": "8.50"
+          }
+        ]
+      },
+      "expected_output": [
+        {
+          "item_type": "prime_eligible",
+          "total_items": 9285.0
+        },
+        {
+          "item_type": "not_prime",
+          "total_items": 6.0
+        }
+      ],
+      "category": "normal"
+    },
+    {
+      "test_case_id": "tc_2_high_volume",
+      "description": "Multiple entities with scaled volume and multi-group distributions",
+      "input_data": {
+        "inventory": [
+          {
+            "item_id": "1374",
+            "item_type": "prime_eligible",
+            "item_category": "mini refrigerator",
+            "square_footage": "68.00"
+          },
+          {
+            "item_id": "4245",
+            "item_type": "not_prime",
+            "item_category": "standing lamp",
+            "square_footage": "26.40"
+          },
+          {
+            "item_id": "2452",
+            "item_type": "prime_eligible",
+            "item_category": "television",
+            "square_footage": "85.00"
+          },
+          {
+            "item_id": "3255",
+            "item_type": "not_prime",
+            "item_category": "side table",
+            "square_footage": "22.60"
+          },
+          {
+            "item_id": "1672",
+            "item_type": "prime_eligible",
+            "item_category": "laptop",
+            "square_footage": "8.50"
+          },
+          {
+            "item_id": 2374,
+            "item_type": "prime_eligible",
+            "item_category": "mini refrigerator",
+            "square_footage": "68.00"
+          },
+          {
+            "item_id": 5245,
+            "item_type": "not_prime",
+            "item_category": "standing lamp",
+            "square_footage": "26.40"
+          },
+          {
+            "item_id": 3452,
+            "item_type": "prime_eligible",
+            "item_category": "television",
+            "square_footage": "85.00"
+          },
+          {
+            "item_id": 4255,
+            "item_type": "not_prime",
+            "item_category": "side table",
+            "square_footage": "22.60"
+          },
+          {
+            "item_id": 2672,
+            "item_type": "prime_eligible",
+            "item_category": "laptop",
+            "square_footage": "8.50"
+          }
+        ]
+      },
+      "expected_output": [
+        {
+          "item_type": "prime_eligible",
+          "total_items": 9282.0
+        },
+        {
+          "item_type": "not_prime",
+          "total_items": 12.0
+        }
+      ],
+      "category": "volume"
+    },
+    {
+      "test_case_id": "tc_3_disqualifying_rows",
+      "description": "Dataset containing disqualifying rows, edge values, and cancelled/zero records",
+      "input_data": {
+        "inventory": [
+          {
+            "item_id": "1374",
+            "item_type": "prime_eligible",
+            "item_category": "mini refrigerator",
+            "square_footage": "68.00"
+          },
+          {
+            "item_id": "4245",
+            "item_type": "not_prime",
+            "item_category": "standing lamp",
+            "square_footage": "26.40"
+          },
+          {
+            "item_id": "2452",
+            "item_type": "prime_eligible",
+            "item_category": "television",
+            "square_footage": "85.00"
+          },
+          {
+            "item_id": "3255",
+            "item_type": "not_prime",
+            "item_category": "side table",
+            "square_footage": "22.60"
+          },
+          {
+            "item_id": "1672",
+            "item_type": "prime_eligible",
+            "item_category": "laptop",
+            "square_footage": "8.50"
+          },
+          {
+            "item_id": 6374,
+            "item_type": "prime_eligible",
+            "item_category": "mini refrigerator",
+            "square_footage": "68.00"
+          },
+          {
+            "item_id": 9245,
+            "item_type": "not_prime",
+            "item_category": "standing lamp",
+            "square_footage": "26.40"
+          }
+        ]
+      },
+      "expected_output": [
+        {
+          "item_type": "prime_eligible",
+          "total_items": 8712.0
+        },
+        {
+          "item_type": "not_prime",
+          "total_items": 3.0
+        }
+      ],
+      "category": "edge"
+    },
+    {
+      "test_case_id": "tc_4_empty_result",
+      "description": "Input where no rows satisfy problem criteria, verifying empty result handling",
+      "input_data": {
+        "inventory": []
+      },
+      "expected_output": [],
+      "category": "edge"
+    },
+    {
+      "test_case_id": "tc_5_ties_and_nulls",
+      "description": "Tied ranking metrics, unmatched join keys, and NULL values in nullable attributes",
+      "input_data": {
+        "inventory": [
+          {
+            "item_id": "1374",
+            "item_type": "prime_eligible",
+            "item_category": "mini refrigerator",
+            "square_footage": "68.00"
+          },
+          {
+            "item_id": "4245",
+            "item_type": "not_prime",
+            "item_category": "standing lamp",
+            "square_footage": "26.40"
+          },
+          {
+            "item_id": "2452",
+            "item_type": "prime_eligible",
+            "item_category": "television",
+            "square_footage": "85.00"
+          },
+          {
+            "item_id": "3255",
+            "item_type": "not_prime",
+            "item_category": "side table",
+            "square_footage": "22.60"
+          },
+          {
+            "item_id": "1672",
+            "item_type": "prime_eligible",
+            "item_category": "laptop",
+            "square_footage": "8.50"
+          },
+          {
+            "item_id": 10374,
+            "item_type": "prime_eligible",
+            "item_category": "mini refrigerator",
+            "square_footage": "68.00"
+          },
+          {
+            "item_id": 13745,
+            "item_type": null,
+            "item_category": null,
+            "square_footage": null
+          }
+        ]
+      },
+      "expected_output": [
+        {
+          "item_type": "prime_eligible",
+          "total_items": 8712.0
+        },
+        {
+          "item_type": "not_prime",
+          "total_items": 6.0
+        }
+      ],
+      "category": "edge"
+    },
+    {
+      "test_case_id": "tc_6_extreme_boundary",
+      "description": "Consecutive day sequences, month-end date rollovers, and high-frequency transactions",
+      "input_data": {
+        "inventory": [
+          {
+            "item_id": "1374",
+            "item_type": "prime_eligible",
+            "item_category": "mini refrigerator",
+            "square_footage": "68.00"
+          },
+          {
+            "item_id": "4245",
+            "item_type": "not_prime",
+            "item_category": "standing lamp",
+            "square_footage": "26.40"
+          },
+          {
+            "item_id": "2452",
+            "item_type": "prime_eligible",
+            "item_category": "television",
+            "square_footage": "85.00"
+          },
+          {
+            "item_id": "3255",
+            "item_type": "not_prime",
+            "item_category": "side table",
+            "square_footage": "22.60"
+          },
+          {
+            "item_id": "1672",
+            "item_type": "prime_eligible",
+            "item_category": "laptop",
+            "square_footage": "8.50"
+          },
+          {
+            "item_id": 9374,
+            "item_type": "prime_eligible",
+            "item_category": "mini refrigerator",
+            "square_footage": "68.00"
+          },
+          {
+            "item_id": 12245,
+            "item_type": "not_prime",
+            "item_category": "standing lamp",
+            "square_footage": "26.40"
+          },
+          {
+            "item_id": 10452,
+            "item_type": "prime_eligible",
+            "item_category": "television",
+            "square_footage": "85.00"
+          },
+          {
+            "item_id": 11255,
+            "item_type": "not_prime",
+            "item_category": "side table",
+            "square_footage": "22.60"
+          },
+          {
+            "item_id": 9672,
+            "item_type": "prime_eligible",
+            "item_category": "laptop",
+            "square_footage": "8.50"
+          }
+        ]
+      },
+      "expected_output": [
+        {
+          "item_type": "prime_eligible",
+          "total_items": 9282.0
+        },
+        {
+          "item_type": "not_prime",
+          "total_items": 12.0
+        }
+      ],
+      "category": "boundary"
+    }
+  ],
+  "order_sensitive": false,
+  "expected_output": [
+    {
+      "item_type": "prime_eligible",
+      "total_items": 9285.0
+    },
+    {
+      "item_type": "not_prime",
+      "total_items": 6.0
+    }
+  ]
+}

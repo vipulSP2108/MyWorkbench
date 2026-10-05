@@ -1,0 +1,288 @@
+{
+  "question_id": "q_066_photoshop_revenue_analysis",
+  "slug": "photoshop-revenue-analysis",
+  "title": "Photoshop Revenue Analysis",
+  "difficulty": "Medium",
+  "company": "Adobe",
+  "premium": true,
+  "question": "Adobe SQL interview problem: for every customer that bought Photoshop, return a list of the customers and the total spent on all\nthe products except for Photoshop products.",
+  "notes": [],
+  "tables": [
+    {
+      "table_name": "adobe_transactions",
+      "columns": [
+        {
+          "column_name": "customer_id",
+          "data_type": "INT"
+        },
+        {
+          "column_name": "product",
+          "data_type": "VARCHAR(255)"
+        },
+        {
+          "column_name": "revenue",
+          "data_type": "INT"
+        }
+      ]
+    }
+  ],
+  "sample_data": {
+    "adobe_transactions": [
+      {
+        "customer_id": "123",
+        "product": "Photoshop",
+        "revenue": "50"
+      },
+      {
+        "customer_id": "234",
+        "product": "Illustrator",
+        "revenue": "200"
+      },
+      {
+        "customer_id": "345",
+        "product": "Photoshop",
+        "revenue": "100"
+      },
+      {
+        "customer_id": "345",
+        "product": "Illustrator",
+        "revenue": "150"
+      }
+    ]
+  },
+  "sample_output": [
+    {
+      "customer_id": "123",
+      "revenue": "150"
+    },
+    {
+      "customer_id": "345",
+      "revenue": "150"
+    }
+  ],
+  "reference_sql": "SELECT customer_id, SUM(revenue) AS revenue\nFROM adobe_transactions\nWHERE customer_id IN (\n  SELECT customer_id FROM adobe_transactions WHERE product = 'Photoshop'\n) AND product != 'Photoshop'\nGROUP BY customer_id\nORDER BY customer_id;",
+  "tags": [
+    "adobe",
+    "aggregation",
+    "ecommerce",
+    "finance",
+    "medium"
+  ],
+  "related_questions": [],
+  "sources": [
+    [
+      "DataLemur's LinkedIn post (Adobe problem)",
+      "https://www.linkedin.com/posts/datalemur_sql-sql-interviewing-activity-6975861681113497600-7khg"
+    ],
+    [
+      "DataLemur page (locked)",
+      "https://datalemur.com/questions/photoshop-revenue-analysis"
+    ],
+    [
+      "DataLemur PDF",
+      "Page 70"
+    ]
+  ],
+  "test_cases": [
+    {
+      "test_case_id": "tc_1_baseline",
+      "description": "Baseline sample input data from problem description",
+      "input_data": {
+        "adobe_transactions": [
+          {
+            "customer_id": "123",
+            "product": "Photoshop",
+            "revenue": "50"
+          },
+          {
+            "customer_id": "234",
+            "product": "Illustrator",
+            "revenue": "200"
+          },
+          {
+            "customer_id": "345",
+            "product": "Photoshop",
+            "revenue": "100"
+          },
+          {
+            "customer_id": "345",
+            "product": "Illustrator",
+            "revenue": "150"
+          }
+        ]
+      },
+      "expected_output": [
+        {
+          "customer_id": 345,
+          "revenue": 150
+        }
+      ],
+      "category": "normal"
+    },
+    {
+      "test_case_id": "tc_2_high_volume",
+      "description": "Multiple entities with scaled volume and multi-group distributions",
+      "input_data": {
+        "adobe_transactions": [
+          {
+            "customer_id": "123",
+            "product": "Photoshop",
+            "revenue": "50"
+          },
+          {
+            "customer_id": "234",
+            "product": "Illustrator",
+            "revenue": "200"
+          },
+          {
+            "customer_id": "345",
+            "product": "Photoshop",
+            "revenue": "100"
+          },
+          {
+            "customer_id": "345",
+            "product": "Illustrator",
+            "revenue": "150"
+          },
+          {
+            "customer_id": 1123,
+            "product": "Photoshop",
+            "revenue": 75.0
+          },
+          {
+            "customer_id": 1234,
+            "product": "Illustrator",
+            "revenue": 300.0
+          },
+          {
+            "customer_id": 1345,
+            "product": "Photoshop",
+            "revenue": 150.0
+          },
+          {
+            "customer_id": 1345,
+            "product": "Illustrator",
+            "revenue": 225.0
+          }
+        ]
+      },
+      "expected_output": [
+        {
+          "customer_id": 345,
+          "revenue": 150
+        },
+        {
+          "customer_id": 1345,
+          "revenue": 225
+        }
+      ],
+      "category": "volume"
+    },
+    {
+      "test_case_id": "tc_3_disqualifying_rows",
+      "description": "Dataset containing disqualifying rows, edge values, and cancelled/zero records",
+      "input_data": {
+        "adobe_transactions": [
+          {
+            "customer_id": "123",
+            "product": "Photoshop",
+            "revenue": "50"
+          },
+          {
+            "customer_id": "234",
+            "product": "Illustrator",
+            "revenue": "200"
+          },
+          {
+            "customer_id": "345",
+            "product": "Photoshop",
+            "revenue": "100"
+          },
+          {
+            "customer_id": "345",
+            "product": "Illustrator",
+            "revenue": "150"
+          },
+          {
+            "customer_id": 5123,
+            "product": "Photoshop",
+            "revenue": "50"
+          },
+          {
+            "customer_id": 5234,
+            "product": "Illustrator",
+            "revenue": "200"
+          }
+        ]
+      },
+      "expected_output": [
+        {
+          "customer_id": 345,
+          "revenue": 150
+        }
+      ],
+      "category": "edge"
+    },
+    {
+      "test_case_id": "tc_4_empty_result",
+      "description": "Input where no rows satisfy problem criteria, verifying empty result handling",
+      "input_data": {
+        "adobe_transactions": []
+      },
+      "expected_output": [],
+      "category": "edge"
+    },
+    {
+      "test_case_id": "tc_5_ties_and_nulls",
+      "description": "Tied ranking metrics, unmatched join keys, and NULL values in nullable attributes",
+      "input_data": {
+        "adobe_transactions": [
+          {
+            "customer_id": "123",
+            "product": "Photoshop",
+            "revenue": "50"
+          },
+          {
+            "customer_id": "234",
+            "product": "Illustrator",
+            "revenue": "200"
+          },
+          {
+            "customer_id": "345",
+            "product": "Photoshop",
+            "revenue": "100"
+          },
+          {
+            "customer_id": "345",
+            "product": "Illustrator",
+            "revenue": "150"
+          },
+          {
+            "customer_id": 9123,
+            "product": "Photoshop",
+            "revenue": "50"
+          },
+          {
+            "customer_id": 9734,
+            "product": "Illustrator",
+            "revenue": "200"
+          }
+        ]
+      },
+      "expected_output": [
+        {
+          "customer_id": 345,
+          "revenue": 150
+        }
+      ],
+      "category": "edge"
+    }
+  ],
+  "order_sensitive": true,
+  "expected_output": [
+    {
+      "customer_id": 345,
+      "revenue": 150
+    }
+  ]
+}

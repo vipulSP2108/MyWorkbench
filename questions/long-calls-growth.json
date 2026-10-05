@@ -1,0 +1,852 @@
+{
+  "question_id": "q_083_long_calls_growth",
+  "slug": "long-calls-growth",
+  "title": "Patient Support Analysis (Part 4)",
+  "difficulty": "Hard",
+  "company": "UnitedHealth",
+  "premium": false,
+  "question": "UnitedHealth Group (UHG) has a program called Advocate4Me, which allows policy holders (or, members) to call an advocate and receive support for their health care needs \u2013 whether that's claims and benefits support, drug coverage, pre- and post-authorisation, medical records, emergency assistance, or member portal services.\n\nTo analyze the performance of the program, write a query to determine the month-over-month growth rate specifically for long-calls. A long-call is defined as any call lasting more than 5 minutes (300 seconds).\n\nOutput the year and month in numerical format and chronological order, along with the growth percentage rounded to 1 decimal place.",
+  "notes": [
+    "Call counts: Jan - 1 call; Feb - 0 call; Mar - 1 call; Apr - 3 calls; May - 2 calls; Jun - 2 calls",
+    "January: With no previous month's call information, the growth percentage is shown as NULL.",
+    "February: The absence of calls compared to January results in a 0.0% growth rate.",
+    "March: Witnessing an increase of 1 call compared to February, the growth percentage is +100.0%.",
+    "April: Experiencing a surge of 3 calls compared to March, the growth percentage is +200.0%.",
+    "May: With a decrease of 1 call compared to April, the growth percentage is -33.3%.",
+    "June: Maintaining the same number of calls as May, the growth percentage remains at 0.0%.",
+    "The dataset you are querying against may have different input & output - this is just an example!"
+  ],
+  "tables": [
+    {
+      "table_name": "callers",
+      "columns": [
+        {
+          "column_name": "policy_holder_id",
+          "data_type": "INT"
+        },
+        {
+          "column_name": "case_id",
+          "data_type": "VARCHAR(255)"
+        },
+        {
+          "column_name": "call_category",
+          "data_type": "VARCHAR(255)"
+        },
+        {
+          "column_name": "call_date",
+          "data_type": "DATETIME"
+        },
+        {
+          "column_name": "call_duration_secs",
+          "data_type": "INT"
+        }
+      ]
+    }
+  ],
+  "sample_data": {
+    "callers": [
+      {
+        "policy_holder_id": "1",
+        "case_id": "f1d012f9-9d02-4966-a968-bf6c5bc9a9fe",
+        "call_category": "emergency assistance",
+        "call_date": "04/13/2023 19:16:53",
+        "call_duration_secs": "144"
+      },
+      {
+        "policy_holder_id": "1",
+        "case_id": "41ce8fb6-1ddd-4f50-ac31-07bfcce6aaab",
+        "call_category": "authorisation",
+        "call_date": "05/25/2023 09:09:30",
+        "call_duration_secs": "815"
+      },
+      {
+        "policy_holder_id": "2",
+        "case_id": "8471a3d4-6fc7-4bb2-9fc7-4583e3638a9e",
+        "call_category": "emergency assistance",
+        "call_date": "03/09/2023 10:58:54",
+        "call_duration_secs": "128"
+      },
+      {
+        "policy_holder_id": "2",
+        "case_id": "38208fae-bad0-49bf-99aa-7842ba2e37bc",
+        "call_category": "benefits",
+        "call_date": "06/05/2023 07:35:43",
+        "call_duration_secs": "619"
+      },
+      {
+        "policy_holder_id": "3",
+        "case_id": "f0e7a8e3-df93-40f3-9b5e-fadff9ebe072",
+        "call_category": "provider network",
+        "call_date": "01/12/2023 04:53:41",
+        "call_duration_secs": "483"
+      },
+      {
+        "policy_holder_id": "3",
+        "case_id": "b72f91e6-c3f8-4358-a1f2-c9507e8dcba4",
+        "call_category": "member portal",
+        "call_date": "04/04/2023 20:03:22",
+        "call_duration_secs": "275"
+      },
+      {
+        "policy_holder_id": "3",
+        "case_id": "3acbe22d-22b3-4144-954d-74c127bc49ea",
+        "call_category": "benefits",
+        "call_date": "04/12/2023 00:05:29",
+        "call_duration_secs": "329"
+      },
+      {
+        "policy_holder_id": "3",
+        "case_id": "e32b61c2-a90d-4371-a5ee-6bc44fa49bbd",
+        "call_category": "benefits",
+        "call_date": "05/25/2023 06:07:41",
+        "call_duration_secs": "512"
+      },
+      {
+        "policy_holder_id": "3",
+        "case_id": "6099f469-b5d6-4447-9acf-d936355eae7c",
+        "call_category": "emergency assistance",
+        "call_date": "06/11/2023 12:04:21",
+        "call_duration_secs": "33"
+      }
+    ]
+  },
+  "sample_output": [
+    {
+      "yr": "2023",
+      "mth": "1",
+      "long_calls_growth_pct": "NULL"
+    },
+    {
+      "yr": "2023",
+      "mth": "2",
+      "long_calls_growth_pct": "0.0"
+    },
+    {
+      "yr": "2023",
+      "mth": "2",
+      "long_calls_growth_pct": "100.0"
+    },
+    {
+      "yr": "2023",
+      "mth": "4",
+      "long_calls_growth_pct": "200.0"
+    },
+    {
+      "yr": "2023",
+      "mth": "5",
+      "long_calls_growth_pct": "-33.3"
+    },
+    {
+      "yr": "2023",
+      "mth": "6",
+      "long_calls_growth_pct": "0.0"
+    }
+  ],
+  "reference_sql": "WITH monthly_calls AS (\n  SELECT \n    DATE_FORMAT(call_date, '%Y-%m') AS ym,\n    COUNT(case_id) AS long_call_count\n  FROM callers\n  WHERE call_duration_secs > 300\n  GROUP BY DATE_FORMAT(call_date, '%Y-%m')\n)\nSELECT \n  ym,\n  long_call_count,\n  ROUND(100.0 * (long_call_count - LAG(long_call_count) OVER (ORDER BY ym)) / \n        NULLIF(LAG(long_call_count) OVER (ORDER BY ym), 0), 1) AS growth_pct\nFROM monthly_calls\nORDER BY ym;",
+  "tags": [
+    "date-manipulation",
+    "ecommerce",
+    "hard",
+    "healthcare",
+    "math",
+    "social-media",
+    "unitedhealth"
+  ],
+  "related_questions": [
+    "frequent-callers",
+    "uncategorized-calls-percentage",
+    "patient-call-history"
+  ],
+  "sources": [
+    [
+      "DataLemur page (free)",
+      "https://datalemur.com/questions/long-calls-growth"
+    ],
+    [
+      "DataLemur PDF",
+      "Page 87"
+    ]
+  ],
+  "test_cases": [
+    {
+      "test_case_id": "tc_1_baseline",
+      "description": "Baseline sample input data from problem description",
+      "input_data": {
+        "callers": [
+          {
+            "policy_holder_id": "1",
+            "case_id": "f1d012f9-9d02-4966-a968-bf6c5bc9a9fe",
+            "call_category": "emergency assistance",
+            "call_date": "04/13/2023 19:16:53",
+            "call_duration_secs": "144"
+          },
+          {
+            "policy_holder_id": "1",
+            "case_id": "41ce8fb6-1ddd-4f50-ac31-07bfcce6aaab",
+            "call_category": "authorisation",
+            "call_date": "05/25/2023 09:09:30",
+            "call_duration_secs": "815"
+          },
+          {
+            "policy_holder_id": "2",
+            "case_id": "8471a3d4-6fc7-4bb2-9fc7-4583e3638a9e",
+            "call_category": "emergency assistance",
+            "call_date": "03/09/2023 10:58:54",
+            "call_duration_secs": "128"
+          },
+          {
+            "policy_holder_id": "2",
+            "case_id": "38208fae-bad0-49bf-99aa-7842ba2e37bc",
+            "call_category": "benefits",
+            "call_date": "06/05/2023 07:35:43",
+            "call_duration_secs": "619"
+          },
+          {
+            "policy_holder_id": "3",
+            "case_id": "f0e7a8e3-df93-40f3-9b5e-fadff9ebe072",
+            "call_category": "provider network",
+            "call_date": "01/12/2023 04:53:41",
+            "call_duration_secs": "483"
+          },
+          {
+            "policy_holder_id": "3",
+            "case_id": "b72f91e6-c3f8-4358-a1f2-c9507e8dcba4",
+            "call_category": "member portal",
+            "call_date": "04/04/2023 20:03:22",
+            "call_duration_secs": "275"
+          },
+          {
+            "policy_holder_id": "3",
+            "case_id": "3acbe22d-22b3-4144-954d-74c127bc49ea",
+            "call_category": "benefits",
+            "call_date": "04/12/2023 00:05:29",
+            "call_duration_secs": "329"
+          },
+          {
+            "policy_holder_id": "3",
+            "case_id": "e32b61c2-a90d-4371-a5ee-6bc44fa49bbd",
+            "call_category": "benefits",
+            "call_date": "05/25/2023 06:07:41",
+            "call_duration_secs": "512"
+          },
+          {
+            "policy_holder_id": "3",
+            "case_id": "6099f469-b5d6-4447-9acf-d936355eae7c",
+            "call_category": "emergency assistance",
+            "call_date": "06/11/2023 12:04:21",
+            "call_duration_secs": "33"
+          }
+        ]
+      },
+      "expected_output": [
+        {
+          "ym": "2023-01",
+          "long_call_count": 1,
+          "growth_pct": null
+        },
+        {
+          "ym": "2023-04",
+          "long_call_count": 1,
+          "growth_pct": 0.0
+        },
+        {
+          "ym": "2023-05",
+          "long_call_count": 2,
+          "growth_pct": 100.0
+        },
+        {
+          "ym": "2023-06",
+          "long_call_count": 1,
+          "growth_pct": -50.0
+        }
+      ],
+      "category": "normal"
+    },
+    {
+      "test_case_id": "tc_2_high_volume",
+      "description": "Multiple entities with scaled volume and multi-group distributions",
+      "input_data": {
+        "callers": [
+          {
+            "policy_holder_id": "1",
+            "case_id": "f1d012f9-9d02-4966-a968-bf6c5bc9a9fe",
+            "call_category": "emergency assistance",
+            "call_date": "04/13/2023 19:16:53",
+            "call_duration_secs": "144"
+          },
+          {
+            "policy_holder_id": "1",
+            "case_id": "41ce8fb6-1ddd-4f50-ac31-07bfcce6aaab",
+            "call_category": "authorisation",
+            "call_date": "05/25/2023 09:09:30",
+            "call_duration_secs": "815"
+          },
+          {
+            "policy_holder_id": "2",
+            "case_id": "8471a3d4-6fc7-4bb2-9fc7-4583e3638a9e",
+            "call_category": "emergency assistance",
+            "call_date": "03/09/2023 10:58:54",
+            "call_duration_secs": "128"
+          },
+          {
+            "policy_holder_id": "2",
+            "case_id": "38208fae-bad0-49bf-99aa-7842ba2e37bc",
+            "call_category": "benefits",
+            "call_date": "06/05/2023 07:35:43",
+            "call_duration_secs": "619"
+          },
+          {
+            "policy_holder_id": "3",
+            "case_id": "f0e7a8e3-df93-40f3-9b5e-fadff9ebe072",
+            "call_category": "provider network",
+            "call_date": "01/12/2023 04:53:41",
+            "call_duration_secs": "483"
+          },
+          {
+            "policy_holder_id": "3",
+            "case_id": "b72f91e6-c3f8-4358-a1f2-c9507e8dcba4",
+            "call_category": "member portal",
+            "call_date": "04/04/2023 20:03:22",
+            "call_duration_secs": "275"
+          },
+          {
+            "policy_holder_id": "3",
+            "case_id": "3acbe22d-22b3-4144-954d-74c127bc49ea",
+            "call_category": "benefits",
+            "call_date": "04/12/2023 00:05:29",
+            "call_duration_secs": "329"
+          },
+          {
+            "policy_holder_id": "3",
+            "case_id": "e32b61c2-a90d-4371-a5ee-6bc44fa49bbd",
+            "call_category": "benefits",
+            "call_date": "05/25/2023 06:07:41",
+            "call_duration_secs": "512"
+          },
+          {
+            "policy_holder_id": "3",
+            "case_id": "6099f469-b5d6-4447-9acf-d936355eae7c",
+            "call_category": "emergency assistance",
+            "call_date": "06/11/2023 12:04:21",
+            "call_duration_secs": "33"
+          },
+          {
+            "policy_holder_id": 1001,
+            "case_id": "f1d012f9-9d02-4966-a968-bf6c5bc9a9fe",
+            "call_category": "emergency assistance",
+            "call_date": "04/18/2023 19:16:53",
+            "call_duration_secs": "144"
+          },
+          {
+            "policy_holder_id": 1001,
+            "case_id": "41ce8fb6-1ddd-4f50-ac31-07bfcce6aaab",
+            "call_category": "authorisation",
+            "call_date": "05/28/2023 09:09:30",
+            "call_duration_secs": "815"
+          },
+          {
+            "policy_holder_id": 1002,
+            "case_id": "8471a3d4-6fc7-4bb2-9fc7-4583e3638a9e",
+            "call_category": "emergency assistance",
+            "call_date": "03/14/2023 10:58:54",
+            "call_duration_secs": "128"
+          },
+          {
+            "policy_holder_id": 1002,
+            "case_id": "38208fae-bad0-49bf-99aa-7842ba2e37bc",
+            "call_category": "benefits",
+            "call_date": "06/10/2023 07:35:43",
+            "call_duration_secs": "619"
+          },
+          {
+            "policy_holder_id": 1003,
+            "case_id": "f0e7a8e3-df93-40f3-9b5e-fadff9ebe072",
+            "call_category": "provider network",
+            "call_date": "01/17/2023 04:53:41",
+            "call_duration_secs": "483"
+          },
+          {
+            "policy_holder_id": 1003,
+            "case_id": "b72f91e6-c3f8-4358-a1f2-c9507e8dcba4",
+            "call_category": "member portal",
+            "call_date": "04/09/2023 20:03:22",
+            "call_duration_secs": "275"
+          },
+          {
+            "policy_holder_id": 1003,
+            "case_id": "3acbe22d-22b3-4144-954d-74c127bc49ea",
+            "call_category": "benefits",
+            "call_date": "04/17/2023 00:05:29",
+            "call_duration_secs": "329"
+          },
+          {
+            "policy_holder_id": 1003,
+            "case_id": "e32b61c2-a90d-4371-a5ee-6bc44fa49bbd",
+            "call_category": "benefits",
+            "call_date": "05/28/2023 06:07:41",
+            "call_duration_secs": "512"
+          },
+          {
+            "policy_holder_id": 1003,
+            "case_id": "6099f469-b5d6-4447-9acf-d936355eae7c",
+            "call_category": "emergency assistance",
+            "call_date": "06/16/2023 12:04:21",
+            "call_duration_secs": "33"
+          }
+        ]
+      },
+      "expected_output": [
+        {
+          "ym": "2023-01",
+          "long_call_count": 2,
+          "growth_pct": null
+        },
+        {
+          "ym": "2023-04",
+          "long_call_count": 2,
+          "growth_pct": 0.0
+        },
+        {
+          "ym": "2023-05",
+          "long_call_count": 4,
+          "growth_pct": 100.0
+        },
+        {
+          "ym": "2023-06",
+          "long_call_count": 2,
+          "growth_pct": -50.0
+        }
+      ],
+      "category": "volume"
+    },
+    {
+      "test_case_id": "tc_3_disqualifying_rows",
+      "description": "Dataset containing disqualifying rows, edge values, and cancelled/zero records",
+      "input_data": {
+        "callers": [
+          {
+            "policy_holder_id": "1",
+            "case_id": "f1d012f9-9d02-4966-a968-bf6c5bc9a9fe",
+            "call_category": "emergency assistance",
+            "call_date": "04/13/2023 19:16:53",
+            "call_duration_secs": "144"
+          },
+          {
+            "policy_holder_id": "1",
+            "case_id": "41ce8fb6-1ddd-4f50-ac31-07bfcce6aaab",
+            "call_category": "authorisation",
+            "call_date": "05/25/2023 09:09:30",
+            "call_duration_secs": "815"
+          },
+          {
+            "policy_holder_id": "2",
+            "case_id": "8471a3d4-6fc7-4bb2-9fc7-4583e3638a9e",
+            "call_category": "emergency assistance",
+            "call_date": "03/09/2023 10:58:54",
+            "call_duration_secs": "128"
+          },
+          {
+            "policy_holder_id": "2",
+            "case_id": "38208fae-bad0-49bf-99aa-7842ba2e37bc",
+            "call_category": "benefits",
+            "call_date": "06/05/2023 07:35:43",
+            "call_duration_secs": "619"
+          },
+          {
+            "policy_holder_id": "3",
+            "case_id": "f0e7a8e3-df93-40f3-9b5e-fadff9ebe072",
+            "call_category": "provider network",
+            "call_date": "01/12/2023 04:53:41",
+            "call_duration_secs": "483"
+          },
+          {
+            "policy_holder_id": "3",
+            "case_id": "b72f91e6-c3f8-4358-a1f2-c9507e8dcba4",
+            "call_category": "member portal",
+            "call_date": "04/04/2023 20:03:22",
+            "call_duration_secs": "275"
+          },
+          {
+            "policy_holder_id": "3",
+            "case_id": "3acbe22d-22b3-4144-954d-74c127bc49ea",
+            "call_category": "benefits",
+            "call_date": "04/12/2023 00:05:29",
+            "call_duration_secs": "329"
+          },
+          {
+            "policy_holder_id": "3",
+            "case_id": "e32b61c2-a90d-4371-a5ee-6bc44fa49bbd",
+            "call_category": "benefits",
+            "call_date": "05/25/2023 06:07:41",
+            "call_duration_secs": "512"
+          },
+          {
+            "policy_holder_id": "3",
+            "case_id": "6099f469-b5d6-4447-9acf-d936355eae7c",
+            "call_category": "emergency assistance",
+            "call_date": "06/11/2023 12:04:21",
+            "call_duration_secs": "33"
+          },
+          {
+            "policy_holder_id": 5001,
+            "case_id": "f1d012f9-9d02-4966-a968-bf6c5bc9a9fe",
+            "call_category": "emergency assistance",
+            "call_date": "04/13/2018 19:16:53",
+            "call_duration_secs": "144"
+          },
+          {
+            "policy_holder_id": 5001,
+            "case_id": "41ce8fb6-1ddd-4f50-ac31-07bfcce6aaab",
+            "call_category": "authorisation",
+            "call_date": "05/25/2018 09:09:30",
+            "call_duration_secs": "815"
+          },
+          {
+            "policy_holder_id": 5002,
+            "case_id": "8471a3d4-6fc7-4bb2-9fc7-4583e3638a9e",
+            "call_category": "emergency assistance",
+            "call_date": "03/09/2018 10:58:54",
+            "call_duration_secs": "128"
+          },
+          {
+            "policy_holder_id": 5002,
+            "case_id": "38208fae-bad0-49bf-99aa-7842ba2e37bc",
+            "call_category": "benefits",
+            "call_date": "06/05/2018 07:35:43",
+            "call_duration_secs": "619"
+          }
+        ]
+      },
+      "expected_output": [
+        {
+          "ym": "2018-05",
+          "long_call_count": 1,
+          "growth_pct": null
+        },
+        {
+          "ym": "2018-06",
+          "long_call_count": 1,
+          "growth_pct": 0.0
+        },
+        {
+          "ym": "2023-01",
+          "long_call_count": 1,
+          "growth_pct": 0.0
+        },
+        {
+          "ym": "2023-04",
+          "long_call_count": 1,
+          "growth_pct": 0.0
+        },
+        {
+          "ym": "2023-05",
+          "long_call_count": 2,
+          "growth_pct": 100.0
+        },
+        {
+          "ym": "2023-06",
+          "long_call_count": 1,
+          "growth_pct": -50.0
+        }
+      ],
+      "category": "edge"
+    },
+    {
+      "test_case_id": "tc_4_empty_result",
+      "description": "Input where no rows satisfy problem criteria, verifying empty result handling",
+      "input_data": {
+        "callers": []
+      },
+      "expected_output": [],
+      "category": "edge"
+    },
+    {
+      "test_case_id": "tc_5_ties_and_nulls",
+      "description": "Tied ranking metrics, unmatched join keys, and NULL values in nullable attributes",
+      "input_data": {
+        "callers": [
+          {
+            "policy_holder_id": "1",
+            "case_id": "f1d012f9-9d02-4966-a968-bf6c5bc9a9fe",
+            "call_category": "emergency assistance",
+            "call_date": "04/13/2023 19:16:53",
+            "call_duration_secs": "144"
+          },
+          {
+            "policy_holder_id": "1",
+            "case_id": "41ce8fb6-1ddd-4f50-ac31-07bfcce6aaab",
+            "call_category": "authorisation",
+            "call_date": "05/25/2023 09:09:30",
+            "call_duration_secs": "815"
+          },
+          {
+            "policy_holder_id": "2",
+            "case_id": "8471a3d4-6fc7-4bb2-9fc7-4583e3638a9e",
+            "call_category": "emergency assistance",
+            "call_date": "03/09/2023 10:58:54",
+            "call_duration_secs": "128"
+          },
+          {
+            "policy_holder_id": "2",
+            "case_id": "38208fae-bad0-49bf-99aa-7842ba2e37bc",
+            "call_category": "benefits",
+            "call_date": "06/05/2023 07:35:43",
+            "call_duration_secs": "619"
+          },
+          {
+            "policy_holder_id": "3",
+            "case_id": "f0e7a8e3-df93-40f3-9b5e-fadff9ebe072",
+            "call_category": "provider network",
+            "call_date": "01/12/2023 04:53:41",
+            "call_duration_secs": "483"
+          },
+          {
+            "policy_holder_id": "3",
+            "case_id": "b72f91e6-c3f8-4358-a1f2-c9507e8dcba4",
+            "call_category": "member portal",
+            "call_date": "04/04/2023 20:03:22",
+            "call_duration_secs": "275"
+          },
+          {
+            "policy_holder_id": "3",
+            "case_id": "3acbe22d-22b3-4144-954d-74c127bc49ea",
+            "call_category": "benefits",
+            "call_date": "04/12/2023 00:05:29",
+            "call_duration_secs": "329"
+          },
+          {
+            "policy_holder_id": "3",
+            "case_id": "e32b61c2-a90d-4371-a5ee-6bc44fa49bbd",
+            "call_category": "benefits",
+            "call_date": "05/25/2023 06:07:41",
+            "call_duration_secs": "512"
+          },
+          {
+            "policy_holder_id": "3",
+            "case_id": "6099f469-b5d6-4447-9acf-d936355eae7c",
+            "call_category": "emergency assistance",
+            "call_date": "06/11/2023 12:04:21",
+            "call_duration_secs": "33"
+          },
+          {
+            "policy_holder_id": 9001,
+            "case_id": "f1d012f9-9d02-4966-a968-bf6c5bc9a9fe",
+            "call_category": "emergency assistance",
+            "call_date": "04/13/2023 19:16:53",
+            "call_duration_secs": "144"
+          },
+          {
+            "policy_holder_id": 9501,
+            "case_id": "41ce8fb6-1ddd-4f50-ac31-07bfcce6aaab",
+            "call_category": null,
+            "call_date": "05/25/2023 09:09:30",
+            "call_duration_secs": "815"
+          }
+        ]
+      },
+      "expected_output": [
+        {
+          "ym": "2023-01",
+          "long_call_count": 1,
+          "growth_pct": null
+        },
+        {
+          "ym": "2023-04",
+          "long_call_count": 1,
+          "growth_pct": 0.0
+        },
+        {
+          "ym": "2023-05",
+          "long_call_count": 3,
+          "growth_pct": 200.0
+        },
+        {
+          "ym": "2023-06",
+          "long_call_count": 1,
+          "growth_pct": -66.7
+        }
+      ],
+      "category": "edge"
+    },
+    {
+      "test_case_id": "tc_6_extreme_boundary",
+      "description": "Consecutive day sequences, month-end date rollovers, and high-frequency transactions",
+      "input_data": {
+        "callers": [
+          {
+            "policy_holder_id": "1",
+            "case_id": "f1d012f9-9d02-4966-a968-bf6c5bc9a9fe",
+            "call_category": "emergency assistance",
+            "call_date": "04/13/2023 19:16:53",
+            "call_duration_secs": "144"
+          },
+          {
+            "policy_holder_id": "1",
+            "case_id": "41ce8fb6-1ddd-4f50-ac31-07bfcce6aaab",
+            "call_category": "authorisation",
+            "call_date": "05/25/2023 09:09:30",
+            "call_duration_secs": "815"
+          },
+          {
+            "policy_holder_id": "2",
+            "case_id": "8471a3d4-6fc7-4bb2-9fc7-4583e3638a9e",
+            "call_category": "emergency assistance",
+            "call_date": "03/09/2023 10:58:54",
+            "call_duration_secs": "128"
+          },
+          {
+            "policy_holder_id": "2",
+            "case_id": "38208fae-bad0-49bf-99aa-7842ba2e37bc",
+            "call_category": "benefits",
+            "call_date": "06/05/2023 07:35:43",
+            "call_duration_secs": "619"
+          },
+          {
+            "policy_holder_id": "3",
+            "case_id": "f0e7a8e3-df93-40f3-9b5e-fadff9ebe072",
+            "call_category": "provider network",
+            "call_date": "01/12/2023 04:53:41",
+            "call_duration_secs": "483"
+          },
+          {
+            "policy_holder_id": "3",
+            "case_id": "b72f91e6-c3f8-4358-a1f2-c9507e8dcba4",
+            "call_category": "member portal",
+            "call_date": "04/04/2023 20:03:22",
+            "call_duration_secs": "275"
+          },
+          {
+            "policy_holder_id": "3",
+            "case_id": "3acbe22d-22b3-4144-954d-74c127bc49ea",
+            "call_category": "benefits",
+            "call_date": "04/12/2023 00:05:29",
+            "call_duration_secs": "329"
+          },
+          {
+            "policy_holder_id": "3",
+            "case_id": "e32b61c2-a90d-4371-a5ee-6bc44fa49bbd",
+            "call_category": "benefits",
+            "call_date": "05/25/2023 06:07:41",
+            "call_duration_secs": "512"
+          },
+          {
+            "policy_holder_id": "3",
+            "case_id": "6099f469-b5d6-4447-9acf-d936355eae7c",
+            "call_category": "emergency assistance",
+            "call_date": "06/11/2023 12:04:21",
+            "call_duration_secs": "33"
+          },
+          {
+            "policy_holder_id": 8001,
+            "case_id": "f1d012f9-9d02-4966-a968-bf6c5bc9a9fe",
+            "call_category": "emergency assistance",
+            "call_date": "04/14/2023 19:16:53",
+            "call_duration_secs": "144"
+          },
+          {
+            "policy_holder_id": 8001,
+            "case_id": "41ce8fb6-1ddd-4f50-ac31-07bfcce6aaab",
+            "call_category": "authorisation",
+            "call_date": "05/26/2023 09:09:30",
+            "call_duration_secs": "815"
+          },
+          {
+            "policy_holder_id": 8002,
+            "case_id": "8471a3d4-6fc7-4bb2-9fc7-4583e3638a9e",
+            "call_category": "emergency assistance",
+            "call_date": "03/10/2023 10:58:54",
+            "call_duration_secs": "128"
+          },
+          {
+            "policy_holder_id": 8002,
+            "case_id": "38208fae-bad0-49bf-99aa-7842ba2e37bc",
+            "call_category": "benefits",
+            "call_date": "06/06/2023 07:35:43",
+            "call_duration_secs": "619"
+          },
+          {
+            "policy_holder_id": 8003,
+            "case_id": "f0e7a8e3-df93-40f3-9b5e-fadff9ebe072",
+            "call_category": "provider network",
+            "call_date": "01/13/2023 04:53:41",
+            "call_duration_secs": "483"
+          },
+          {
+            "policy_holder_id": 8003,
+            "case_id": "b72f91e6-c3f8-4358-a1f2-c9507e8dcba4",
+            "call_category": "member portal",
+            "call_date": "04/05/2023 20:03:22",
+            "call_duration_secs": "275"
+          },
+          {
+            "policy_holder_id": 8003,
+            "case_id": "3acbe22d-22b3-4144-954d-74c127bc49ea",
+            "call_category": "benefits",
+            "call_date": "04/13/2023 00:05:29",
+            "call_duration_secs": "329"
+          },
+          {
+            "policy_holder_id": 8003,
+            "case_id": "e32b61c2-a90d-4371-a5ee-6bc44fa49bbd",
+            "call_category": "benefits",
+            "call_date": "05/26/2023 06:07:41",
+            "call_duration_secs": "512"
+          },
+          {
+            "policy_holder_id": 8003,
+            "case_id": "6099f469-b5d6-4447-9acf-d936355eae7c",
+            "call_category": "emergency assistance",
+            "call_date": "06/12/2023 12:04:21",
+            "call_duration_secs": "33"
+          }
+        ]
+      },
+      "expected_output": [
+        {
+          "ym": "2023-01",
+          "long_call_count": 2,
+          "growth_pct": null
+        },
+        {
+          "ym": "2023-04",
+          "long_call_count": 2,
+          "growth_pct": 0.0
+        },
+        {
+          "ym": "2023-05",
+          "long_call_count": 4,
+          "growth_pct": 100.0
+        },
+        {
+          "ym": "2023-06",
+          "long_call_count": 2,
+          "growth_pct": -50.0
+        }
+      ],
+      "category": "boundary"
+    }
+  ],
+  "order_sensitive": true,
+  "expected_output": [
+    {
+      "ym": "2023-01",
+      "long_call_count": 1,
+      "growth_pct": null
+    },
+    {
+      "ym": "2023-04",
+      "long_call_count": 1,
+      "growth_pct": 0.0
+    },
+    {
+      "ym": "2023-05",
+      "long_call_count": 2,
+      "growth_pct": 100.0
+    },
+    {
+      "ym": "2023-06",
+      "long_call_count": 1,
+      "growth_pct": -50.0
+    }
+  ]
+}

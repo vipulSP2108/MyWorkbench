@@ -1,0 +1,479 @@
+{
+  "question_id": "q_056_off_topic_maps_ugc",
+  "slug": "off-topic-maps-ugc",
+  "title": "Google Maps Flagged UGC",
+  "difficulty": "Medium",
+  "company": "Google",
+  "premium": true,
+  "question": "As a Data Analyst on the Google Maps User Generated Content team, you and your Product Manager are investigating user-generated content (UGC): photos and reviews that independent users upload to Google Maps.\n\nWrite a query to determine which type of place (place_category) attracts the most UGC tagged as 'off-topic'. In the case of a tie, show the output in ascending order of place_category.",
+  "notes": [],
+  "tables": [
+    {
+      "table_name": "places",
+      "columns": [
+        {
+          "column_name": "place_id",
+          "data_type": "INT"
+        },
+        {
+          "column_name": "place_name",
+          "data_type": "VARCHAR(255)"
+        },
+        {
+          "column_name": "place_category",
+          "data_type": "VARCHAR(255)"
+        }
+      ]
+    },
+    {
+      "table_name": "ugc",
+      "columns": [
+        {
+          "column_name": "content_id",
+          "data_type": "INT"
+        },
+        {
+          "column_name": "place_id",
+          "data_type": "INT"
+        },
+        {
+          "column_name": "content_tag",
+          "data_type": "VARCHAR(255)"
+        }
+      ]
+    }
+  ],
+  "sample_data": {
+    "places": [
+      {
+        "place_id": 1,
+        "place_name": "Baar Baar",
+        "place_category": "Restaurant"
+      },
+      {
+        "place_id": 2,
+        "place_name": "Rubirosa",
+        "place_category": "Restaurant"
+      },
+      {
+        "place_id": 3,
+        "place_name": "Mr. Purple",
+        "place_category": "Bar"
+      },
+      {
+        "place_id": 4,
+        "place_name": "La Caverna",
+        "place_category": "Bar"
+      }
+    ],
+    "ugc": [
+      {
+        "content_id": 101,
+        "place_id": 1,
+        "content_tag": "Off-topic"
+      },
+      {
+        "content_id": 110,
+        "place_id": 2,
+        "content_tag": "Misinformation"
+      },
+      {
+        "content_id": 153,
+        "place_id": 2,
+        "content_tag": "Off-topic"
+      },
+      {
+        "content_id": 176,
+        "place_id": 3,
+        "content_tag": "Harassment"
+      },
+      {
+        "content_id": 190,
+        "place_id": 3,
+        "content_tag": "Off-topic"
+      }
+    ]
+  },
+  "sample_output": [
+    {
+      "off_topic_places": "Restaurant"
+    }
+  ],
+  "reference_sql": "SELECT p.place_name, COUNT(u.content_id) AS off_topic_count\nFROM places p\nJOIN ugc u ON p.place_id = u.place_id\nWHERE u.content_tag = 'Off-topic'\nGROUP BY p.place_name\nORDER BY off_topic_count DESC, p.place_name\nLIMIT 1;",
+  "tags": [
+    "aggregation",
+    "cte",
+    "ecommerce",
+    "google",
+    "hr",
+    "join",
+    "medium"
+  ],
+  "related_questions": [],
+  "sources": [
+    [
+      "DataLemur blog: 14 Google SQL questions (#3)",
+      "https://datalemur.com/blog/google-sql-interview-questions"
+    ],
+    [
+      "DataLemur page (locked)",
+      "https://datalemur.com/questions/off-topic-maps-ugc"
+    ],
+    [
+      "DataLemur PDF",
+      "Page 60"
+    ]
+  ],
+  "test_cases": [
+    {
+      "test_case_id": "tc_1_baseline",
+      "description": "Baseline sample input data from problem description",
+      "input_data": {
+        "places": [
+          {
+            "place_id": 1,
+            "place_name": "Baar Baar",
+            "place_category": "Restaurant"
+          },
+          {
+            "place_id": 2,
+            "place_name": "Rubirosa",
+            "place_category": "Restaurant"
+          },
+          {
+            "place_id": 3,
+            "place_name": "Mr. Purple",
+            "place_category": "Bar"
+          },
+          {
+            "place_id": 4,
+            "place_name": "La Caverna",
+            "place_category": "Bar"
+          }
+        ],
+        "ugc": [
+          {
+            "content_id": 101,
+            "place_id": 1,
+            "content_tag": "Off-topic"
+          },
+          {
+            "content_id": 110,
+            "place_id": 2,
+            "content_tag": "Misinformation"
+          },
+          {
+            "content_id": 153,
+            "place_id": 2,
+            "content_tag": "Off-topic"
+          },
+          {
+            "content_id": 176,
+            "place_id": 3,
+            "content_tag": "Harassment"
+          },
+          {
+            "content_id": 190,
+            "place_id": 3,
+            "content_tag": "Off-topic"
+          }
+        ]
+      },
+      "expected_output": [
+        {
+          "place_name": "Baar Baar",
+          "off_topic_count": 1
+        }
+      ],
+      "category": "normal"
+    },
+    {
+      "test_case_id": "tc_2_high_volume",
+      "description": "Multiple entities with scaled volume and multi-group distributions",
+      "input_data": {
+        "places": [
+          {
+            "place_id": 1,
+            "place_name": "Baar Baar",
+            "place_category": "Restaurant"
+          },
+          {
+            "place_id": 2,
+            "place_name": "Rubirosa",
+            "place_category": "Restaurant"
+          },
+          {
+            "place_id": 3,
+            "place_name": "Mr. Purple",
+            "place_category": "Bar"
+          },
+          {
+            "place_id": 4,
+            "place_name": "La Caverna",
+            "place_category": "Bar"
+          },
+          {
+            "place_id": 1001,
+            "place_name": "Baar Baar",
+            "place_category": "Restaurant"
+          },
+          {
+            "place_id": 1002,
+            "place_name": "Rubirosa",
+            "place_category": "Restaurant"
+          },
+          {
+            "place_id": 1003,
+            "place_name": "Mr. Purple",
+            "place_category": "Bar"
+          },
+          {
+            "place_id": 1004,
+            "place_name": "La Caverna",
+            "place_category": "Bar"
+          }
+        ],
+        "ugc": [
+          {
+            "content_id": 101,
+            "place_id": 1,
+            "content_tag": "Off-topic"
+          },
+          {
+            "content_id": 110,
+            "place_id": 2,
+            "content_tag": "Misinformation"
+          },
+          {
+            "content_id": 153,
+            "place_id": 2,
+            "content_tag": "Off-topic"
+          },
+          {
+            "content_id": 176,
+            "place_id": 3,
+            "content_tag": "Harassment"
+          },
+          {
+            "content_id": 190,
+            "place_id": 3,
+            "content_tag": "Off-topic"
+          },
+          {
+            "content_id": 1101,
+            "place_id": 1001,
+            "content_tag": "Off-topic"
+          },
+          {
+            "content_id": 1110,
+            "place_id": 1002,
+            "content_tag": "Misinformation"
+          },
+          {
+            "content_id": 1153,
+            "place_id": 1002,
+            "content_tag": "Off-topic"
+          },
+          {
+            "content_id": 1176,
+            "place_id": 1003,
+            "content_tag": "Harassment"
+          },
+          {
+            "content_id": 1190,
+            "place_id": 1003,
+            "content_tag": "Off-topic"
+          }
+        ]
+      },
+      "expected_output": [
+        {
+          "place_name": "Baar Baar",
+          "off_topic_count": 2
+        }
+      ],
+      "category": "volume"
+    },
+    {
+      "test_case_id": "tc_3_disqualifying_rows",
+      "description": "Dataset containing disqualifying rows, edge values, and cancelled/zero records",
+      "input_data": {
+        "places": [
+          {
+            "place_id": 1,
+            "place_name": "Baar Baar",
+            "place_category": "Restaurant"
+          },
+          {
+            "place_id": 2,
+            "place_name": "Rubirosa",
+            "place_category": "Restaurant"
+          },
+          {
+            "place_id": 3,
+            "place_name": "Mr. Purple",
+            "place_category": "Bar"
+          },
+          {
+            "place_id": 4,
+            "place_name": "La Caverna",
+            "place_category": "Bar"
+          },
+          {
+            "place_id": 5001,
+            "place_name": "Baar Baar",
+            "place_category": "Restaurant"
+          },
+          {
+            "place_id": 5002,
+            "place_name": "Rubirosa",
+            "place_category": "Restaurant"
+          }
+        ],
+        "ugc": [
+          {
+            "content_id": 101,
+            "place_id": 1,
+            "content_tag": "Off-topic"
+          },
+          {
+            "content_id": 110,
+            "place_id": 2,
+            "content_tag": "Misinformation"
+          },
+          {
+            "content_id": 153,
+            "place_id": 2,
+            "content_tag": "Off-topic"
+          },
+          {
+            "content_id": 176,
+            "place_id": 3,
+            "content_tag": "Harassment"
+          },
+          {
+            "content_id": 190,
+            "place_id": 3,
+            "content_tag": "Off-topic"
+          },
+          {
+            "content_id": 5101,
+            "place_id": 5001,
+            "content_tag": "Off-topic"
+          },
+          {
+            "content_id": 5110,
+            "place_id": 5002,
+            "content_tag": "Misinformation"
+          }
+        ]
+      },
+      "expected_output": [
+        {
+          "place_name": "Baar Baar",
+          "off_topic_count": 2
+        }
+      ],
+      "category": "edge"
+    },
+    {
+      "test_case_id": "tc_4_empty_result",
+      "description": "Input where no rows satisfy problem criteria, verifying empty result handling",
+      "input_data": {
+        "places": [],
+        "ugc": []
+      },
+      "expected_output": [],
+      "category": "edge"
+    },
+    {
+      "test_case_id": "tc_5_ties_and_nulls",
+      "description": "Tied ranking metrics, unmatched join keys, and NULL values in nullable attributes",
+      "input_data": {
+        "places": [
+          {
+            "place_id": 1,
+            "place_name": "Baar Baar",
+            "place_category": "Restaurant"
+          },
+          {
+            "place_id": 2,
+            "place_name": "Rubirosa",
+            "place_category": "Restaurant"
+          },
+          {
+            "place_id": 3,
+            "place_name": "Mr. Purple",
+            "place_category": "Bar"
+          },
+          {
+            "place_id": 4,
+            "place_name": "La Caverna",
+            "place_category": "Bar"
+          },
+          {
+            "place_id": 9001,
+            "place_name": "Baar Baar Duplicate",
+            "place_category": "Restaurant"
+          },
+          {
+            "place_id": 9502,
+            "place_name": "Rubirosa",
+            "place_category": null
+          }
+        ],
+        "ugc": [
+          {
+            "content_id": 101,
+            "place_id": 1,
+            "content_tag": "Off-topic"
+          },
+          {
+            "content_id": 110,
+            "place_id": 2,
+            "content_tag": "Misinformation"
+          },
+          {
+            "content_id": 153,
+            "place_id": 2,
+            "content_tag": "Off-topic"
+          },
+          {
+            "content_id": 176,
+            "place_id": 3,
+            "content_tag": "Harassment"
+          },
+          {
+            "content_id": 190,
+            "place_id": 3,
+            "content_tag": "Off-topic"
+          },
+          {
+            "content_id": 9101,
+            "place_id": 9001,
+            "content_tag": "Off-topic"
+          },
+          {
+            "content_id": 9610,
+            "place_id": 9502,
+            "content_tag": null
+          }
+        ]
+      },
+      "expected_output": [
+        {
+          "place_name": "Baar Baar",
+          "off_topic_count": 1
+        }
+      ],
+      "category": "edge"
+    }
+  ],
+  "order_sensitive": true,
+  "expected_output": [
+    {
+      "place_name": "Baar Baar",
+      "off_topic_count": 1
+    }
+  ]
+}

@@ -1,0 +1,757 @@
+{
+  "question_id": "q_094_matching_rental_amenities",
+  "slug": "matching-rental-amenities",
+  "title": "Matching Rental Amenities",
+  "difficulty": "Hard",
+  "company": "Airbnb",
+  "premium": true,
+  "question": "The Airbnb Booking Recommendations team wants to know how substitutable two rentals are. Write a query that decides whether two rentals offer exactly the same set of amenities, and output the count of matching rentals.\n\nAssumptions given in the public write-up: rentals with the same amenities (e.g. kitchen + pool vs kitchen + pool) count as 1 match. A rental with an extra or missing amenity (e.g. kitchen + pool + fireplace vs pool + fireplace) is not a match.",
+  "notes": [],
+  "tables": [
+    {
+      "table_name": "rental_amenities",
+      "columns": [
+        {
+          "column_name": "rental_id",
+          "data_type": "INT"
+        },
+        {
+          "column_name": "amenity",
+          "data_type": "VARCHAR(255)"
+        }
+      ]
+    }
+  ],
+  "sample_data": {
+    "rental_amenities": [
+      {
+        "rental_id": 1,
+        "amenity": "kitchen"
+      },
+      {
+        "rental_id": 1,
+        "amenity": "pool"
+      },
+      {
+        "rental_id": 2,
+        "amenity": "pool"
+      },
+      {
+        "rental_id": 2,
+        "amenity": "kitchen"
+      },
+      {
+        "rental_id": 3,
+        "amenity": "kitchen"
+      },
+      {
+        "rental_id": 3,
+        "amenity": "pool"
+      },
+      {
+        "rental_id": 3,
+        "amenity": "fireplace"
+      },
+      {
+        "rental_id": 4,
+        "amenity": "pool"
+      },
+      {
+        "rental_id": 4,
+        "amenity": "fireplace"
+      }
+    ]
+  },
+  "sample_output": [
+    {
+      "matching_airbnb": 1
+    }
+  ],
+  "reference_sql": "SELECT a.rental_id AS rental_1, b.rental_id AS rental_2, COUNT(a.amenity) AS matching_amenities\nFROM rental_amenities a\nJOIN rental_amenities b ON a.amenity = b.amenity AND a.rental_id < b.rental_id\nGROUP BY a.rental_id, b.rental_id\nHAVING COUNT(a.amenity) >= 2\nORDER BY matching_amenities DESC, rental_1, rental_2;",
+  "tags": [
+    "aggregation",
+    "airbnb",
+    "cte",
+    "hard",
+    "join"
+  ],
+  "related_questions": [],
+  "sources": [
+    [
+      "DataLemur page (locked)",
+      "https://datalemur.com/questions/matching-rental-amenities"
+    ],
+    [
+      "Medium write-up of the same task",
+      "https://medium.com/@kabirahuja5/sql-interview-question-airbnb-8743ab3a2d32"
+    ],
+    [
+      "GitHub solution (table/column names)",
+      "https://github.com/Deeksha-5/DataLemur-SQL-Questions/blob/main/Airbnb%20-%20Matching%20Rental%20Amenities.txt"
+    ],
+    [
+      "DataLemur PDF",
+      "Page 98"
+    ]
+  ],
+  "test_cases": [
+    {
+      "test_case_id": "tc_1_baseline",
+      "description": "Baseline sample input data from problem description",
+      "input_data": {
+        "rental_amenities": [
+          {
+            "rental_id": 1,
+            "amenity": "kitchen"
+          },
+          {
+            "rental_id": 1,
+            "amenity": "pool"
+          },
+          {
+            "rental_id": 2,
+            "amenity": "pool"
+          },
+          {
+            "rental_id": 2,
+            "amenity": "kitchen"
+          },
+          {
+            "rental_id": 3,
+            "amenity": "kitchen"
+          },
+          {
+            "rental_id": 3,
+            "amenity": "pool"
+          },
+          {
+            "rental_id": 3,
+            "amenity": "fireplace"
+          },
+          {
+            "rental_id": 4,
+            "amenity": "pool"
+          },
+          {
+            "rental_id": 4,
+            "amenity": "fireplace"
+          }
+        ]
+      },
+      "expected_output": [
+        {
+          "rental_1": 1,
+          "rental_2": 2,
+          "matching_amenities": 2
+        },
+        {
+          "rental_1": 1,
+          "rental_2": 3,
+          "matching_amenities": 2
+        },
+        {
+          "rental_1": 2,
+          "rental_2": 3,
+          "matching_amenities": 2
+        },
+        {
+          "rental_1": 3,
+          "rental_2": 4,
+          "matching_amenities": 2
+        }
+      ],
+      "category": "normal"
+    },
+    {
+      "test_case_id": "tc_2_high_volume",
+      "description": "Multiple entities with scaled volume and multi-group distributions",
+      "input_data": {
+        "rental_amenities": [
+          {
+            "rental_id": 1,
+            "amenity": "kitchen"
+          },
+          {
+            "rental_id": 1,
+            "amenity": "pool"
+          },
+          {
+            "rental_id": 2,
+            "amenity": "pool"
+          },
+          {
+            "rental_id": 2,
+            "amenity": "kitchen"
+          },
+          {
+            "rental_id": 3,
+            "amenity": "kitchen"
+          },
+          {
+            "rental_id": 3,
+            "amenity": "pool"
+          },
+          {
+            "rental_id": 3,
+            "amenity": "fireplace"
+          },
+          {
+            "rental_id": 4,
+            "amenity": "pool"
+          },
+          {
+            "rental_id": 4,
+            "amenity": "fireplace"
+          },
+          {
+            "rental_id": 1001,
+            "amenity": "kitchen"
+          },
+          {
+            "rental_id": 1001,
+            "amenity": "pool"
+          },
+          {
+            "rental_id": 1002,
+            "amenity": "pool"
+          },
+          {
+            "rental_id": 1002,
+            "amenity": "kitchen"
+          },
+          {
+            "rental_id": 1003,
+            "amenity": "kitchen"
+          },
+          {
+            "rental_id": 1003,
+            "amenity": "pool"
+          },
+          {
+            "rental_id": 1003,
+            "amenity": "fireplace"
+          },
+          {
+            "rental_id": 1004,
+            "amenity": "pool"
+          },
+          {
+            "rental_id": 1004,
+            "amenity": "fireplace"
+          }
+        ]
+      },
+      "expected_output": [
+        {
+          "rental_1": 3,
+          "rental_2": 1003,
+          "matching_amenities": 3
+        },
+        {
+          "rental_1": 1,
+          "rental_2": 2,
+          "matching_amenities": 2
+        },
+        {
+          "rental_1": 1,
+          "rental_2": 3,
+          "matching_amenities": 2
+        },
+        {
+          "rental_1": 1,
+          "rental_2": 1001,
+          "matching_amenities": 2
+        },
+        {
+          "rental_1": 1,
+          "rental_2": 1002,
+          "matching_amenities": 2
+        },
+        {
+          "rental_1": 1,
+          "rental_2": 1003,
+          "matching_amenities": 2
+        },
+        {
+          "rental_1": 2,
+          "rental_2": 3,
+          "matching_amenities": 2
+        },
+        {
+          "rental_1": 2,
+          "rental_2": 1001,
+          "matching_amenities": 2
+        },
+        {
+          "rental_1": 2,
+          "rental_2": 1002,
+          "matching_amenities": 2
+        },
+        {
+          "rental_1": 2,
+          "rental_2": 1003,
+          "matching_amenities": 2
+        },
+        {
+          "rental_1": 3,
+          "rental_2": 4,
+          "matching_amenities": 2
+        },
+        {
+          "rental_1": 3,
+          "rental_2": 1001,
+          "matching_amenities": 2
+        },
+        {
+          "rental_1": 3,
+          "rental_2": 1002,
+          "matching_amenities": 2
+        },
+        {
+          "rental_1": 3,
+          "rental_2": 1004,
+          "matching_amenities": 2
+        },
+        {
+          "rental_1": 4,
+          "rental_2": 1003,
+          "matching_amenities": 2
+        },
+        {
+          "rental_1": 4,
+          "rental_2": 1004,
+          "matching_amenities": 2
+        },
+        {
+          "rental_1": 1001,
+          "rental_2": 1002,
+          "matching_amenities": 2
+        },
+        {
+          "rental_1": 1001,
+          "rental_2": 1003,
+          "matching_amenities": 2
+        },
+        {
+          "rental_1": 1002,
+          "rental_2": 1003,
+          "matching_amenities": 2
+        },
+        {
+          "rental_1": 1003,
+          "rental_2": 1004,
+          "matching_amenities": 2
+        }
+      ],
+      "category": "volume"
+    },
+    {
+      "test_case_id": "tc_3_disqualifying_rows",
+      "description": "Dataset containing disqualifying rows, edge values, and cancelled/zero records",
+      "input_data": {
+        "rental_amenities": [
+          {
+            "rental_id": 1,
+            "amenity": "kitchen"
+          },
+          {
+            "rental_id": 1,
+            "amenity": "pool"
+          },
+          {
+            "rental_id": 2,
+            "amenity": "pool"
+          },
+          {
+            "rental_id": 2,
+            "amenity": "kitchen"
+          },
+          {
+            "rental_id": 3,
+            "amenity": "kitchen"
+          },
+          {
+            "rental_id": 3,
+            "amenity": "pool"
+          },
+          {
+            "rental_id": 3,
+            "amenity": "fireplace"
+          },
+          {
+            "rental_id": 4,
+            "amenity": "pool"
+          },
+          {
+            "rental_id": 4,
+            "amenity": "fireplace"
+          },
+          {
+            "rental_id": 5001,
+            "amenity": "kitchen"
+          },
+          {
+            "rental_id": 5001,
+            "amenity": "pool"
+          },
+          {
+            "rental_id": 5002,
+            "amenity": "pool"
+          },
+          {
+            "rental_id": 5002,
+            "amenity": "kitchen"
+          }
+        ]
+      },
+      "expected_output": [
+        {
+          "rental_1": 1,
+          "rental_2": 2,
+          "matching_amenities": 2
+        },
+        {
+          "rental_1": 1,
+          "rental_2": 3,
+          "matching_amenities": 2
+        },
+        {
+          "rental_1": 1,
+          "rental_2": 5001,
+          "matching_amenities": 2
+        },
+        {
+          "rental_1": 1,
+          "rental_2": 5002,
+          "matching_amenities": 2
+        },
+        {
+          "rental_1": 2,
+          "rental_2": 3,
+          "matching_amenities": 2
+        },
+        {
+          "rental_1": 2,
+          "rental_2": 5001,
+          "matching_amenities": 2
+        },
+        {
+          "rental_1": 2,
+          "rental_2": 5002,
+          "matching_amenities": 2
+        },
+        {
+          "rental_1": 3,
+          "rental_2": 4,
+          "matching_amenities": 2
+        },
+        {
+          "rental_1": 3,
+          "rental_2": 5001,
+          "matching_amenities": 2
+        },
+        {
+          "rental_1": 3,
+          "rental_2": 5002,
+          "matching_amenities": 2
+        },
+        {
+          "rental_1": 5001,
+          "rental_2": 5002,
+          "matching_amenities": 2
+        }
+      ],
+      "category": "edge"
+    },
+    {
+      "test_case_id": "tc_4_empty_result",
+      "description": "Input where no rows satisfy problem criteria, verifying empty result handling",
+      "input_data": {
+        "rental_amenities": []
+      },
+      "expected_output": [],
+      "category": "edge"
+    },
+    {
+      "test_case_id": "tc_5_ties_and_nulls",
+      "description": "Tied ranking metrics, unmatched join keys, and NULL values in nullable attributes",
+      "input_data": {
+        "rental_amenities": [
+          {
+            "rental_id": 1,
+            "amenity": "kitchen"
+          },
+          {
+            "rental_id": 1,
+            "amenity": "pool"
+          },
+          {
+            "rental_id": 2,
+            "amenity": "pool"
+          },
+          {
+            "rental_id": 2,
+            "amenity": "kitchen"
+          },
+          {
+            "rental_id": 3,
+            "amenity": "kitchen"
+          },
+          {
+            "rental_id": 3,
+            "amenity": "pool"
+          },
+          {
+            "rental_id": 3,
+            "amenity": "fireplace"
+          },
+          {
+            "rental_id": 4,
+            "amenity": "pool"
+          },
+          {
+            "rental_id": 4,
+            "amenity": "fireplace"
+          },
+          {
+            "rental_id": 9001,
+            "amenity": "kitchen"
+          },
+          {
+            "rental_id": 9501,
+            "amenity": "pool"
+          }
+        ]
+      },
+      "expected_output": [
+        {
+          "rental_1": 1,
+          "rental_2": 2,
+          "matching_amenities": 2
+        },
+        {
+          "rental_1": 1,
+          "rental_2": 3,
+          "matching_amenities": 2
+        },
+        {
+          "rental_1": 2,
+          "rental_2": 3,
+          "matching_amenities": 2
+        },
+        {
+          "rental_1": 3,
+          "rental_2": 4,
+          "matching_amenities": 2
+        }
+      ],
+      "category": "edge"
+    },
+    {
+      "test_case_id": "tc_6_extreme_boundary",
+      "description": "Consecutive day sequences, month-end date rollovers, and high-frequency transactions",
+      "input_data": {
+        "rental_amenities": [
+          {
+            "rental_id": 1,
+            "amenity": "kitchen"
+          },
+          {
+            "rental_id": 1,
+            "amenity": "pool"
+          },
+          {
+            "rental_id": 2,
+            "amenity": "pool"
+          },
+          {
+            "rental_id": 2,
+            "amenity": "kitchen"
+          },
+          {
+            "rental_id": 3,
+            "amenity": "kitchen"
+          },
+          {
+            "rental_id": 3,
+            "amenity": "pool"
+          },
+          {
+            "rental_id": 3,
+            "amenity": "fireplace"
+          },
+          {
+            "rental_id": 4,
+            "amenity": "pool"
+          },
+          {
+            "rental_id": 4,
+            "amenity": "fireplace"
+          },
+          {
+            "rental_id": 8001,
+            "amenity": "kitchen"
+          },
+          {
+            "rental_id": 8001,
+            "amenity": "pool"
+          },
+          {
+            "rental_id": 8002,
+            "amenity": "pool"
+          },
+          {
+            "rental_id": 8002,
+            "amenity": "kitchen"
+          },
+          {
+            "rental_id": 8003,
+            "amenity": "kitchen"
+          },
+          {
+            "rental_id": 8003,
+            "amenity": "pool"
+          },
+          {
+            "rental_id": 8003,
+            "amenity": "fireplace"
+          },
+          {
+            "rental_id": 8004,
+            "amenity": "pool"
+          },
+          {
+            "rental_id": 8004,
+            "amenity": "fireplace"
+          }
+        ]
+      },
+      "expected_output": [
+        {
+          "rental_1": 3,
+          "rental_2": 8003,
+          "matching_amenities": 3
+        },
+        {
+          "rental_1": 1,
+          "rental_2": 2,
+          "matching_amenities": 2
+        },
+        {
+          "rental_1": 1,
+          "rental_2": 3,
+          "matching_amenities": 2
+        },
+        {
+          "rental_1": 1,
+          "rental_2": 8001,
+          "matching_amenities": 2
+        },
+        {
+          "rental_1": 1,
+          "rental_2": 8002,
+          "matching_amenities": 2
+        },
+        {
+          "rental_1": 1,
+          "rental_2": 8003,
+          "matching_amenities": 2
+        },
+        {
+          "rental_1": 2,
+          "rental_2": 3,
+          "matching_amenities": 2
+        },
+        {
+          "rental_1": 2,
+          "rental_2": 8001,
+          "matching_amenities": 2
+        },
+        {
+          "rental_1": 2,
+          "rental_2": 8002,
+          "matching_amenities": 2
+        },
+        {
+          "rental_1": 2,
+          "rental_2": 8003,
+          "matching_amenities": 2
+        },
+        {
+          "rental_1": 3,
+          "rental_2": 4,
+          "matching_amenities": 2
+        },
+        {
+          "rental_1": 3,
+          "rental_2": 8001,
+          "matching_amenities": 2
+        },
+        {
+          "rental_1": 3,
+          "rental_2": 8002,
+          "matching_amenities": 2
+        },
+        {
+          "rental_1": 3,
+          "rental_2": 8004,
+          "matching_amenities": 2
+        },
+        {
+          "rental_1": 4,
+          "rental_2": 8003,
+          "matching_amenities": 2
+        },
+        {
+          "rental_1": 4,
+          "rental_2": 8004,
+          "matching_amenities": 2
+        },
+        {
+          "rental_1": 8001,
+          "rental_2": 8002,
+          "matching_amenities": 2
+        },
+        {
+          "rental_1": 8001,
+          "rental_2": 8003,
+          "matching_amenities": 2
+        },
+        {
+          "rental_1": 8002,
+          "rental_2": 8003,
+          "matching_amenities": 2
+        },
+        {
+          "rental_1": 8003,
+          "rental_2": 8004,
+          "matching_amenities": 2
+        }
+      ],
+      "category": "boundary"
+    }
+  ],
+  "order_sensitive": false,
+  "expected_output": [
+    {
+      "rental_1": 1,
+      "rental_2": 2,
+      "matching_amenities": 2
+    },
+    {
+      "rental_1": 1,
+      "rental_2": 3,
+      "matching_amenities": 2
+    },
+    {
+      "rental_1": 2,
+      "rental_2": 3,
+      "matching_amenities": 2
+    },
+    {
+      "rental_1": 3,
+      "rental_2": 4,
+      "matching_amenities": 2
+    }
+  ]
+}

@@ -1,0 +1,403 @@
+{
+  "question_id": "q_010_sql_avg_review_ratings",
+  "slug": "sql-avg-review-ratings",
+  "title": "Average Review Ratings",
+  "difficulty": "Easy",
+  "company": "Amazon",
+  "premium": false,
+  "question": "Given the reviews table, write a query to retrieve the average star rating for each product, grouped by month. The output should display the month as a numerical value, product ID, and average star rating rounded to two decimal places. Sort the output first by month and then by product ID.",
+  "notes": [
+    "Product 50001 received two ratings of 4 and 3 in the month of June (6th month), resulting in an average star rating of 3.5.",
+    "The dataset you are querying against may have different input & output - this is just an example!"
+  ],
+  "tables": [
+    {
+      "table_name": "reviews",
+      "columns": [
+        {
+          "column_name": "review_id",
+          "data_type": "INT"
+        },
+        {
+          "column_name": "user_id",
+          "data_type": "INT"
+        },
+        {
+          "column_name": "submit_date",
+          "data_type": "DATETIME"
+        },
+        {
+          "column_name": "product_id",
+          "data_type": "INT"
+        },
+        {
+          "column_name": "stars",
+          "data_type": "INT"
+        }
+      ]
+    }
+  ],
+  "sample_data": {
+    "reviews": [
+      {
+        "review_id": "6171",
+        "user_id": "123",
+        "submit_date": "06/08/2022 00:00:00",
+        "product_id": "50001",
+        "stars": "4"
+      },
+      {
+        "review_id": "7802",
+        "user_id": "265",
+        "submit_date": "06/10/2022 00:00:00",
+        "product_id": "69852",
+        "stars": "4"
+      },
+      {
+        "review_id": "5293",
+        "user_id": "362",
+        "submit_date": "06/18/2022 00:00:00",
+        "product_id": "50001",
+        "stars": "3"
+      },
+      {
+        "review_id": "6352",
+        "user_id": "192",
+        "submit_date": "07/26/2022 00:00:00",
+        "product_id": "69852",
+        "stars": "3"
+      },
+      {
+        "review_id": "4517",
+        "user_id": "981",
+        "submit_date": "07/05/2022 00:00:00",
+        "product_id": "69852",
+        "stars": "2"
+      }
+    ]
+  },
+  "sample_output": [
+    {
+      "mth": "6",
+      "product": "50001",
+      "avg_stars": "3.50"
+    },
+    {
+      "mth": "6",
+      "product": "69852",
+      "avg_stars": "4.00"
+    },
+    {
+      "mth": "7",
+      "product": "69852",
+      "avg_stars": "2.50"
+    }
+  ],
+  "reference_sql": "SELECT \n  MONTH(submit_date) AS mth,\n  product_id,\n  ROUND(AVG(stars), 2) AS avg_stars\nFROM reviews\nGROUP BY MONTH(submit_date), product_id\nORDER BY mth, product_id;",
+  "tags": [
+    "aggregation",
+    "amazon",
+    "date-manipulation",
+    "easy",
+    "ecommerce",
+    "math",
+    "social-media"
+  ],
+  "related_questions": [],
+  "sources": [
+    [
+      "DataLemur page (free)",
+      "https://datalemur.com/questions/sql-avg-review-ratings"
+    ],
+    [
+      "DataLemur PDF",
+      "Page 14"
+    ]
+  ],
+  "test_cases": [
+    {
+      "test_case_id": "tc_1_baseline",
+      "description": "Baseline sample input data from problem description",
+      "input_data": {
+        "reviews": [
+          {
+            "review_id": "6171",
+            "user_id": "123",
+            "submit_date": "06/08/2022 00:00:00",
+            "product_id": "50001",
+            "stars": "4"
+          },
+          {
+            "review_id": "7802",
+            "user_id": "265",
+            "submit_date": "06/10/2022 00:00:00",
+            "product_id": "69852",
+            "stars": "4"
+          },
+          {
+            "review_id": "5293",
+            "user_id": "362",
+            "submit_date": "06/18/2022 00:00:00",
+            "product_id": "50001",
+            "stars": "3"
+          },
+          {
+            "review_id": "6352",
+            "user_id": "192",
+            "submit_date": "07/26/2022 00:00:00",
+            "product_id": "69852",
+            "stars": "3"
+          },
+          {
+            "review_id": "4517",
+            "user_id": "981",
+            "submit_date": "07/05/2022 00:00:00",
+            "product_id": "69852",
+            "stars": "2"
+          }
+        ]
+      },
+      "expected_output": [
+        {
+          "mth": 6,
+          "product_id": 50001,
+          "avg_stars": 3.5
+        },
+        {
+          "mth": 6,
+          "product_id": 69852,
+          "avg_stars": 4.0
+        },
+        {
+          "mth": 7,
+          "product_id": 69852,
+          "avg_stars": 2.5
+        }
+      ],
+      "category": "normal"
+    },
+    {
+      "test_case_id": "tc_2_high_volume",
+      "description": "Multiple entities with scaled volume and multi-group distributions",
+      "input_data": {
+        "reviews": [
+          {
+            "review_id": "6171",
+            "user_id": "123",
+            "submit_date": "06/08/2022 00:00:00",
+            "product_id": "50001",
+            "stars": "4"
+          },
+          {
+            "review_id": "7802",
+            "user_id": "265",
+            "submit_date": "06/10/2022 00:00:00",
+            "product_id": "69852",
+            "stars": "4"
+          },
+          {
+            "review_id": "5293",
+            "user_id": "362",
+            "submit_date": "06/18/2022 00:00:00",
+            "product_id": "50001",
+            "stars": "3"
+          },
+          {
+            "review_id": "6352",
+            "user_id": "192",
+            "submit_date": "07/26/2022 00:00:00",
+            "product_id": "69852",
+            "stars": "3"
+          },
+          {
+            "review_id": "4517",
+            "user_id": "981",
+            "submit_date": "07/05/2022 00:00:00",
+            "product_id": "69852",
+            "stars": "2"
+          },
+          {
+            "review_id": 7171,
+            "user_id": 1123,
+            "submit_date": "06/13/2022 00:00:00",
+            "product_id": 51001,
+            "stars": "4"
+          },
+          {
+            "review_id": 8802,
+            "user_id": 1265,
+            "submit_date": "06/15/2022 00:00:00",
+            "product_id": 70852,
+            "stars": "4"
+          },
+          {
+            "review_id": 6293,
+            "user_id": 1362,
+            "submit_date": "06/23/2022 00:00:00",
+            "product_id": 51001,
+            "stars": "3"
+          },
+          {
+            "review_id": 7352,
+            "user_id": 1192,
+            "submit_date": "07/28/2022 00:00:00",
+            "product_id": 70852,
+            "stars": "3"
+          },
+          {
+            "review_id": 5517,
+            "user_id": 1981,
+            "submit_date": "07/10/2022 00:00:00",
+            "product_id": 70852,
+            "stars": "2"
+          }
+        ]
+      },
+      "expected_output": [
+        {
+          "mth": 6,
+          "product_id": 50001,
+          "avg_stars": 3.5
+        },
+        {
+          "mth": 6,
+          "product_id": 51001,
+          "avg_stars": 3.5
+        },
+        {
+          "mth": 6,
+          "product_id": 69852,
+          "avg_stars": 4.0
+        },
+        {
+          "mth": 6,
+          "product_id": 70852,
+          "avg_stars": 4.0
+        },
+        {
+          "mth": 7,
+          "product_id": 69852,
+          "avg_stars": 2.5
+        },
+        {
+          "mth": 7,
+          "product_id": 70852,
+          "avg_stars": 2.5
+        }
+      ],
+      "category": "volume"
+    },
+    {
+      "test_case_id": "tc_3_disqualifying_rows",
+      "description": "Dataset containing disqualifying rows, edge values, and cancelled/zero records",
+      "input_data": {
+        "reviews": [
+          {
+            "review_id": "6171",
+            "user_id": "123",
+            "submit_date": "06/08/2022 00:00:00",
+            "product_id": "50001",
+            "stars": "4"
+          },
+          {
+            "review_id": "7802",
+            "user_id": "265",
+            "submit_date": "06/10/2022 00:00:00",
+            "product_id": "69852",
+            "stars": "4"
+          },
+          {
+            "review_id": "5293",
+            "user_id": "362",
+            "submit_date": "06/18/2022 00:00:00",
+            "product_id": "50001",
+            "stars": "3"
+          },
+          {
+            "review_id": "6352",
+            "user_id": "192",
+            "submit_date": "07/26/2022 00:00:00",
+            "product_id": "69852",
+            "stars": "3"
+          },
+          {
+            "review_id": "4517",
+            "user_id": "981",
+            "submit_date": "07/05/2022 00:00:00",
+            "product_id": "69852",
+            "stars": "2"
+          },
+          {
+            "review_id": 11171,
+            "user_id": 5123,
+            "submit_date": "06/08/2017 00:00:00",
+            "product_id": 55001,
+            "stars": 1
+          },
+          {
+            "review_id": 12802,
+            "user_id": 5265,
+            "submit_date": "06/10/2017 00:00:00",
+            "product_id": 74852,
+            "stars": 1
+          }
+        ]
+      },
+      "expected_output": [
+        {
+          "mth": 6,
+          "product_id": 50001,
+          "avg_stars": 3.5
+        },
+        {
+          "mth": 6,
+          "product_id": 55001,
+          "avg_stars": 1.0
+        },
+        {
+          "mth": 6,
+          "product_id": 69852,
+          "avg_stars": 4.0
+        },
+        {
+          "mth": 6,
+          "product_id": 74852,
+          "avg_stars": 1.0
+        },
+        {
+          "mth": 7,
+          "product_id": 69852,
+          "avg_stars": 2.5
+        }
+      ],
+      "category": "edge"
+    },
+    {
+      "test_case_id": "tc_4_empty_result",
+      "description": "Input where no rows satisfy problem criteria, verifying empty result handling",
+      "input_data": {
+        "reviews": []
+      },
+      "expected_output": [],
+      "category": "edge"
+    }
+  ],
+  "order_sensitive": true,
+  "expected_output": [
+    {
+      "mth": 6,
+      "product_id": 50001,
+      "avg_stars": 3.5
+    },
+    {
+      "mth": 6,
+      "product_id": 69852,
+      "avg_stars": 4.0
+    },
+    {
+      "mth": 7,
+      "product_id": 69852,
+      "avg_stars": 2.5
+    }
+  ]
+}

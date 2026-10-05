@@ -1,0 +1,321 @@
+{
+  "question_id": "q_012_final_account_balance",
+  "slug": "final-account-balance",
+  "title": "Final Account Balance",
+  "difficulty": "Easy",
+  "company": "PayPal",
+  "premium": false,
+  "question": "Given a table containing information about bank deposits and withdrawals made using Paypal, write a query to retrieve the final account balance for each account, taking into account all the transactions recorded in the table with the assumption that there are no missing transactions.",
+  "notes": [
+    "Using account ID 101 as an example, \\$30.00 was deposited into this account, while \\$5.00 was withdrawn. Therefore, the final account balance can be calculated as the difference between the total deposits and withdrawals which is \\$30.00 - \\$5.00, resulting in a final balance of \\$25.00.",
+    "The dataset you are querying against may have different input & output - this is just an example!"
+  ],
+  "tables": [
+    {
+      "table_name": "transactions",
+      "columns": [
+        {
+          "column_name": "transaction_id",
+          "data_type": "INT"
+        },
+        {
+          "column_name": "account_id",
+          "data_type": "INT"
+        },
+        {
+          "column_name": "amount",
+          "data_type": "DECIMAL(10,2)"
+        },
+        {
+          "column_name": "transaction_type",
+          "data_type": "VARCHAR(255)"
+        }
+      ]
+    }
+  ],
+  "sample_data": {
+    "transactions": [
+      {
+        "transaction_id": "123",
+        "account_id": "101",
+        "amount": "10.00",
+        "transaction_type": "Deposit"
+      },
+      {
+        "transaction_id": "124",
+        "account_id": "101",
+        "amount": "20.00",
+        "transaction_type": "Deposit"
+      },
+      {
+        "transaction_id": "125",
+        "account_id": "101",
+        "amount": "5.00",
+        "transaction_type": "Withdrawal"
+      },
+      {
+        "transaction_id": "126",
+        "account_id": "201",
+        "amount": "20.00",
+        "transaction_type": "Deposit"
+      },
+      {
+        "transaction_id": "128",
+        "account_id": "201",
+        "amount": "10.00",
+        "transaction_type": "Withdrawal"
+      }
+    ]
+  },
+  "sample_output": [
+    {
+      "account_id": "101",
+      "final_balance": "25.00"
+    },
+    {
+      "account_id": "201",
+      "final_balance": "10.00"
+    }
+  ],
+  "reference_sql": "SELECT \n  account_id,\n  SUM(CASE WHEN transaction_type = 'Deposit' THEN amount ELSE -amount END) AS final_balance\nFROM transactions\nGROUP BY account_id\nORDER BY account_id;",
+  "tags": [
+    "aggregation",
+    "easy",
+    "finance",
+    "paypal"
+  ],
+  "related_questions": [],
+  "sources": [
+    [
+      "DataLemur page (free)",
+      "https://datalemur.com/questions/final-account-balance"
+    ],
+    [
+      "DataLemur PDF",
+      "Page 16"
+    ]
+  ],
+  "test_cases": [
+    {
+      "test_case_id": "tc_1_baseline",
+      "description": "Baseline sample input data from problem description",
+      "input_data": {
+        "transactions": [
+          {
+            "transaction_id": "123",
+            "account_id": "101",
+            "amount": "10.00",
+            "transaction_type": "Deposit"
+          },
+          {
+            "transaction_id": "124",
+            "account_id": "101",
+            "amount": "20.00",
+            "transaction_type": "Deposit"
+          },
+          {
+            "transaction_id": "125",
+            "account_id": "101",
+            "amount": "5.00",
+            "transaction_type": "Withdrawal"
+          },
+          {
+            "transaction_id": "126",
+            "account_id": "201",
+            "amount": "20.00",
+            "transaction_type": "Deposit"
+          },
+          {
+            "transaction_id": "128",
+            "account_id": "201",
+            "amount": "10.00",
+            "transaction_type": "Withdrawal"
+          }
+        ]
+      },
+      "expected_output": [
+        {
+          "account_id": 101,
+          "final_balance": 25.0
+        },
+        {
+          "account_id": 201,
+          "final_balance": 10.0
+        }
+      ],
+      "category": "normal"
+    },
+    {
+      "test_case_id": "tc_2_high_volume",
+      "description": "Multiple entities with scaled volume and multi-group distributions",
+      "input_data": {
+        "transactions": [
+          {
+            "transaction_id": "123",
+            "account_id": "101",
+            "amount": "10.00",
+            "transaction_type": "Deposit"
+          },
+          {
+            "transaction_id": "124",
+            "account_id": "101",
+            "amount": "20.00",
+            "transaction_type": "Deposit"
+          },
+          {
+            "transaction_id": "125",
+            "account_id": "101",
+            "amount": "5.00",
+            "transaction_type": "Withdrawal"
+          },
+          {
+            "transaction_id": "126",
+            "account_id": "201",
+            "amount": "20.00",
+            "transaction_type": "Deposit"
+          },
+          {
+            "transaction_id": "128",
+            "account_id": "201",
+            "amount": "10.00",
+            "transaction_type": "Withdrawal"
+          },
+          {
+            "transaction_id": 1123,
+            "account_id": 1101,
+            "amount": 15.0,
+            "transaction_type": "Deposit"
+          },
+          {
+            "transaction_id": 1124,
+            "account_id": 1101,
+            "amount": 30.0,
+            "transaction_type": "Deposit"
+          },
+          {
+            "transaction_id": 1125,
+            "account_id": 1101,
+            "amount": 7.5,
+            "transaction_type": "Withdrawal"
+          },
+          {
+            "transaction_id": 1126,
+            "account_id": 1201,
+            "amount": 30.0,
+            "transaction_type": "Deposit"
+          },
+          {
+            "transaction_id": 1128,
+            "account_id": 1201,
+            "amount": 15.0,
+            "transaction_type": "Withdrawal"
+          }
+        ]
+      },
+      "expected_output": [
+        {
+          "account_id": 101,
+          "final_balance": 25.0
+        },
+        {
+          "account_id": 201,
+          "final_balance": 10.0
+        },
+        {
+          "account_id": 1101,
+          "final_balance": 37.5
+        },
+        {
+          "account_id": 1201,
+          "final_balance": 15.0
+        }
+      ],
+      "category": "volume"
+    },
+    {
+      "test_case_id": "tc_3_disqualifying_rows",
+      "description": "Dataset containing disqualifying rows, edge values, and cancelled/zero records",
+      "input_data": {
+        "transactions": [
+          {
+            "transaction_id": "123",
+            "account_id": "101",
+            "amount": "10.00",
+            "transaction_type": "Deposit"
+          },
+          {
+            "transaction_id": "124",
+            "account_id": "101",
+            "amount": "20.00",
+            "transaction_type": "Deposit"
+          },
+          {
+            "transaction_id": "125",
+            "account_id": "101",
+            "amount": "5.00",
+            "transaction_type": "Withdrawal"
+          },
+          {
+            "transaction_id": "126",
+            "account_id": "201",
+            "amount": "20.00",
+            "transaction_type": "Deposit"
+          },
+          {
+            "transaction_id": "128",
+            "account_id": "201",
+            "amount": "10.00",
+            "transaction_type": "Withdrawal"
+          },
+          {
+            "transaction_id": 5123,
+            "account_id": 5101,
+            "amount": 0,
+            "transaction_type": "Deposit"
+          },
+          {
+            "transaction_id": 5124,
+            "account_id": 5101,
+            "amount": 0,
+            "transaction_type": "Deposit"
+          }
+        ]
+      },
+      "expected_output": [
+        {
+          "account_id": 101,
+          "final_balance": 25.0
+        },
+        {
+          "account_id": 201,
+          "final_balance": 10.0
+        },
+        {
+          "account_id": 5101,
+          "final_balance": 0.0
+        }
+      ],
+      "category": "edge"
+    },
+    {
+      "test_case_id": "tc_4_empty_result",
+      "description": "Input where no rows satisfy problem criteria, verifying empty result handling",
+      "input_data": {
+        "transactions": []
+      },
+      "expected_output": [],
+      "category": "edge"
+    }
+  ],
+  "order_sensitive": false,
+  "expected_output": [
+    {
+      "account_id": 101,
+      "final_balance": 25.0
+    },
+    {
+      "account_id": 201,
+      "final_balance": 10.0
+    }
+  ]
+}

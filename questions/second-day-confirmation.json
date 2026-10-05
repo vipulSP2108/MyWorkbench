@@ -1,0 +1,302 @@
+{
+  "question_id": "q_015_second_day_confirmation",
+  "slug": "second-day-confirmation",
+  "title": "Second Day Confirmation",
+  "difficulty": "Easy",
+  "company": "TikTok",
+  "premium": false,
+  "question": "Assume you're given tables with information about TikTok user sign-ups and confirmations through email and text. New users on TikTok sign up using their email addresses, and upon sign-up, each user receives a text message confirmation to activate their account.\n\nWrite a query to display the user IDs of those who did not confirm their sign-up on the first day, but confirmed on the second day.\n\nDefinition:",
+  "notes": [
+    "action_date refers to the date when users activated their accounts and confirmed their sign-up through text messages.",
+    "Only User 1052 confirmed their sign-up on the second day.",
+    "The dataset you are querying against may have different input & output - this is just an example!"
+  ],
+  "tables": [
+    {
+      "table_name": "emails",
+      "columns": [
+        {
+          "column_name": "email_id",
+          "data_type": "INT"
+        },
+        {
+          "column_name": "user_id",
+          "data_type": "INT"
+        },
+        {
+          "column_name": "signup_date",
+          "data_type": "DATETIME"
+        }
+      ]
+    },
+    {
+      "table_name": "texts",
+      "columns": [
+        {
+          "column_name": "text_id",
+          "data_type": "INT"
+        },
+        {
+          "column_name": "email_id",
+          "data_type": "INT"
+        },
+        {
+          "column_name": "signup_action",
+          "data_type": "VARCHAR(50)"
+        },
+        {
+          "column_name": "action_date",
+          "data_type": "DATETIME"
+        }
+      ]
+    }
+  ],
+  "sample_data": {
+    "emails": [
+      {
+        "email_id": "125",
+        "user_id": "7771",
+        "signup_date": "06/14/2022 00:00:00"
+      },
+      {
+        "email_id": "433",
+        "user_id": "1052",
+        "signup_date": "07/09/2022 00:00:00"
+      }
+    ],
+    "texts": [
+      {
+        "text_id": "6878",
+        "email_id": "125",
+        "signup_action": "Confirmed",
+        "action_date": "06/14/2022 00:00:00"
+      },
+      {
+        "text_id": "6997",
+        "email_id": "433",
+        "signup_action": "Not Confirmed",
+        "action_date": "07/09/2022 00:00:00"
+      },
+      {
+        "text_id": "7000",
+        "email_id": "433",
+        "signup_action": "Confirmed",
+        "action_date": "07/10/2022 00:00:00"
+      }
+    ]
+  },
+  "sample_output": [
+    {
+      "user_id": "1052"
+    }
+  ],
+  "reference_sql": "SELECT DISTINCT e.user_id\nFROM emails e\nJOIN texts t ON e.email_id = t.email_id\nWHERE t.signup_action = 'Confirmed'\n  AND DATEDIFF(t.action_date, e.signup_date) = 1\nORDER BY e.user_id;",
+  "tags": [
+    "aggregation",
+    "easy",
+    "tiktok"
+  ],
+  "related_questions": [],
+  "sources": [
+    [
+      "DataLemur page (free)",
+      "https://datalemur.com/questions/second-day-confirmation"
+    ],
+    [
+      "DataLemur PDF",
+      "Page 19"
+    ]
+  ],
+  "test_cases": [
+    {
+      "test_case_id": "tc_1_baseline",
+      "description": "Baseline sample input data from problem description",
+      "input_data": {
+        "emails": [
+          {
+            "email_id": "125",
+            "user_id": "7771",
+            "signup_date": "06/14/2022 00:00:00"
+          },
+          {
+            "email_id": "433",
+            "user_id": "1052",
+            "signup_date": "07/09/2022 00:00:00"
+          }
+        ],
+        "texts": [
+          {
+            "text_id": "6878",
+            "email_id": "125",
+            "signup_action": "Confirmed",
+            "action_date": "06/14/2022 00:00:00"
+          },
+          {
+            "text_id": "6997",
+            "email_id": "433",
+            "signup_action": "Not Confirmed",
+            "action_date": "07/09/2022 00:00:00"
+          },
+          {
+            "text_id": "7000",
+            "email_id": "433",
+            "signup_action": "Confirmed",
+            "action_date": "07/10/2022 00:00:00"
+          }
+        ]
+      },
+      "expected_output": [
+        {
+          "user_id": 1052
+        }
+      ],
+      "category": "normal"
+    },
+    {
+      "test_case_id": "tc_2_high_volume",
+      "description": "Multiple entities with scaled volume and multi-group distributions",
+      "input_data": {
+        "emails": [
+          {
+            "email_id": "125",
+            "user_id": "7771",
+            "signup_date": "06/14/2022 00:00:00"
+          },
+          {
+            "email_id": "433",
+            "user_id": "1052",
+            "signup_date": "07/09/2022 00:00:00"
+          },
+          {
+            "email_id": 1125,
+            "user_id": 8771,
+            "signup_date": "06/19/2022 00:00:00"
+          },
+          {
+            "email_id": 1433,
+            "user_id": 2052,
+            "signup_date": "07/14/2022 00:00:00"
+          }
+        ],
+        "texts": [
+          {
+            "text_id": "6878",
+            "email_id": "125",
+            "signup_action": "Confirmed",
+            "action_date": "06/14/2022 00:00:00"
+          },
+          {
+            "text_id": "6997",
+            "email_id": "433",
+            "signup_action": "Not Confirmed",
+            "action_date": "07/09/2022 00:00:00"
+          },
+          {
+            "text_id": "7000",
+            "email_id": "433",
+            "signup_action": "Confirmed",
+            "action_date": "07/10/2022 00:00:00"
+          },
+          {
+            "text_id": 7878,
+            "email_id": 1125,
+            "signup_action": "Confirmed",
+            "action_date": "06/19/2022 00:00:00"
+          },
+          {
+            "text_id": 7997,
+            "email_id": 1433,
+            "signup_action": "Not Confirmed",
+            "action_date": "07/14/2022 00:00:00"
+          },
+          {
+            "text_id": 8000,
+            "email_id": 1433,
+            "signup_action": "Confirmed",
+            "action_date": "07/15/2022 00:00:00"
+          }
+        ]
+      },
+      "expected_output": [
+        {
+          "user_id": 1052
+        },
+        {
+          "user_id": 2052
+        }
+      ],
+      "category": "volume"
+    },
+    {
+      "test_case_id": "tc_3_disqualifying_rows",
+      "description": "Dataset containing disqualifying rows, edge values, and cancelled/zero records",
+      "input_data": {
+        "emails": [
+          {
+            "email_id": "125",
+            "user_id": "7771",
+            "signup_date": "06/14/2022 00:00:00"
+          },
+          {
+            "email_id": "433",
+            "user_id": "1052",
+            "signup_date": "07/09/2022 00:00:00"
+          },
+          {
+            "email_id": 5125,
+            "user_id": 12771,
+            "signup_date": "06/14/2017 00:00:00"
+          }
+        ],
+        "texts": [
+          {
+            "text_id": "6878",
+            "email_id": "125",
+            "signup_action": "Confirmed",
+            "action_date": "06/14/2022 00:00:00"
+          },
+          {
+            "text_id": "6997",
+            "email_id": "433",
+            "signup_action": "Not Confirmed",
+            "action_date": "07/09/2022 00:00:00"
+          },
+          {
+            "text_id": "7000",
+            "email_id": "433",
+            "signup_action": "Confirmed",
+            "action_date": "07/10/2022 00:00:00"
+          },
+          {
+            "text_id": 11878,
+            "email_id": 5125,
+            "signup_action": "Confirmed",
+            "action_date": "06/14/2017 00:00:00"
+          }
+        ]
+      },
+      "expected_output": [
+        {
+          "user_id": 1052
+        }
+      ],
+      "category": "edge"
+    },
+    {
+      "test_case_id": "tc_4_empty_result",
+      "description": "Input where no rows satisfy problem criteria, verifying empty result handling",
+      "input_data": {
+        "emails": [],
+        "texts": []
+      },
+      "expected_output": [],
+      "category": "edge"
+    }
+  ],
+  "order_sensitive": false,
+  "expected_output": [
+    {
+      "user_id": 1052
+    }
+  ]
+}

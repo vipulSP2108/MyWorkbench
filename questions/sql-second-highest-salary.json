@@ -1,0 +1,292 @@
+{
+  "question_id": "q_036_sql_second_highest_salary",
+  "slug": "sql-second-highest-salary",
+  "title": "Second Highest Salary",
+  "difficulty": "Medium",
+  "company": "FAANG",
+  "premium": false,
+  "question": "Imagine you're an HR analyst at a tech company tasked with analyzing employee salaries. Your manager is keen on understanding the pay distribution and asks you to determine the second highest salary among all employees.\n\nIt's possible that multiple employees may share the same second highest salary. In case of duplicate, display the salary only once.",
+  "notes": [
+    "The output represents the second highest salary among all employees. In this case, the second highest salary is \\$2,230.",
+    "The dataset you are querying against may have different input & output - this is just an example!"
+  ],
+  "tables": [
+    {
+      "table_name": "employee",
+      "columns": [
+        {
+          "column_name": "employee_id",
+          "data_type": "INT"
+        },
+        {
+          "column_name": "name",
+          "data_type": "VARCHAR(255)"
+        },
+        {
+          "column_name": "salary",
+          "data_type": "INT"
+        },
+        {
+          "column_name": "department_id",
+          "data_type": "INT"
+        },
+        {
+          "column_name": "manager_id",
+          "data_type": "INT"
+        }
+      ]
+    }
+  ],
+  "sample_data": {
+    "employee": [
+      {
+        "employee_id": "1",
+        "name": "Emma Thompson",
+        "salary": "3800",
+        "department_id": "1",
+        "manager_id": "6"
+      },
+      {
+        "employee_id": "2",
+        "name": "Daniel Rodriguez",
+        "salary": "2230",
+        "department_id": "1",
+        "manager_id": "7"
+      },
+      {
+        "employee_id": "3",
+        "name": "Olivia Smith",
+        "salary": "2000",
+        "department_id": "1",
+        "manager_id": "8"
+      }
+    ]
+  },
+  "sample_output": [
+    {
+      "second_highest_salary": "2230"
+    }
+  ],
+  "reference_sql": "SELECT MAX(salary) AS second_highest_salary\nFROM employee\nWHERE salary < (SELECT MAX(salary) FROM employee);",
+  "tags": [
+    "faang",
+    "finance",
+    "hr",
+    "medium",
+    "self-join"
+  ],
+  "related_questions": [],
+  "sources": [
+    [
+      "DataLemur page (free)",
+      "https://datalemur.com/questions/sql-second-highest-salary"
+    ],
+    [
+      "DataLemur PDF",
+      "Page 40"
+    ]
+  ],
+  "test_cases": [
+    {
+      "test_case_id": "tc_1_baseline",
+      "description": "Baseline sample input data from problem description",
+      "input_data": {
+        "employee": [
+          {
+            "employee_id": "1",
+            "name": "Emma Thompson",
+            "salary": "3800",
+            "department_id": "1",
+            "manager_id": "6"
+          },
+          {
+            "employee_id": "2",
+            "name": "Daniel Rodriguez",
+            "salary": "2230",
+            "department_id": "1",
+            "manager_id": "7"
+          },
+          {
+            "employee_id": "3",
+            "name": "Olivia Smith",
+            "salary": "2000",
+            "department_id": "1",
+            "manager_id": "8"
+          }
+        ]
+      },
+      "expected_output": [
+        {
+          "second_highest_salary": 2230
+        }
+      ],
+      "category": "normal"
+    },
+    {
+      "test_case_id": "tc_2_high_volume",
+      "description": "Multiple entities with scaled volume and multi-group distributions",
+      "input_data": {
+        "employee": [
+          {
+            "employee_id": "1",
+            "name": "Emma Thompson",
+            "salary": "3800",
+            "department_id": "1",
+            "manager_id": "6"
+          },
+          {
+            "employee_id": "2",
+            "name": "Daniel Rodriguez",
+            "salary": "2230",
+            "department_id": "1",
+            "manager_id": "7"
+          },
+          {
+            "employee_id": "3",
+            "name": "Olivia Smith",
+            "salary": "2000",
+            "department_id": "1",
+            "manager_id": "8"
+          },
+          {
+            "employee_id": 1001,
+            "name": "Emma Thompson",
+            "salary": 5700.0,
+            "department_id": 1001,
+            "manager_id": 1006
+          },
+          {
+            "employee_id": 1002,
+            "name": "Daniel Rodriguez",
+            "salary": 3345.0,
+            "department_id": 1001,
+            "manager_id": 1007
+          },
+          {
+            "employee_id": 1003,
+            "name": "Olivia Smith",
+            "salary": 3000.0,
+            "department_id": 1001,
+            "manager_id": 1008
+          }
+        ]
+      },
+      "expected_output": [
+        {
+          "second_highest_salary": 3800
+        }
+      ],
+      "category": "volume"
+    },
+    {
+      "test_case_id": "tc_3_disqualifying_rows",
+      "description": "Dataset containing disqualifying rows, edge values, and cancelled/zero records",
+      "input_data": {
+        "employee": [
+          {
+            "employee_id": "1",
+            "name": "Emma Thompson",
+            "salary": "3800",
+            "department_id": "1",
+            "manager_id": "6"
+          },
+          {
+            "employee_id": "2",
+            "name": "Daniel Rodriguez",
+            "salary": "2230",
+            "department_id": "1",
+            "manager_id": "7"
+          },
+          {
+            "employee_id": "3",
+            "name": "Olivia Smith",
+            "salary": "2000",
+            "department_id": "1",
+            "manager_id": "8"
+          },
+          {
+            "employee_id": 5001,
+            "name": "Emma Thompson",
+            "salary": 0,
+            "department_id": 5001,
+            "manager_id": 5006
+          }
+        ]
+      },
+      "expected_output": [
+        {
+          "second_highest_salary": 2230
+        }
+      ],
+      "category": "edge"
+    },
+    {
+      "test_case_id": "tc_4_empty_result",
+      "description": "Input where no rows satisfy problem criteria, verifying empty result handling",
+      "input_data": {
+        "employee": []
+      },
+      "expected_output": [
+        {
+          "second_highest_salary": null
+        }
+      ],
+      "category": "edge"
+    },
+    {
+      "test_case_id": "tc_5_ties_and_nulls",
+      "description": "Tied ranking metrics, unmatched join keys, and NULL values in nullable attributes",
+      "input_data": {
+        "employee": [
+          {
+            "employee_id": "1",
+            "name": "Emma Thompson",
+            "salary": "3800",
+            "department_id": "1",
+            "manager_id": "6"
+          },
+          {
+            "employee_id": "2",
+            "name": "Daniel Rodriguez",
+            "salary": "2230",
+            "department_id": "1",
+            "manager_id": "7"
+          },
+          {
+            "employee_id": "3",
+            "name": "Olivia Smith",
+            "salary": "2000",
+            "department_id": "1",
+            "manager_id": "8"
+          },
+          {
+            "employee_id": 9001,
+            "name": "Emma Thompson Duplicate",
+            "salary": "3800",
+            "department_id": 9001,
+            "manager_id": 9006
+          },
+          {
+            "employee_id": 9502,
+            "name": "Daniel Rodriguez",
+            "salary": "2230",
+            "department_id": 9501,
+            "manager_id": 9507
+          }
+        ]
+      },
+      "expected_output": [
+        {
+          "second_highest_salary": 2230
+        }
+      ],
+      "category": "edge"
+    }
+  ],
+  "order_sensitive": false,
+  "expected_output": [
+    {
+      "second_highest_salary": 2230
+    }
+  ]
+}

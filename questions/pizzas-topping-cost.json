@@ -1,0 +1,685 @@
+{
+  "question_id": "q_081_pizzas_topping_cost",
+  "slug": "pizzas-topping-cost",
+  "title": "3-Topping Pizzas",
+  "difficulty": "Hard",
+  "company": "McKinsey",
+  "premium": false,
+  "question": "You\u2019re a consultant for a major pizza chain that will be running a promotion where all 3-topping pizzas will be sold for a fixed price, and are trying to understand the costs involved.\n\nGiven a list of pizza toppings, consider all the possible 3-topping pizzas, and print out the total cost of those 3 toppings. Sort the results with the highest total cost on the top followed by pizza toppings in ascending order.\n\nBreak ties by listing the ingredients in alphabetical order, starting from the first ingredient, followed by the second and third.\n\n*P.S. Be careful with the spacing (or lack of) between each ingredient. Refer to our Example Output.*\n\nNotes:",
+  "notes": [
+    "Do not display pizzas where a topping is repeated. For example, \u2018Pepperoni,Pepperoni,Onion Pizza\u2019.",
+    "Ingredients must be listed in alphabetical order. For example, 'Chicken,Onions,Sausage'. 'Onion,Sausage,Chicken' is not acceptable.",
+    "There are four different combinations of the three toppings. Cost of the pizza with toppings Chicken, Pepperoni and Sausage is \\$0.55 + \\$0.50 + \\$0.70 = \\$1.75.",
+    "Additionally, they are arranged alphabetically; in the dictionary, the chicken comes before pepperoni and pepperoni comes before sausage.",
+    "The dataset you are querying against may have different input & output - this is just an example!"
+  ],
+  "tables": [
+    {
+      "table_name": "pizza_toppings",
+      "columns": [
+        {
+          "column_name": "topping_name",
+          "data_type": "VARCHAR(255)"
+        },
+        {
+          "column_name": "ingredient_cost",
+          "data_type": "DECIMAL(10,2)"
+        }
+      ]
+    }
+  ],
+  "sample_data": {
+    "pizza_toppings": [
+      {
+        "topping_name": "Pepperoni",
+        "ingredient_cost": "0.50"
+      },
+      {
+        "topping_name": "Sausage",
+        "ingredient_cost": "0.70"
+      },
+      {
+        "topping_name": "Chicken",
+        "ingredient_cost": "0.55"
+      },
+      {
+        "topping_name": "Extra Cheese",
+        "ingredient_cost": "0.40"
+      }
+    ]
+  },
+  "sample_output": [
+    {
+      "pizza": "Chicken,Pepperoni,Sausage",
+      "total_cost": "1.75"
+    },
+    {
+      "pizza": "Chicken,Extra Cheese,Sausage",
+      "total_cost": "1.65"
+    },
+    {
+      "pizza": "Extra Cheese,Pepperoni,Sausage",
+      "total_cost": "1.60"
+    },
+    {
+      "pizza": "Chicken,Extra Cheese,Pepperoni",
+      "total_cost": "1.45"
+    }
+  ],
+  "reference_sql": "SELECT \n  CONCAT(p1.topping_name, ',', p2.topping_name, ',', p3.topping_name) AS pizza,\n  ROUND(p1.ingredient_cost + p2.ingredient_cost + p3.ingredient_cost, 2) AS total_cost\nFROM pizza_toppings p1\nJOIN pizza_toppings p2 ON p1.topping_name < p2.topping_name\nJOIN pizza_toppings p3 ON p2.topping_name < p3.topping_name\nORDER BY total_cost DESC, pizza;",
+  "tags": [
+    "aggregation",
+    "ecommerce",
+    "finance",
+    "hard",
+    "mckinsey"
+  ],
+  "related_questions": [],
+  "sources": [
+    [
+      "DataLemur page (free)",
+      "https://datalemur.com/questions/pizzas-topping-cost"
+    ],
+    [
+      "DataLemur PDF",
+      "Page 85"
+    ]
+  ],
+  "test_cases": [
+    {
+      "test_case_id": "tc_1_baseline",
+      "description": "Baseline sample input data from problem description",
+      "input_data": {
+        "pizza_toppings": [
+          {
+            "topping_name": "Pepperoni",
+            "ingredient_cost": "0.50"
+          },
+          {
+            "topping_name": "Sausage",
+            "ingredient_cost": "0.70"
+          },
+          {
+            "topping_name": "Chicken",
+            "ingredient_cost": "0.55"
+          },
+          {
+            "topping_name": "Extra Cheese",
+            "ingredient_cost": "0.40"
+          }
+        ]
+      },
+      "expected_output": [
+        {
+          "pizza": "Chicken,Pepperoni,Sausage",
+          "total_cost": 1.75
+        },
+        {
+          "pizza": "Chicken,Extra Cheese,Sausage",
+          "total_cost": 1.65
+        },
+        {
+          "pizza": "Extra Cheese,Pepperoni,Sausage",
+          "total_cost": 1.6
+        },
+        {
+          "pizza": "Chicken,Extra Cheese,Pepperoni",
+          "total_cost": 1.45
+        }
+      ],
+      "category": "normal"
+    },
+    {
+      "test_case_id": "tc_2_high_volume",
+      "description": "Multiple entities with scaled volume and multi-group distributions",
+      "input_data": {
+        "pizza_toppings": [
+          {
+            "topping_name": "Pepperoni",
+            "ingredient_cost": "0.50"
+          },
+          {
+            "topping_name": "Sausage",
+            "ingredient_cost": "0.70"
+          },
+          {
+            "topping_name": "Chicken",
+            "ingredient_cost": "0.55"
+          },
+          {
+            "topping_name": "Extra Cheese",
+            "ingredient_cost": "0.40"
+          },
+          {
+            "topping_name": "Pepperoni",
+            "ingredient_cost": "0.50"
+          },
+          {
+            "topping_name": "Sausage",
+            "ingredient_cost": "0.70"
+          },
+          {
+            "topping_name": "Chicken",
+            "ingredient_cost": "0.55"
+          },
+          {
+            "topping_name": "Extra Cheese",
+            "ingredient_cost": "0.40"
+          }
+        ]
+      },
+      "expected_output": [
+        {
+          "pizza": "Chicken,Pepperoni,Sausage",
+          "total_cost": 1.75
+        },
+        {
+          "pizza": "Chicken,Pepperoni,Sausage",
+          "total_cost": 1.75
+        },
+        {
+          "pizza": "Chicken,Pepperoni,Sausage",
+          "total_cost": 1.75
+        },
+        {
+          "pizza": "Chicken,Pepperoni,Sausage",
+          "total_cost": 1.75
+        },
+        {
+          "pizza": "Chicken,Pepperoni,Sausage",
+          "total_cost": 1.75
+        },
+        {
+          "pizza": "Chicken,Pepperoni,Sausage",
+          "total_cost": 1.75
+        },
+        {
+          "pizza": "Chicken,Pepperoni,Sausage",
+          "total_cost": 1.75
+        },
+        {
+          "pizza": "Chicken,Pepperoni,Sausage",
+          "total_cost": 1.75
+        },
+        {
+          "pizza": "Chicken,Extra Cheese,Sausage",
+          "total_cost": 1.65
+        },
+        {
+          "pizza": "Chicken,Extra Cheese,Sausage",
+          "total_cost": 1.65
+        },
+        {
+          "pizza": "Chicken,Extra Cheese,Sausage",
+          "total_cost": 1.65
+        },
+        {
+          "pizza": "Chicken,Extra Cheese,Sausage",
+          "total_cost": 1.65
+        },
+        {
+          "pizza": "Chicken,Extra Cheese,Sausage",
+          "total_cost": 1.65
+        },
+        {
+          "pizza": "Chicken,Extra Cheese,Sausage",
+          "total_cost": 1.65
+        },
+        {
+          "pizza": "Chicken,Extra Cheese,Sausage",
+          "total_cost": 1.65
+        },
+        {
+          "pizza": "Chicken,Extra Cheese,Sausage",
+          "total_cost": 1.65
+        },
+        {
+          "pizza": "Extra Cheese,Pepperoni,Sausage",
+          "total_cost": 1.6
+        },
+        {
+          "pizza": "Extra Cheese,Pepperoni,Sausage",
+          "total_cost": 1.6
+        },
+        {
+          "pizza": "Extra Cheese,Pepperoni,Sausage",
+          "total_cost": 1.6
+        },
+        {
+          "pizza": "Extra Cheese,Pepperoni,Sausage",
+          "total_cost": 1.6
+        },
+        {
+          "pizza": "Extra Cheese,Pepperoni,Sausage",
+          "total_cost": 1.6
+        },
+        {
+          "pizza": "Extra Cheese,Pepperoni,Sausage",
+          "total_cost": 1.6
+        },
+        {
+          "pizza": "Extra Cheese,Pepperoni,Sausage",
+          "total_cost": 1.6
+        },
+        {
+          "pizza": "Extra Cheese,Pepperoni,Sausage",
+          "total_cost": 1.6
+        },
+        {
+          "pizza": "Chicken,Extra Cheese,Pepperoni",
+          "total_cost": 1.45
+        },
+        {
+          "pizza": "Chicken,Extra Cheese,Pepperoni",
+          "total_cost": 1.45
+        },
+        {
+          "pizza": "Chicken,Extra Cheese,Pepperoni",
+          "total_cost": 1.45
+        },
+        {
+          "pizza": "Chicken,Extra Cheese,Pepperoni",
+          "total_cost": 1.45
+        },
+        {
+          "pizza": "Chicken,Extra Cheese,Pepperoni",
+          "total_cost": 1.45
+        },
+        {
+          "pizza": "Chicken,Extra Cheese,Pepperoni",
+          "total_cost": 1.45
+        },
+        {
+          "pizza": "Chicken,Extra Cheese,Pepperoni",
+          "total_cost": 1.45
+        },
+        {
+          "pizza": "Chicken,Extra Cheese,Pepperoni",
+          "total_cost": 1.45
+        }
+      ],
+      "category": "volume"
+    },
+    {
+      "test_case_id": "tc_3_disqualifying_rows",
+      "description": "Dataset containing disqualifying rows, edge values, and cancelled/zero records",
+      "input_data": {
+        "pizza_toppings": [
+          {
+            "topping_name": "Pepperoni",
+            "ingredient_cost": "0.50"
+          },
+          {
+            "topping_name": "Sausage",
+            "ingredient_cost": "0.70"
+          },
+          {
+            "topping_name": "Chicken",
+            "ingredient_cost": "0.55"
+          },
+          {
+            "topping_name": "Extra Cheese",
+            "ingredient_cost": "0.40"
+          },
+          {
+            "topping_name": "Pepperoni",
+            "ingredient_cost": "0.50"
+          },
+          {
+            "topping_name": "Sausage",
+            "ingredient_cost": "0.70"
+          }
+        ]
+      },
+      "expected_output": [
+        {
+          "pizza": "Chicken,Pepperoni,Sausage",
+          "total_cost": 1.75
+        },
+        {
+          "pizza": "Chicken,Pepperoni,Sausage",
+          "total_cost": 1.75
+        },
+        {
+          "pizza": "Chicken,Pepperoni,Sausage",
+          "total_cost": 1.75
+        },
+        {
+          "pizza": "Chicken,Pepperoni,Sausage",
+          "total_cost": 1.75
+        },
+        {
+          "pizza": "Chicken,Extra Cheese,Sausage",
+          "total_cost": 1.65
+        },
+        {
+          "pizza": "Chicken,Extra Cheese,Sausage",
+          "total_cost": 1.65
+        },
+        {
+          "pizza": "Extra Cheese,Pepperoni,Sausage",
+          "total_cost": 1.6
+        },
+        {
+          "pizza": "Extra Cheese,Pepperoni,Sausage",
+          "total_cost": 1.6
+        },
+        {
+          "pizza": "Extra Cheese,Pepperoni,Sausage",
+          "total_cost": 1.6
+        },
+        {
+          "pizza": "Extra Cheese,Pepperoni,Sausage",
+          "total_cost": 1.6
+        },
+        {
+          "pizza": "Chicken,Extra Cheese,Pepperoni",
+          "total_cost": 1.45
+        },
+        {
+          "pizza": "Chicken,Extra Cheese,Pepperoni",
+          "total_cost": 1.45
+        }
+      ],
+      "category": "edge"
+    },
+    {
+      "test_case_id": "tc_4_empty_result",
+      "description": "Input where no rows satisfy problem criteria, verifying empty result handling",
+      "input_data": {
+        "pizza_toppings": []
+      },
+      "expected_output": [],
+      "category": "edge"
+    },
+    {
+      "test_case_id": "tc_5_ties_and_nulls",
+      "description": "Tied ranking metrics, unmatched join keys, and NULL values in nullable attributes",
+      "input_data": {
+        "pizza_toppings": [
+          {
+            "topping_name": "Pepperoni",
+            "ingredient_cost": "0.50"
+          },
+          {
+            "topping_name": "Sausage",
+            "ingredient_cost": "0.70"
+          },
+          {
+            "topping_name": "Chicken",
+            "ingredient_cost": "0.55"
+          },
+          {
+            "topping_name": "Extra Cheese",
+            "ingredient_cost": "0.40"
+          },
+          {
+            "topping_name": "Pepperoni Duplicate",
+            "ingredient_cost": "0.50"
+          },
+          {
+            "topping_name": "Sausage",
+            "ingredient_cost": "0.70"
+          }
+        ]
+      },
+      "expected_output": [
+        {
+          "pizza": "Chicken,Pepperoni Duplicate,Sausage",
+          "total_cost": 1.75
+        },
+        {
+          "pizza": "Chicken,Pepperoni Duplicate,Sausage",
+          "total_cost": 1.75
+        },
+        {
+          "pizza": "Chicken,Pepperoni,Sausage",
+          "total_cost": 1.75
+        },
+        {
+          "pizza": "Chicken,Pepperoni,Sausage",
+          "total_cost": 1.75
+        },
+        {
+          "pizza": "Pepperoni,Pepperoni Duplicate,Sausage",
+          "total_cost": 1.7
+        },
+        {
+          "pizza": "Pepperoni,Pepperoni Duplicate,Sausage",
+          "total_cost": 1.7
+        },
+        {
+          "pizza": "Chicken,Extra Cheese,Sausage",
+          "total_cost": 1.65
+        },
+        {
+          "pizza": "Chicken,Extra Cheese,Sausage",
+          "total_cost": 1.65
+        },
+        {
+          "pizza": "Extra Cheese,Pepperoni Duplicate,Sausage",
+          "total_cost": 1.6
+        },
+        {
+          "pizza": "Extra Cheese,Pepperoni Duplicate,Sausage",
+          "total_cost": 1.6
+        },
+        {
+          "pizza": "Extra Cheese,Pepperoni,Sausage",
+          "total_cost": 1.6
+        },
+        {
+          "pizza": "Extra Cheese,Pepperoni,Sausage",
+          "total_cost": 1.6
+        },
+        {
+          "pizza": "Chicken,Pepperoni,Pepperoni Duplicate",
+          "total_cost": 1.55
+        },
+        {
+          "pizza": "Chicken,Extra Cheese,Pepperoni",
+          "total_cost": 1.45
+        },
+        {
+          "pizza": "Chicken,Extra Cheese,Pepperoni Duplicate",
+          "total_cost": 1.45
+        },
+        {
+          "pizza": "Extra Cheese,Pepperoni,Pepperoni Duplicate",
+          "total_cost": 1.4
+        }
+      ],
+      "category": "edge"
+    },
+    {
+      "test_case_id": "tc_6_extreme_boundary",
+      "description": "Consecutive day sequences, month-end date rollovers, and high-frequency transactions",
+      "input_data": {
+        "pizza_toppings": [
+          {
+            "topping_name": "Pepperoni",
+            "ingredient_cost": "0.50"
+          },
+          {
+            "topping_name": "Sausage",
+            "ingredient_cost": "0.70"
+          },
+          {
+            "topping_name": "Chicken",
+            "ingredient_cost": "0.55"
+          },
+          {
+            "topping_name": "Extra Cheese",
+            "ingredient_cost": "0.40"
+          },
+          {
+            "topping_name": "Pepperoni",
+            "ingredient_cost": "0.50"
+          },
+          {
+            "topping_name": "Sausage",
+            "ingredient_cost": "0.70"
+          },
+          {
+            "topping_name": "Chicken",
+            "ingredient_cost": "0.55"
+          },
+          {
+            "topping_name": "Extra Cheese",
+            "ingredient_cost": "0.40"
+          }
+        ]
+      },
+      "expected_output": [
+        {
+          "pizza": "Chicken,Pepperoni,Sausage",
+          "total_cost": 1.75
+        },
+        {
+          "pizza": "Chicken,Pepperoni,Sausage",
+          "total_cost": 1.75
+        },
+        {
+          "pizza": "Chicken,Pepperoni,Sausage",
+          "total_cost": 1.75
+        },
+        {
+          "pizza": "Chicken,Pepperoni,Sausage",
+          "total_cost": 1.75
+        },
+        {
+          "pizza": "Chicken,Pepperoni,Sausage",
+          "total_cost": 1.75
+        },
+        {
+          "pizza": "Chicken,Pepperoni,Sausage",
+          "total_cost": 1.75
+        },
+        {
+          "pizza": "Chicken,Pepperoni,Sausage",
+          "total_cost": 1.75
+        },
+        {
+          "pizza": "Chicken,Pepperoni,Sausage",
+          "total_cost": 1.75
+        },
+        {
+          "pizza": "Chicken,Extra Cheese,Sausage",
+          "total_cost": 1.65
+        },
+        {
+          "pizza": "Chicken,Extra Cheese,Sausage",
+          "total_cost": 1.65
+        },
+        {
+          "pizza": "Chicken,Extra Cheese,Sausage",
+          "total_cost": 1.65
+        },
+        {
+          "pizza": "Chicken,Extra Cheese,Sausage",
+          "total_cost": 1.65
+        },
+        {
+          "pizza": "Chicken,Extra Cheese,Sausage",
+          "total_cost": 1.65
+        },
+        {
+          "pizza": "Chicken,Extra Cheese,Sausage",
+          "total_cost": 1.65
+        },
+        {
+          "pizza": "Chicken,Extra Cheese,Sausage",
+          "total_cost": 1.65
+        },
+        {
+          "pizza": "Chicken,Extra Cheese,Sausage",
+          "total_cost": 1.65
+        },
+        {
+          "pizza": "Extra Cheese,Pepperoni,Sausage",
+          "total_cost": 1.6
+        },
+        {
+          "pizza": "Extra Cheese,Pepperoni,Sausage",
+          "total_cost": 1.6
+        },
+        {
+          "pizza": "Extra Cheese,Pepperoni,Sausage",
+          "total_cost": 1.6
+        },
+        {
+          "pizza": "Extra Cheese,Pepperoni,Sausage",
+          "total_cost": 1.6
+        },
+        {
+          "pizza": "Extra Cheese,Pepperoni,Sausage",
+          "total_cost": 1.6
+        },
+        {
+          "pizza": "Extra Cheese,Pepperoni,Sausage",
+          "total_cost": 1.6
+        },
+        {
+          "pizza": "Extra Cheese,Pepperoni,Sausage",
+          "total_cost": 1.6
+        },
+        {
+          "pizza": "Extra Cheese,Pepperoni,Sausage",
+          "total_cost": 1.6
+        },
+        {
+          "pizza": "Chicken,Extra Cheese,Pepperoni",
+          "total_cost": 1.45
+        },
+        {
+          "pizza": "Chicken,Extra Cheese,Pepperoni",
+          "total_cost": 1.45
+        },
+        {
+          "pizza": "Chicken,Extra Cheese,Pepperoni",
+          "total_cost": 1.45
+        },
+        {
+          "pizza": "Chicken,Extra Cheese,Pepperoni",
+          "total_cost": 1.45
+        },
+        {
+          "pizza": "Chicken,Extra Cheese,Pepperoni",
+          "total_cost": 1.45
+        },
+        {
+          "pizza": "Chicken,Extra Cheese,Pepperoni",
+          "total_cost": 1.45
+        },
+        {
+          "pizza": "Chicken,Extra Cheese,Pepperoni",
+          "total_cost": 1.45
+        },
+        {
+          "pizza": "Chicken,Extra Cheese,Pepperoni",
+          "total_cost": 1.45
+        }
+      ],
+      "category": "boundary"
+    }
+  ],
+  "order_sensitive": true,
+  "expected_output": [
+    {
+      "pizza": "Chicken,Pepperoni,Sausage",
+      "total_cost": 1.75
+    },
+    {
+      "pizza": "Chicken,Extra Cheese,Sausage",
+      "total_cost": 1.65
+    },
+    {
+      "pizza": "Extra Cheese,Pepperoni,Sausage",
+      "total_cost": 1.6
+    },
+    {
+      "pizza": "Chicken,Extra Cheese,Pepperoni",
+      "total_cost": 1.45
+    }
+  ]
+}

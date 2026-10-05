@@ -1,0 +1,457 @@
+{
+  "question_id": "q_091_sql_bad_experience",
+  "slug": "sql-bad-experience",
+  "title": "Bad Delivery Rate",
+  "difficulty": "Hard",
+  "company": "DoorDash",
+  "premium": true,
+  "question": "The Growth Team at DoorDash wants new users who order within their first 14 days on the platform to have a positive experience. They have noticed several delivery issues that result in a bad experience:\n\n(1) orders completed incorrectly, with missing items or wrong orders; (2) orders never received because of incorrect addresses or drop-off spots; (3) orders delivered late, where the actual delivery time is 30 minutes or more after the order placement time. The estimated delivery time is automatically set to 30 minutes after the order time.\n\nWrite a query that calculates the bad experience rate for new users who signed up in June 2022, during their first 14 days on the platform. The output should be the percentage of bad experiences, rounded to 2 decimal places.",
+  "notes": [],
+  "tables": [
+    {
+      "table_name": "orders",
+      "columns": [
+        {
+          "column_name": "order_id",
+          "data_type": "INT"
+        },
+        {
+          "column_name": "customer_id",
+          "data_type": "INT"
+        },
+        {
+          "column_name": "trip_id",
+          "data_type": "INT"
+        },
+        {
+          "column_name": "status",
+          "data_type": "VARCHAR(50)"
+        },
+        {
+          "column_name": "order_timestamp",
+          "data_type": "DATETIME"
+        }
+      ]
+    },
+    {
+      "table_name": "trips",
+      "columns": [
+        {
+          "column_name": "dasher_id",
+          "data_type": "INT"
+        },
+        {
+          "column_name": "trip_id",
+          "data_type": "INT"
+        },
+        {
+          "column_name": "estimated_delivery_timestamp",
+          "data_type": "DATETIME"
+        },
+        {
+          "column_name": "actual_delivery_timestamp",
+          "data_type": "DATETIME"
+        }
+      ]
+    },
+    {
+      "table_name": "customers",
+      "columns": [
+        {
+          "column_name": "customer_id",
+          "data_type": "INT"
+        },
+        {
+          "column_name": "signup_timestamp",
+          "data_type": "DATETIME"
+        }
+      ]
+    }
+  ],
+  "sample_data": {
+    "orders": [
+      {
+        "order_id": 727424,
+        "customer_id": 8472,
+        "trip_id": 100463,
+        "status": "completed successfully",
+        "order_timestamp": "06/05/2022 09:12:00"
+      },
+      {
+        "order_id": 242513,
+        "customer_id": 2341,
+        "trip_id": 100482,
+        "status": "completed incorrectly",
+        "order_timestamp": "06/05/2022 14:40:00"
+      },
+      {
+        "order_id": 141367,
+        "customer_id": 1314,
+        "trip_id": 100362,
+        "status": "completed incorrectly",
+        "order_timestamp": "06/07/2022 15:03:00"
+      },
+      {
+        "order_id": 582193,
+        "customer_id": 5421,
+        "trip_id": 100657,
+        "status": "never_received",
+        "order_timestamp": "07/07/2022 15:22:00"
+      },
+      {
+        "order_id": 253613,
+        "customer_id": 1314,
+        "trip_id": 100213,
+        "status": "completed successfully",
+        "order_timestamp": "06/12/2022 13:43:00"
+      }
+    ],
+    "trips": [
+      {
+        "dasher_id": 101,
+        "trip_id": 100463,
+        "estimated_delivery_timestamp": "06/05/2022 09:42:00",
+        "actual_delivery_timestamp": "06/05/2022 09:38:00"
+      },
+      {
+        "dasher_id": 102,
+        "trip_id": 100482,
+        "estimated_delivery_timestamp": "06/05/2022 15:10:00",
+        "actual_delivery_timestamp": "06/05/2022 15:46:00"
+      },
+      {
+        "dasher_id": 101,
+        "trip_id": 100362,
+        "estimated_delivery_timestamp": "06/07/2022 15:33:00",
+        "actual_delivery_timestamp": "06/07/2022 16:45:00"
+      },
+      {
+        "dasher_id": 102,
+        "trip_id": 100657,
+        "estimated_delivery_timestamp": "07/07/2022 15:52:00",
+        "actual_delivery_timestamp": "-"
+      },
+      {
+        "dasher_id": 103,
+        "trip_id": 100213,
+        "estimated_delivery_timestamp": "06/12/2022 14:13:00",
+        "actual_delivery_timestamp": "06/12/2022 14:10:00"
+      }
+    ],
+    "customers": [
+      {
+        "customer_id": 8472,
+        "signup_timestamp": "05/30/2022 00:00:00"
+      },
+      {
+        "customer_id": 2341,
+        "signup_timestamp": "06/01/2022 00:00:00"
+      },
+      {
+        "customer_id": 1314,
+        "signup_timestamp": "06/03/2022 00:00:00"
+      },
+      {
+        "customer_id": 1435,
+        "signup_timestamp": "06/05/2022 00:00:00"
+      },
+      {
+        "customer_id": 5421,
+        "signup_timestamp": "06/07/2022 00:00:00"
+      }
+    ]
+  },
+  "sample_output": [
+    {
+      "bad_experience_pct": 66.67
+    }
+  ],
+  "reference_sql": "SELECT \n  ROUND(100.0 * COUNT(CASE \n    WHEN o.status IN ('completed incorrectly', 'never_received') \n      OR t.actual_delivery_timestamp > t.estimated_delivery_timestamp \n    THEN 1 END) / COUNT(*), 2) AS bad_experience_pct\nFROM orders o\nJOIN trips t ON o.trip_id = t.trip_id\nJOIN customers c ON o.customer_id = c.customer_id\nWHERE c.signup_timestamp >= '2022-06-01' AND c.signup_timestamp < '2022-07-01'\n  AND DATEDIFF(o.order_timestamp, c.signup_timestamp) BETWEEN 0 AND 14;",
+  "tags": [
+    "date-manipulation",
+    "doordash",
+    "ecommerce",
+    "hard",
+    "healthcare",
+    "math",
+    "transportation"
+  ],
+  "related_questions": [],
+  "sources": [
+    [
+      "DataLemur blog: 20 Advanced SQL questions",
+      "https://datalemur.com/blog/advanced-sql-interview-questions"
+    ],
+    [
+      "DataLemur page (locked)",
+      "https://datalemur.com/questions/sql-bad-experience"
+    ],
+    [
+      "DataLemur blog: 8 DoorDash SQL questions",
+      "https://datalemur.com/blog/doordash-sql-interview-questions"
+    ],
+    [
+      "DataLemur PDF",
+      "Page 95"
+    ]
+  ],
+  "test_cases": [
+    {
+      "test_case_id": "tc_1_baseline",
+      "description": "Baseline: 2 bad experiences out of 3 eligible orders (bad_experience_pct = 66.67)",
+      "input_data": {
+        "orders": [
+          {
+            "order_id": 727424,
+            "customer_id": 8472,
+            "trip_id": 100463,
+            "status": "completed successfully",
+            "order_timestamp": "06/05/2022 09:12:00"
+          },
+          {
+            "order_id": 242513,
+            "customer_id": 2341,
+            "trip_id": 100482,
+            "status": "completed incorrectly",
+            "order_timestamp": "06/05/2022 14:40:00"
+          },
+          {
+            "order_id": 141367,
+            "customer_id": 1314,
+            "trip_id": 100362,
+            "status": "completed incorrectly",
+            "order_timestamp": "06/07/2022 15:03:00"
+          },
+          {
+            "order_id": 582193,
+            "customer_id": 5421,
+            "trip_id": 100657,
+            "status": "never_received",
+            "order_timestamp": "07/07/2022 15:22:00"
+          },
+          {
+            "order_id": 253613,
+            "customer_id": 1314,
+            "trip_id": 100213,
+            "status": "completed successfully",
+            "order_timestamp": "06/12/2022 13:43:00"
+          }
+        ],
+        "trips": [
+          {
+            "dasher_id": 101,
+            "trip_id": 100463,
+            "estimated_delivery_timestamp": "06/05/2022 09:42:00",
+            "actual_delivery_timestamp": "06/05/2022 09:38:00"
+          },
+          {
+            "dasher_id": 102,
+            "trip_id": 100482,
+            "estimated_delivery_timestamp": "06/05/2022 15:10:00",
+            "actual_delivery_timestamp": "06/05/2022 15:46:00"
+          },
+          {
+            "dasher_id": 101,
+            "trip_id": 100362,
+            "estimated_delivery_timestamp": "06/07/2022 15:33:00",
+            "actual_delivery_timestamp": "06/07/2022 16:45:00"
+          },
+          {
+            "dasher_id": 102,
+            "trip_id": 100657,
+            "estimated_delivery_timestamp": "07/07/2022 15:52:00",
+            "actual_delivery_timestamp": "-"
+          },
+          {
+            "dasher_id": 103,
+            "trip_id": 100213,
+            "estimated_delivery_timestamp": "06/12/2022 14:13:00",
+            "actual_delivery_timestamp": "06/12/2022 14:10:00"
+          }
+        ],
+        "customers": [
+          {
+            "customer_id": 8472,
+            "signup_timestamp": "05/30/2022 00:00:00"
+          },
+          {
+            "customer_id": 2341,
+            "signup_timestamp": "06/01/2022 00:00:00"
+          },
+          {
+            "customer_id": 1314,
+            "signup_timestamp": "06/03/2022 00:00:00"
+          },
+          {
+            "customer_id": 1435,
+            "signup_timestamp": "06/05/2022 00:00:00"
+          },
+          {
+            "customer_id": 5421,
+            "signup_timestamp": "06/07/2022 00:00:00"
+          }
+        ]
+      },
+      "expected_output": [
+        {
+          "bad_experience_pct": 66.67
+        }
+      ],
+      "category": "normal"
+    },
+    {
+      "test_case_id": "tc_2_all_bad_experiences",
+      "description": "Tests 100.00% bad experience (1 wrong order + 1 late delivery)",
+      "input_data": {
+        "customers": [
+          {
+            "customer_id": 1,
+            "signup_timestamp": "2022-06-10 00:00:00"
+          }
+        ],
+        "orders": [
+          {
+            "order_id": 101,
+            "customer_id": 1,
+            "trip_id": 201,
+            "status": "completed incorrectly",
+            "order_timestamp": "2022-06-12 12:00:00"
+          },
+          {
+            "order_id": 102,
+            "customer_id": 1,
+            "trip_id": 202,
+            "status": "completed successfully",
+            "order_timestamp": "2022-06-15 13:00:00"
+          }
+        ],
+        "trips": [
+          {
+            "dasher_id": 1,
+            "trip_id": 201,
+            "estimated_delivery_timestamp": "2022-06-12 12:30:00",
+            "actual_delivery_timestamp": "2022-06-12 12:25:00"
+          },
+          {
+            "dasher_id": 1,
+            "trip_id": 202,
+            "estimated_delivery_timestamp": "2022-06-15 13:30:00",
+            "actual_delivery_timestamp": "2022-06-15 14:15:00"
+          }
+        ]
+      },
+      "expected_output": [
+        {
+          "bad_experience_pct": 100.0
+        }
+      ],
+      "category": "volume"
+    },
+    {
+      "test_case_id": "tc_3_perfect_experience",
+      "description": "Tests 0.00% bad experience (on-time and successfully completed)",
+      "input_data": {
+        "customers": [
+          {
+            "customer_id": 2,
+            "signup_timestamp": "2022-06-05 00:00:00"
+          }
+        ],
+        "orders": [
+          {
+            "order_id": 301,
+            "customer_id": 2,
+            "trip_id": 401,
+            "status": "completed successfully",
+            "order_timestamp": "2022-06-08 18:00:00"
+          }
+        ],
+        "trips": [
+          {
+            "dasher_id": 5,
+            "trip_id": 401,
+            "estimated_delivery_timestamp": "2022-06-08 18:30:00",
+            "actual_delivery_timestamp": "2022-06-08 18:22:00"
+          }
+        ]
+      },
+      "expected_output": [
+        {
+          "bad_experience_pct": 0.0
+        }
+      ],
+      "category": "normal"
+    },
+    {
+      "test_case_id": "tc_4_boundary_and_date_filtering",
+      "description": "Tests filtering out orders > 14 days and customers signed up before June",
+      "input_data": {
+        "customers": [
+          {
+            "customer_id": 10,
+            "signup_timestamp": "2022-05-31 00:00:00"
+          },
+          {
+            "customer_id": 20,
+            "signup_timestamp": "2022-06-01 00:00:00"
+          }
+        ],
+        "orders": [
+          {
+            "order_id": 501,
+            "customer_id": 10,
+            "trip_id": 601,
+            "status": "completed incorrectly",
+            "order_timestamp": "2022-06-02 12:00:00"
+          },
+          {
+            "order_id": 502,
+            "customer_id": 20,
+            "trip_id": 602,
+            "status": "never_received",
+            "order_timestamp": "2022-06-25 12:00:00"
+          },
+          {
+            "order_id": 503,
+            "customer_id": 20,
+            "trip_id": 603,
+            "status": "completed incorrectly",
+            "order_timestamp": "2022-06-05 12:00:00"
+          }
+        ],
+        "trips": [
+          {
+            "dasher_id": 1,
+            "trip_id": 601,
+            "estimated_delivery_timestamp": "2022-06-02 12:30:00",
+            "actual_delivery_timestamp": null
+          },
+          {
+            "dasher_id": 1,
+            "trip_id": 602,
+            "estimated_delivery_timestamp": "2022-06-25 12:30:00",
+            "actual_delivery_timestamp": null
+          },
+          {
+            "dasher_id": 1,
+            "trip_id": 603,
+            "estimated_delivery_timestamp": "2022-06-05 12:30:00",
+            "actual_delivery_timestamp": null
+          }
+        ]
+      },
+      "expected_output": [
+        {
+          "bad_experience_pct": 100.0
+        }
+      ],
+      "category": "boundary"
+    }
+  ],
+  "order_sensitive": false,
+  "expected_output": [
+    {
+      "bad_experience_pct": 66.67
+    }
+  ]
+}

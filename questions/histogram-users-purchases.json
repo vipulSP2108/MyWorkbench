@@ -1,0 +1,442 @@
+{
+  "question_id": "q_055_histogram_users_purchases",
+  "slug": "histogram-users-purchases",
+  "title": "Histogram of Users and Purchases",
+  "difficulty": "Medium",
+  "company": "Walmart",
+  "premium": false,
+  "question": "Assume you're given a table on Walmart user transactions. Based on their most recent transaction date, write a query that retrieve the users along with the number of products they bought.\n\nOutput the user's most recent transaction date, user ID, and the number of products, sorted in chronological order by the transaction date.",
+  "notes": [
+    "The dataset you are querying against may have different input & output - this is just an example!"
+  ],
+  "tables": [
+    {
+      "table_name": "user_transactions",
+      "columns": [
+        {
+          "column_name": "product_id",
+          "data_type": "INT"
+        },
+        {
+          "column_name": "user_id",
+          "data_type": "INT"
+        },
+        {
+          "column_name": "spend",
+          "data_type": "DECIMAL(10,2)"
+        },
+        {
+          "column_name": "transaction_date",
+          "data_type": "DATETIME"
+        }
+      ]
+    }
+  ],
+  "sample_data": {
+    "user_transactions": [
+      {
+        "product_id": "3673",
+        "user_id": "123",
+        "spend": "68.90",
+        "transaction_date": "07/08/2022 12:00:00"
+      },
+      {
+        "product_id": "9623",
+        "user_id": "123",
+        "spend": "274.10",
+        "transaction_date": "07/08/2022 12:00:00"
+      },
+      {
+        "product_id": "1467",
+        "user_id": "115",
+        "spend": "19.90",
+        "transaction_date": "07/08/2022 12:00:00"
+      },
+      {
+        "product_id": "2513",
+        "user_id": "159",
+        "spend": "25.00",
+        "transaction_date": "07/08/2022 12:00:00"
+      },
+      {
+        "product_id": "1452",
+        "user_id": "159",
+        "spend": "74.50",
+        "transaction_date": "07/10/2022 12:00:00"
+      }
+    ]
+  },
+  "sample_output": [
+    {
+      "transaction_date": "07/08/2022 12:00:00",
+      "user_id": "115",
+      "purchase_count": "1"
+    },
+    {
+      "transaction_date": "07/08/2022 12:00:000",
+      "user_id": "123",
+      "purchase_count": "2"
+    },
+    {
+      "transaction_date": "07/10/2022 12:00:00",
+      "user_id": "159",
+      "purchase_count": "1"
+    }
+  ],
+  "reference_sql": "WITH ranked AS (\n  SELECT user_id, product_id, spend, transaction_date,\n         DENSE_RANK() OVER (PARTITION BY user_id ORDER BY transaction_date DESC) AS rn\n  FROM user_transactions\n)\nSELECT \n  DATE(transaction_date) AS transaction_date,\n  user_id,\n  COUNT(product_id) AS purchase_count\nFROM ranked\nWHERE rn = 1\nGROUP BY transaction_date, user_id\nORDER BY transaction_date, user_id;",
+  "tags": [
+    "date-manipulation",
+    "ecommerce",
+    "finance",
+    "medium",
+    "walmart"
+  ],
+  "related_questions": [],
+  "sources": [
+    [
+      "DataLemur page (free)",
+      "https://datalemur.com/questions/histogram-users-purchases"
+    ],
+    [
+      "DataLemur PDF",
+      "Page 59"
+    ]
+  ],
+  "test_cases": [
+    {
+      "test_case_id": "tc_1_baseline",
+      "description": "Baseline sample input data from problem description",
+      "input_data": {
+        "user_transactions": [
+          {
+            "product_id": "3673",
+            "user_id": "123",
+            "spend": "68.90",
+            "transaction_date": "07/08/2022 12:00:00"
+          },
+          {
+            "product_id": "9623",
+            "user_id": "123",
+            "spend": "274.10",
+            "transaction_date": "07/08/2022 12:00:00"
+          },
+          {
+            "product_id": "1467",
+            "user_id": "115",
+            "spend": "19.90",
+            "transaction_date": "07/08/2022 12:00:00"
+          },
+          {
+            "product_id": "2513",
+            "user_id": "159",
+            "spend": "25.00",
+            "transaction_date": "07/08/2022 12:00:00"
+          },
+          {
+            "product_id": "1452",
+            "user_id": "159",
+            "spend": "74.50",
+            "transaction_date": "07/10/2022 12:00:00"
+          }
+        ]
+      },
+      "expected_output": [
+        {
+          "transaction_date": "2022-07-08",
+          "user_id": 115,
+          "purchase_count": 1
+        },
+        {
+          "transaction_date": "2022-07-08",
+          "user_id": 123,
+          "purchase_count": 2
+        },
+        {
+          "transaction_date": "2022-07-10",
+          "user_id": 159,
+          "purchase_count": 1
+        }
+      ],
+      "category": "normal"
+    },
+    {
+      "test_case_id": "tc_2_high_volume",
+      "description": "Multiple entities with scaled volume and multi-group distributions",
+      "input_data": {
+        "user_transactions": [
+          {
+            "product_id": "3673",
+            "user_id": "123",
+            "spend": "68.90",
+            "transaction_date": "07/08/2022 12:00:00"
+          },
+          {
+            "product_id": "9623",
+            "user_id": "123",
+            "spend": "274.10",
+            "transaction_date": "07/08/2022 12:00:00"
+          },
+          {
+            "product_id": "1467",
+            "user_id": "115",
+            "spend": "19.90",
+            "transaction_date": "07/08/2022 12:00:00"
+          },
+          {
+            "product_id": "2513",
+            "user_id": "159",
+            "spend": "25.00",
+            "transaction_date": "07/08/2022 12:00:00"
+          },
+          {
+            "product_id": "1452",
+            "user_id": "159",
+            "spend": "74.50",
+            "transaction_date": "07/10/2022 12:00:00"
+          },
+          {
+            "product_id": 4673,
+            "user_id": 1123,
+            "spend": 103.35,
+            "transaction_date": "07/13/2022 12:00:00"
+          },
+          {
+            "product_id": 10623,
+            "user_id": 1123,
+            "spend": 411.15,
+            "transaction_date": "07/13/2022 12:00:00"
+          },
+          {
+            "product_id": 2467,
+            "user_id": 1115,
+            "spend": 29.85,
+            "transaction_date": "07/13/2022 12:00:00"
+          },
+          {
+            "product_id": 3513,
+            "user_id": 1159,
+            "spend": 37.5,
+            "transaction_date": "07/13/2022 12:00:00"
+          },
+          {
+            "product_id": 2452,
+            "user_id": 1159,
+            "spend": 111.75,
+            "transaction_date": "07/15/2022 12:00:00"
+          }
+        ]
+      },
+      "expected_output": [
+        {
+          "transaction_date": "2022-07-08",
+          "user_id": 115,
+          "purchase_count": 1
+        },
+        {
+          "transaction_date": "2022-07-08",
+          "user_id": 123,
+          "purchase_count": 2
+        },
+        {
+          "transaction_date": "2022-07-10",
+          "user_id": 159,
+          "purchase_count": 1
+        },
+        {
+          "transaction_date": "2022-07-13",
+          "user_id": 1115,
+          "purchase_count": 1
+        },
+        {
+          "transaction_date": "2022-07-13",
+          "user_id": 1123,
+          "purchase_count": 2
+        },
+        {
+          "transaction_date": "2022-07-15",
+          "user_id": 1159,
+          "purchase_count": 1
+        }
+      ],
+      "category": "volume"
+    },
+    {
+      "test_case_id": "tc_3_disqualifying_rows",
+      "description": "Dataset containing disqualifying rows, edge values, and cancelled/zero records",
+      "input_data": {
+        "user_transactions": [
+          {
+            "product_id": "3673",
+            "user_id": "123",
+            "spend": "68.90",
+            "transaction_date": "07/08/2022 12:00:00"
+          },
+          {
+            "product_id": "9623",
+            "user_id": "123",
+            "spend": "274.10",
+            "transaction_date": "07/08/2022 12:00:00"
+          },
+          {
+            "product_id": "1467",
+            "user_id": "115",
+            "spend": "19.90",
+            "transaction_date": "07/08/2022 12:00:00"
+          },
+          {
+            "product_id": "2513",
+            "user_id": "159",
+            "spend": "25.00",
+            "transaction_date": "07/08/2022 12:00:00"
+          },
+          {
+            "product_id": "1452",
+            "user_id": "159",
+            "spend": "74.50",
+            "transaction_date": "07/10/2022 12:00:00"
+          },
+          {
+            "product_id": 8673,
+            "user_id": 5123,
+            "spend": 0,
+            "transaction_date": "07/08/2017 12:00:00"
+          },
+          {
+            "product_id": 14623,
+            "user_id": 5123,
+            "spend": 0,
+            "transaction_date": "07/08/2017 12:00:00"
+          }
+        ]
+      },
+      "expected_output": [
+        {
+          "transaction_date": "2017-07-08",
+          "user_id": 5123,
+          "purchase_count": 2
+        },
+        {
+          "transaction_date": "2022-07-08",
+          "user_id": 115,
+          "purchase_count": 1
+        },
+        {
+          "transaction_date": "2022-07-08",
+          "user_id": 123,
+          "purchase_count": 2
+        },
+        {
+          "transaction_date": "2022-07-10",
+          "user_id": 159,
+          "purchase_count": 1
+        }
+      ],
+      "category": "edge"
+    },
+    {
+      "test_case_id": "tc_4_empty_result",
+      "description": "Input where no rows satisfy problem criteria, verifying empty result handling",
+      "input_data": {
+        "user_transactions": []
+      },
+      "expected_output": [],
+      "category": "edge"
+    },
+    {
+      "test_case_id": "tc_5_ties_and_nulls",
+      "description": "Tied ranking metrics, unmatched join keys, and NULL values in nullable attributes",
+      "input_data": {
+        "user_transactions": [
+          {
+            "product_id": "3673",
+            "user_id": "123",
+            "spend": "68.90",
+            "transaction_date": "07/08/2022 12:00:00"
+          },
+          {
+            "product_id": "9623",
+            "user_id": "123",
+            "spend": "274.10",
+            "transaction_date": "07/08/2022 12:00:00"
+          },
+          {
+            "product_id": "1467",
+            "user_id": "115",
+            "spend": "19.90",
+            "transaction_date": "07/08/2022 12:00:00"
+          },
+          {
+            "product_id": "2513",
+            "user_id": "159",
+            "spend": "25.00",
+            "transaction_date": "07/08/2022 12:00:00"
+          },
+          {
+            "product_id": "1452",
+            "user_id": "159",
+            "spend": "74.50",
+            "transaction_date": "07/10/2022 12:00:00"
+          },
+          {
+            "product_id": 12673,
+            "user_id": 9123,
+            "spend": "68.90",
+            "transaction_date": "07/08/2022 12:00:00"
+          },
+          {
+            "product_id": 19123,
+            "user_id": 9623,
+            "spend": "274.10",
+            "transaction_date": "07/08/2022 12:00:00"
+          }
+        ]
+      },
+      "expected_output": [
+        {
+          "transaction_date": "2022-07-08",
+          "user_id": 115,
+          "purchase_count": 1
+        },
+        {
+          "transaction_date": "2022-07-08",
+          "user_id": 123,
+          "purchase_count": 2
+        },
+        {
+          "transaction_date": "2022-07-08",
+          "user_id": 9123,
+          "purchase_count": 1
+        },
+        {
+          "transaction_date": "2022-07-08",
+          "user_id": 9623,
+          "purchase_count": 1
+        },
+        {
+          "transaction_date": "2022-07-10",
+          "user_id": 159,
+          "purchase_count": 1
+        }
+      ],
+      "category": "edge"
+    }
+  ],
+  "order_sensitive": true,
+  "expected_output": [
+    {
+      "transaction_date": "2022-07-08",
+      "user_id": 115,
+      "purchase_count": 1
+    },
+    {
+      "transaction_date": "2022-07-08",
+      "user_id": 123,
+      "purchase_count": 2
+    },
+    {
+      "transaction_date": "2022-07-10",
+      "user_id": 159,
+      "purchase_count": 1
+    }
+  ]
+}

@@ -1,0 +1,307 @@
+{
+  "question_id": "q_007_teams_power_users",
+  "slug": "teams-power-users",
+  "title": "Teams Power Users",
+  "difficulty": "Easy",
+  "company": "Microsoft",
+  "premium": false,
+  "question": "Write a query to identify the top 2 Power Users who sent the highest number of messages on Microsoft Teams in August 2022. Display the IDs of these 2 users along with the total number of messages they sent. Output the results in descending order based on the count of the messages.\n\nAssumption:",
+  "notes": [
+    "No two users have sent the same number of messages in August 2022.",
+    "The dataset you are querying against may have different input & output - this is just an example!"
+  ],
+  "tables": [
+    {
+      "table_name": "messages",
+      "columns": [
+        {
+          "column_name": "message_id",
+          "data_type": "INT"
+        },
+        {
+          "column_name": "sender_id",
+          "data_type": "INT"
+        },
+        {
+          "column_name": "receiver_id",
+          "data_type": "INT"
+        },
+        {
+          "column_name": "content",
+          "data_type": "VARCHAR(255)"
+        },
+        {
+          "column_name": "sent_date",
+          "data_type": "DATETIME"
+        }
+      ]
+    }
+  ],
+  "sample_data": {
+    "messages": [
+      {
+        "message_id": "901",
+        "sender_id": "3601",
+        "receiver_id": "4500",
+        "content": "You up?",
+        "sent_date": "08/03/2022 00:00:00"
+      },
+      {
+        "message_id": "902",
+        "sender_id": "4500",
+        "receiver_id": "3601",
+        "content": "Only if you're buying",
+        "sent_date": "08/03/2022 00:00:00"
+      },
+      {
+        "message_id": "743",
+        "sender_id": "3601",
+        "receiver_id": "8752",
+        "content": "Let's take this offline",
+        "sent_date": "06/14/2022 00:00:00"
+      },
+      {
+        "message_id": "922",
+        "sender_id": "3601",
+        "receiver_id": "4500",
+        "content": "Get on the call",
+        "sent_date": "08/10/2022 00:00:00"
+      }
+    ]
+  },
+  "sample_output": [
+    {
+      "sender_id": "3601",
+      "message_count": "2"
+    },
+    {
+      "sender_id": "4500",
+      "message_count": "1"
+    }
+  ],
+  "reference_sql": "SELECT sender_id, COUNT(message_id) AS message_count\nFROM messages\nWHERE YEAR(sent_date) = 2022 AND MONTH(sent_date) = 8\nGROUP BY sender_id\nORDER BY message_count DESC, sender_id ASC\nLIMIT 2;",
+  "tags": [
+    "aggregation",
+    "easy",
+    "ecommerce",
+    "microsoft",
+    "ranking",
+    "window-function"
+  ],
+  "related_questions": [],
+  "sources": [
+    [
+      "DataLemur page (free)",
+      "https://datalemur.com/questions/teams-power-users"
+    ],
+    [
+      "DataLemur PDF",
+      "Page 11"
+    ]
+  ],
+  "test_cases": [
+    {
+      "test_case_id": "tc_1_baseline",
+      "description": "Baseline sample input data from problem description",
+      "input_data": {
+        "messages": [
+          {
+            "message_id": "901",
+            "sender_id": "3601",
+            "receiver_id": "4500",
+            "content": "You up?",
+            "sent_date": "08/03/2022 00:00:00"
+          },
+          {
+            "message_id": "902",
+            "sender_id": "4500",
+            "receiver_id": "3601",
+            "content": "Only if you're buying",
+            "sent_date": "08/03/2022 00:00:00"
+          },
+          {
+            "message_id": "743",
+            "sender_id": "3601",
+            "receiver_id": "8752",
+            "content": "Let's take this offline",
+            "sent_date": "06/14/2022 00:00:00"
+          },
+          {
+            "message_id": "922",
+            "sender_id": "3601",
+            "receiver_id": "4500",
+            "content": "Get on the call",
+            "sent_date": "08/10/2022 00:00:00"
+          }
+        ]
+      },
+      "expected_output": [
+        {
+          "sender_id": 3601,
+          "message_count": 2
+        },
+        {
+          "sender_id": 4500,
+          "message_count": 1
+        }
+      ],
+      "category": "normal"
+    },
+    {
+      "test_case_id": "tc_2_high_volume",
+      "description": "Multiple entities with scaled volume and multi-group distributions",
+      "input_data": {
+        "messages": [
+          {
+            "message_id": "901",
+            "sender_id": "3601",
+            "receiver_id": "4500",
+            "content": "You up?",
+            "sent_date": "08/03/2022 00:00:00"
+          },
+          {
+            "message_id": "902",
+            "sender_id": "4500",
+            "receiver_id": "3601",
+            "content": "Only if you're buying",
+            "sent_date": "08/03/2022 00:00:00"
+          },
+          {
+            "message_id": "743",
+            "sender_id": "3601",
+            "receiver_id": "8752",
+            "content": "Let's take this offline",
+            "sent_date": "06/14/2022 00:00:00"
+          },
+          {
+            "message_id": "922",
+            "sender_id": "3601",
+            "receiver_id": "4500",
+            "content": "Get on the call",
+            "sent_date": "08/10/2022 00:00:00"
+          },
+          {
+            "message_id": 1901,
+            "sender_id": 4601,
+            "receiver_id": 5500,
+            "content": "You up?",
+            "sent_date": "08/08/2022 00:00:00"
+          },
+          {
+            "message_id": 1902,
+            "sender_id": 5500,
+            "receiver_id": 4601,
+            "content": "Only if you're buying",
+            "sent_date": "08/08/2022 00:00:00"
+          },
+          {
+            "message_id": 1743,
+            "sender_id": 4601,
+            "receiver_id": 9752,
+            "content": "Let's take this offline",
+            "sent_date": "06/19/2022 00:00:00"
+          },
+          {
+            "message_id": 1922,
+            "sender_id": 4601,
+            "receiver_id": 5500,
+            "content": "Get on the call",
+            "sent_date": "08/15/2022 00:00:00"
+          }
+        ]
+      },
+      "expected_output": [
+        {
+          "sender_id": 3601,
+          "message_count": 2
+        },
+        {
+          "sender_id": 4601,
+          "message_count": 2
+        }
+      ],
+      "category": "volume"
+    },
+    {
+      "test_case_id": "tc_3_disqualifying_rows",
+      "description": "Dataset containing disqualifying rows, edge values, and cancelled/zero records",
+      "input_data": {
+        "messages": [
+          {
+            "message_id": "901",
+            "sender_id": "3601",
+            "receiver_id": "4500",
+            "content": "You up?",
+            "sent_date": "08/03/2022 00:00:00"
+          },
+          {
+            "message_id": "902",
+            "sender_id": "4500",
+            "receiver_id": "3601",
+            "content": "Only if you're buying",
+            "sent_date": "08/03/2022 00:00:00"
+          },
+          {
+            "message_id": "743",
+            "sender_id": "3601",
+            "receiver_id": "8752",
+            "content": "Let's take this offline",
+            "sent_date": "06/14/2022 00:00:00"
+          },
+          {
+            "message_id": "922",
+            "sender_id": "3601",
+            "receiver_id": "4500",
+            "content": "Get on the call",
+            "sent_date": "08/10/2022 00:00:00"
+          },
+          {
+            "message_id": 5901,
+            "sender_id": 8601,
+            "receiver_id": 9500,
+            "content": "You up?",
+            "sent_date": "08/03/2017 00:00:00"
+          },
+          {
+            "message_id": 5902,
+            "sender_id": 9500,
+            "receiver_id": 8601,
+            "content": "Only if you're buying",
+            "sent_date": "08/03/2017 00:00:00"
+          }
+        ]
+      },
+      "expected_output": [
+        {
+          "sender_id": 3601,
+          "message_count": 2
+        },
+        {
+          "sender_id": 4500,
+          "message_count": 1
+        }
+      ],
+      "category": "edge"
+    },
+    {
+      "test_case_id": "tc_4_empty_result",
+      "description": "Input where no rows satisfy problem criteria, verifying empty result handling",
+      "input_data": {
+        "messages": []
+      },
+      "expected_output": [],
+      "category": "edge"
+    }
+  ],
+  "order_sensitive": true,
+  "expected_output": [
+    {
+      "sender_id": 3601,
+      "message_count": 2
+    },
+    {
+      "sender_id": 4500,
+      "message_count": 1
+    }
+  ]
+}

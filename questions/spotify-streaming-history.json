@@ -1,0 +1,501 @@
+{
+  "question_id": "q_043_spotify_streaming_history",
+  "slug": "spotify-streaming-history",
+  "title": "Spotify Streaming History",
+  "difficulty": "Medium",
+  "company": "Spotify",
+  "premium": false,
+  "question": "You're given two tables containing data on Spotify users' streaming activity: songs_history which has historical streaming data, and songs_weekly which has data from the current week.\n\nWrite a query that outputs the user ID, song ID, and cumulative count of song plays up to August 4th, 2022, sorted in descending order.\n\nAssume that there may be new users or songs in the songs_weekly table that are not present in the songs_history table.\n\nDefinitions:",
+  "notes": [
+    "song_weeklytable only contains data for the week of August 1st to August 7th, 2022.",
+    "songs_history table contains data up to July 31st, 2022. The query should include historical data from this table.",
+    "song_plays field contains the historical data of the number of times a user has played a particular song.",
+    "On 4 August 2022, the data shows that User 777 listened to the song with song ID 1238 for a total of 12 times, with 11 of those times occurring before the current week and 1 time occurring within the current week.",
+    "However, the streaming data for User 695 with the song ID 9852 are not included in the output because the streaming date for that record falls outside the date range specified in the question.",
+    "The dataset you are querying against may have different input & output - this is just an example!"
+  ],
+  "tables": [
+    {
+      "table_name": "songs_history",
+      "columns": [
+        {
+          "column_name": "history_id",
+          "data_type": "INT"
+        },
+        {
+          "column_name": "user_id",
+          "data_type": "INT"
+        },
+        {
+          "column_name": "song_id",
+          "data_type": "INT"
+        },
+        {
+          "column_name": "song_plays",
+          "data_type": "INT"
+        }
+      ]
+    },
+    {
+      "table_name": "songs_weekly",
+      "columns": [
+        {
+          "column_name": "user_id",
+          "data_type": "INT"
+        },
+        {
+          "column_name": "song_id",
+          "data_type": "INT"
+        },
+        {
+          "column_name": "listen_time",
+          "data_type": "DATETIME"
+        }
+      ]
+    }
+  ],
+  "sample_data": {
+    "songs_history": [
+      {
+        "history_id": "10011",
+        "user_id": "777",
+        "song_id": "1238",
+        "song_plays": "11"
+      },
+      {
+        "history_id": "12452",
+        "user_id": "695",
+        "song_id": "4520",
+        "song_plays": "1"
+      }
+    ],
+    "songs_weekly": [
+      {
+        "user_id": "777",
+        "song_id": "1238",
+        "listen_time": "08/01/2022 12:00:00"
+      },
+      {
+        "user_id": "695",
+        "song_id": "4520",
+        "listen_time": "08/04/2022 08:00:00"
+      },
+      {
+        "user_id": "125",
+        "song_id": "9630",
+        "listen_time": "08/04/2022 16:00:00"
+      },
+      {
+        "user_id": "695",
+        "song_id": "9852",
+        "listen_time": "08/07/2022 12:00:00"
+      }
+    ]
+  },
+  "sample_output": [
+    {
+      "user_id": "777",
+      "song_id": "1238",
+      "song_plays": "12"
+    },
+    {
+      "user_id": "695",
+      "song_id": "4520",
+      "song_plays": "2"
+    },
+    {
+      "user_id": "125",
+      "song_id": "9630",
+      "song_plays": "1"
+    }
+  ],
+  "reference_sql": "WITH weekly_summary AS (\n  SELECT user_id, song_id, COUNT(*) AS weekly_plays\n  FROM songs_weekly\n  WHERE listen_time <= '2022-08-04 23:59:59'\n  GROUP BY user_id, song_id\n),\ncombined AS (\n  SELECT user_id, song_id, song_plays FROM songs_history\n  UNION ALL\n  SELECT user_id, song_id, weekly_plays FROM weekly_summary\n)\nSELECT user_id, song_id, SUM(song_plays) AS song_plays\nFROM combined\nGROUP BY user_id, song_id\nORDER BY song_plays DESC, user_id ASC, song_id ASC;",
+  "tags": [
+    "aggregation",
+    "ecommerce",
+    "entertainment",
+    "medium",
+    "spotify"
+  ],
+  "related_questions": [],
+  "sources": [
+    [
+      "DataLemur page (free)",
+      "https://datalemur.com/questions/spotify-streaming-history"
+    ],
+    [
+      "DataLemur PDF",
+      "Page 47"
+    ]
+  ],
+  "test_cases": [
+    {
+      "test_case_id": "tc_1_baseline",
+      "description": "Baseline sample input data from problem description",
+      "input_data": {
+        "songs_history": [
+          {
+            "history_id": "10011",
+            "user_id": "777",
+            "song_id": "1238",
+            "song_plays": "11"
+          },
+          {
+            "history_id": "12452",
+            "user_id": "695",
+            "song_id": "4520",
+            "song_plays": "1"
+          }
+        ],
+        "songs_weekly": [
+          {
+            "user_id": "777",
+            "song_id": "1238",
+            "listen_time": "08/01/2022 12:00:00"
+          },
+          {
+            "user_id": "695",
+            "song_id": "4520",
+            "listen_time": "08/04/2022 08:00:00"
+          },
+          {
+            "user_id": "125",
+            "song_id": "9630",
+            "listen_time": "08/04/2022 16:00:00"
+          },
+          {
+            "user_id": "695",
+            "song_id": "9852",
+            "listen_time": "08/07/2022 12:00:00"
+          }
+        ]
+      },
+      "expected_output": [
+        {
+          "user_id": 777,
+          "song_id": 1238,
+          "song_plays": 12
+        },
+        {
+          "user_id": 695,
+          "song_id": 4520,
+          "song_plays": 2
+        },
+        {
+          "user_id": 125,
+          "song_id": 9630,
+          "song_plays": 1
+        }
+      ],
+      "category": "normal"
+    },
+    {
+      "test_case_id": "tc_2_high_volume",
+      "description": "Multiple entities with scaled volume and multi-group distributions",
+      "input_data": {
+        "songs_history": [
+          {
+            "history_id": "10011",
+            "user_id": "777",
+            "song_id": "1238",
+            "song_plays": "11"
+          },
+          {
+            "history_id": "12452",
+            "user_id": "695",
+            "song_id": "4520",
+            "song_plays": "1"
+          },
+          {
+            "history_id": 11011,
+            "user_id": 1777,
+            "song_id": 2238,
+            "song_plays": "11"
+          },
+          {
+            "history_id": 13452,
+            "user_id": 1695,
+            "song_id": 5520,
+            "song_plays": "1"
+          }
+        ],
+        "songs_weekly": [
+          {
+            "user_id": "777",
+            "song_id": "1238",
+            "listen_time": "08/01/2022 12:00:00"
+          },
+          {
+            "user_id": "695",
+            "song_id": "4520",
+            "listen_time": "08/04/2022 08:00:00"
+          },
+          {
+            "user_id": "125",
+            "song_id": "9630",
+            "listen_time": "08/04/2022 16:00:00"
+          },
+          {
+            "user_id": "695",
+            "song_id": "9852",
+            "listen_time": "08/07/2022 12:00:00"
+          },
+          {
+            "user_id": 1777,
+            "song_id": 2238,
+            "listen_time": "08/06/2022 12:00:00"
+          },
+          {
+            "user_id": 1695,
+            "song_id": 5520,
+            "listen_time": "08/09/2022 08:00:00"
+          },
+          {
+            "user_id": 1125,
+            "song_id": 10630,
+            "listen_time": "08/09/2022 16:00:00"
+          },
+          {
+            "user_id": 1695,
+            "song_id": 10852,
+            "listen_time": "08/12/2022 12:00:00"
+          }
+        ]
+      },
+      "expected_output": [
+        {
+          "user_id": 777,
+          "song_id": 1238,
+          "song_plays": 12
+        },
+        {
+          "user_id": 1777,
+          "song_id": 2238,
+          "song_plays": 11
+        },
+        {
+          "user_id": 695,
+          "song_id": 4520,
+          "song_plays": 2
+        },
+        {
+          "user_id": 125,
+          "song_id": 9630,
+          "song_plays": 1
+        },
+        {
+          "user_id": 1695,
+          "song_id": 5520,
+          "song_plays": 1
+        }
+      ],
+      "category": "volume"
+    },
+    {
+      "test_case_id": "tc_3_disqualifying_rows",
+      "description": "Dataset containing disqualifying rows, edge values, and cancelled/zero records",
+      "input_data": {
+        "songs_history": [
+          {
+            "history_id": "10011",
+            "user_id": "777",
+            "song_id": "1238",
+            "song_plays": "11"
+          },
+          {
+            "history_id": "12452",
+            "user_id": "695",
+            "song_id": "4520",
+            "song_plays": "1"
+          },
+          {
+            "history_id": 15011,
+            "user_id": 5777,
+            "song_id": 6238,
+            "song_plays": "11"
+          }
+        ],
+        "songs_weekly": [
+          {
+            "user_id": "777",
+            "song_id": "1238",
+            "listen_time": "08/01/2022 12:00:00"
+          },
+          {
+            "user_id": "695",
+            "song_id": "4520",
+            "listen_time": "08/04/2022 08:00:00"
+          },
+          {
+            "user_id": "125",
+            "song_id": "9630",
+            "listen_time": "08/04/2022 16:00:00"
+          },
+          {
+            "user_id": "695",
+            "song_id": "9852",
+            "listen_time": "08/07/2022 12:00:00"
+          },
+          {
+            "user_id": 5777,
+            "song_id": 6238,
+            "listen_time": "08/01/2017 12:00:00"
+          },
+          {
+            "user_id": 5695,
+            "song_id": 9520,
+            "listen_time": "08/04/2017 08:00:00"
+          }
+        ]
+      },
+      "expected_output": [
+        {
+          "user_id": 777,
+          "song_id": 1238,
+          "song_plays": 12
+        },
+        {
+          "user_id": 5777,
+          "song_id": 6238,
+          "song_plays": 12
+        },
+        {
+          "user_id": 695,
+          "song_id": 4520,
+          "song_plays": 2
+        },
+        {
+          "user_id": 125,
+          "song_id": 9630,
+          "song_plays": 1
+        },
+        {
+          "user_id": 5695,
+          "song_id": 9520,
+          "song_plays": 1
+        }
+      ],
+      "category": "edge"
+    },
+    {
+      "test_case_id": "tc_4_empty_result",
+      "description": "Input where no rows satisfy problem criteria, verifying empty result handling",
+      "input_data": {
+        "songs_history": [],
+        "songs_weekly": []
+      },
+      "expected_output": [],
+      "category": "edge"
+    },
+    {
+      "test_case_id": "tc_5_ties_and_nulls",
+      "description": "Tied ranking metrics, unmatched join keys, and NULL values in nullable attributes",
+      "input_data": {
+        "songs_history": [
+          {
+            "history_id": "10011",
+            "user_id": "777",
+            "song_id": "1238",
+            "song_plays": "11"
+          },
+          {
+            "history_id": "12452",
+            "user_id": "695",
+            "song_id": "4520",
+            "song_plays": "1"
+          },
+          {
+            "history_id": 19011,
+            "user_id": 9777,
+            "song_id": 10238,
+            "song_plays": "11"
+          },
+          {
+            "history_id": 21952,
+            "user_id": 10195,
+            "song_id": 14020,
+            "song_plays": "1"
+          }
+        ],
+        "songs_weekly": [
+          {
+            "user_id": "777",
+            "song_id": "1238",
+            "listen_time": "08/01/2022 12:00:00"
+          },
+          {
+            "user_id": "695",
+            "song_id": "4520",
+            "listen_time": "08/04/2022 08:00:00"
+          },
+          {
+            "user_id": "125",
+            "song_id": "9630",
+            "listen_time": "08/04/2022 16:00:00"
+          },
+          {
+            "user_id": "695",
+            "song_id": "9852",
+            "listen_time": "08/07/2022 12:00:00"
+          },
+          {
+            "user_id": 9777,
+            "song_id": 10238,
+            "listen_time": "08/01/2022 12:00:00"
+          },
+          {
+            "user_id": 10195,
+            "song_id": 14020,
+            "listen_time": "08/04/2022 08:00:00"
+          }
+        ]
+      },
+      "expected_output": [
+        {
+          "user_id": 777,
+          "song_id": 1238,
+          "song_plays": 12
+        },
+        {
+          "user_id": 9777,
+          "song_id": 10238,
+          "song_plays": 12
+        },
+        {
+          "user_id": 695,
+          "song_id": 4520,
+          "song_plays": 2
+        },
+        {
+          "user_id": 10195,
+          "song_id": 14020,
+          "song_plays": 2
+        },
+        {
+          "user_id": 125,
+          "song_id": 9630,
+          "song_plays": 1
+        }
+      ],
+      "category": "edge"
+    }
+  ],
+  "order_sensitive": true,
+  "expected_output": [
+    {
+      "user_id": 777,
+      "song_id": 1238,
+      "song_plays": 12
+    },
+    {
+      "user_id": 695,
+      "song_id": 4520,
+      "song_plays": 2
+    },
+    {
+      "user_id": 125,
+      "song_id": 9630,
+      "song_plays": 1
+    }
+  ]
+}

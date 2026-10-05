@@ -1,0 +1,536 @@
+{
+  "question_id": "q_039_sql_highest_grossing",
+  "slug": "sql-highest-grossing",
+  "title": "Highest-Grossing Items",
+  "difficulty": "Medium",
+  "company": "Amazon",
+  "premium": false,
+  "question": "Assume you're given a table containing data on Amazon customers and their spending on products in different category, write a query to identify the top two highest-grossing products within each category in the year 2022. The output should include the category, product, and total spend.",
+  "notes": [
+    "Within the \"appliance\" category, the top two highest-grossing products are \"refrigerator\" and \"washing machine.\"",
+    "In the \"electronics\" category, the top two highest-grossing products are \"vacuum\" and \"wireless headset.\"",
+    "The dataset you are querying against may have different input & output - this is just an example!"
+  ],
+  "tables": [
+    {
+      "table_name": "product_spend",
+      "columns": [
+        {
+          "column_name": "category",
+          "data_type": "VARCHAR(255)"
+        },
+        {
+          "column_name": "product",
+          "data_type": "VARCHAR(255)"
+        },
+        {
+          "column_name": "user_id",
+          "data_type": "INT"
+        },
+        {
+          "column_name": "spend",
+          "data_type": "DECIMAL(10,2)"
+        },
+        {
+          "column_name": "transaction_date",
+          "data_type": "DATETIME"
+        }
+      ]
+    }
+  ],
+  "sample_data": {
+    "product_spend": [
+      {
+        "category": "appliance",
+        "product": "refrigerator",
+        "user_id": "165",
+        "spend": "246.00",
+        "transaction_date": "12/26/2021 12:00:00"
+      },
+      {
+        "category": "appliance",
+        "product": "refrigerator",
+        "user_id": "123",
+        "spend": "299.99",
+        "transaction_date": "03/02/2022 12:00:00"
+      },
+      {
+        "category": "appliance",
+        "product": "washing machine",
+        "user_id": "123",
+        "spend": "219.80",
+        "transaction_date": "03/02/2022 12:00:00"
+      },
+      {
+        "category": "electronics",
+        "product": "vacuum",
+        "user_id": "178",
+        "spend": "152.00",
+        "transaction_date": "04/05/2022 12:00:00"
+      },
+      {
+        "category": "electronics",
+        "product": "wireless headset",
+        "user_id": "156",
+        "spend": "249.90",
+        "transaction_date": "07/08/2022 12:00:00"
+      },
+      {
+        "category": "electronics",
+        "product": "vacuum",
+        "user_id": "145",
+        "spend": "189.00",
+        "transaction_date": "07/15/2022 12:00:00"
+      }
+    ]
+  },
+  "sample_output": [
+    {
+      "category": "appliance",
+      "product": "refrigerator",
+      "total_spend": "299.99"
+    },
+    {
+      "category": "appliance",
+      "product": "washing machine",
+      "total_spend": "219.80"
+    },
+    {
+      "category": "electronics",
+      "product": "vacuum",
+      "total_spend": "341.00"
+    },
+    {
+      "category": "electronics",
+      "product": "wireless headset",
+      "total_spend": "249.90"
+    }
+  ],
+  "reference_sql": "WITH product_totals AS (\n  SELECT \n    category,\n    product,\n    SUM(spend) AS total_spend,\n    DENSE_RANK() OVER (PARTITION BY category ORDER BY SUM(spend) DESC) AS ranking\n  FROM product_spend\n  WHERE YEAR(transaction_date) = 2022\n  GROUP BY category, product\n)\nSELECT category, product, total_spend\nFROM product_totals\nWHERE ranking <= 2\nORDER BY category, ranking, product;",
+  "tags": [
+    "aggregation",
+    "amazon",
+    "date-manipulation",
+    "ecommerce",
+    "medium"
+  ],
+  "related_questions": [],
+  "sources": [
+    [
+      "DataLemur page (free)",
+      "https://datalemur.com/questions/sql-highest-grossing"
+    ],
+    [
+      "DataLemur PDF",
+      "Page 43"
+    ]
+  ],
+  "test_cases": [
+    {
+      "test_case_id": "tc_1_baseline",
+      "description": "Baseline sample input data from problem description",
+      "input_data": {
+        "product_spend": [
+          {
+            "category": "appliance",
+            "product": "refrigerator",
+            "user_id": "165",
+            "spend": "246.00",
+            "transaction_date": "12/26/2021 12:00:00"
+          },
+          {
+            "category": "appliance",
+            "product": "refrigerator",
+            "user_id": "123",
+            "spend": "299.99",
+            "transaction_date": "03/02/2022 12:00:00"
+          },
+          {
+            "category": "appliance",
+            "product": "washing machine",
+            "user_id": "123",
+            "spend": "219.80",
+            "transaction_date": "03/02/2022 12:00:00"
+          },
+          {
+            "category": "electronics",
+            "product": "vacuum",
+            "user_id": "178",
+            "spend": "152.00",
+            "transaction_date": "04/05/2022 12:00:00"
+          },
+          {
+            "category": "electronics",
+            "product": "wireless headset",
+            "user_id": "156",
+            "spend": "249.90",
+            "transaction_date": "07/08/2022 12:00:00"
+          },
+          {
+            "category": "electronics",
+            "product": "vacuum",
+            "user_id": "145",
+            "spend": "189.00",
+            "transaction_date": "07/15/2022 12:00:00"
+          }
+        ]
+      },
+      "expected_output": [
+        {
+          "category": "appliance",
+          "product": "refrigerator",
+          "total_spend": 299.99
+        },
+        {
+          "category": "appliance",
+          "product": "washing machine",
+          "total_spend": 219.8
+        },
+        {
+          "category": "electronics",
+          "product": "vacuum",
+          "total_spend": 341.0
+        },
+        {
+          "category": "electronics",
+          "product": "wireless headset",
+          "total_spend": 249.9
+        }
+      ],
+      "category": "normal"
+    },
+    {
+      "test_case_id": "tc_2_high_volume",
+      "description": "Multiple entities with scaled volume and multi-group distributions",
+      "input_data": {
+        "product_spend": [
+          {
+            "category": "appliance",
+            "product": "refrigerator",
+            "user_id": "165",
+            "spend": "246.00",
+            "transaction_date": "12/26/2021 12:00:00"
+          },
+          {
+            "category": "appliance",
+            "product": "refrigerator",
+            "user_id": "123",
+            "spend": "299.99",
+            "transaction_date": "03/02/2022 12:00:00"
+          },
+          {
+            "category": "appliance",
+            "product": "washing machine",
+            "user_id": "123",
+            "spend": "219.80",
+            "transaction_date": "03/02/2022 12:00:00"
+          },
+          {
+            "category": "electronics",
+            "product": "vacuum",
+            "user_id": "178",
+            "spend": "152.00",
+            "transaction_date": "04/05/2022 12:00:00"
+          },
+          {
+            "category": "electronics",
+            "product": "wireless headset",
+            "user_id": "156",
+            "spend": "249.90",
+            "transaction_date": "07/08/2022 12:00:00"
+          },
+          {
+            "category": "electronics",
+            "product": "vacuum",
+            "user_id": "145",
+            "spend": "189.00",
+            "transaction_date": "07/15/2022 12:00:00"
+          },
+          {
+            "category": "appliance",
+            "product": "refrigerator",
+            "user_id": 1165,
+            "spend": 369.0,
+            "transaction_date": "12/28/2021 12:00:00"
+          },
+          {
+            "category": "appliance",
+            "product": "refrigerator",
+            "user_id": 1123,
+            "spend": 449.99,
+            "transaction_date": "03/07/2022 12:00:00"
+          },
+          {
+            "category": "appliance",
+            "product": "washing machine",
+            "user_id": 1123,
+            "spend": 329.7,
+            "transaction_date": "03/07/2022 12:00:00"
+          },
+          {
+            "category": "electronics",
+            "product": "vacuum",
+            "user_id": 1178,
+            "spend": 228.0,
+            "transaction_date": "04/10/2022 12:00:00"
+          },
+          {
+            "category": "electronics",
+            "product": "wireless headset",
+            "user_id": 1156,
+            "spend": 374.85,
+            "transaction_date": "07/13/2022 12:00:00"
+          },
+          {
+            "category": "electronics",
+            "product": "vacuum",
+            "user_id": 1145,
+            "spend": 283.5,
+            "transaction_date": "07/20/2022 12:00:00"
+          }
+        ]
+      },
+      "expected_output": [
+        {
+          "category": "appliance",
+          "product": "refrigerator",
+          "total_spend": 749.98
+        },
+        {
+          "category": "appliance",
+          "product": "washing machine",
+          "total_spend": 549.5
+        },
+        {
+          "category": "electronics",
+          "product": "vacuum",
+          "total_spend": 852.5
+        },
+        {
+          "category": "electronics",
+          "product": "wireless headset",
+          "total_spend": 624.75
+        }
+      ],
+      "category": "volume"
+    },
+    {
+      "test_case_id": "tc_3_disqualifying_rows",
+      "description": "Dataset containing disqualifying rows, edge values, and cancelled/zero records",
+      "input_data": {
+        "product_spend": [
+          {
+            "category": "appliance",
+            "product": "refrigerator",
+            "user_id": "165",
+            "spend": "246.00",
+            "transaction_date": "12/26/2021 12:00:00"
+          },
+          {
+            "category": "appliance",
+            "product": "refrigerator",
+            "user_id": "123",
+            "spend": "299.99",
+            "transaction_date": "03/02/2022 12:00:00"
+          },
+          {
+            "category": "appliance",
+            "product": "washing machine",
+            "user_id": "123",
+            "spend": "219.80",
+            "transaction_date": "03/02/2022 12:00:00"
+          },
+          {
+            "category": "electronics",
+            "product": "vacuum",
+            "user_id": "178",
+            "spend": "152.00",
+            "transaction_date": "04/05/2022 12:00:00"
+          },
+          {
+            "category": "electronics",
+            "product": "wireless headset",
+            "user_id": "156",
+            "spend": "249.90",
+            "transaction_date": "07/08/2022 12:00:00"
+          },
+          {
+            "category": "electronics",
+            "product": "vacuum",
+            "user_id": "145",
+            "spend": "189.00",
+            "transaction_date": "07/15/2022 12:00:00"
+          },
+          {
+            "category": "appliance",
+            "product": "refrigerator",
+            "user_id": 5165,
+            "spend": 0,
+            "transaction_date": "12/26/2016 12:00:00"
+          },
+          {
+            "category": "appliance",
+            "product": "refrigerator",
+            "user_id": 5123,
+            "spend": 0,
+            "transaction_date": "03/02/2017 12:00:00"
+          },
+          {
+            "category": "appliance",
+            "product": "washing machine",
+            "user_id": 5123,
+            "spend": 0,
+            "transaction_date": "03/02/2017 12:00:00"
+          }
+        ]
+      },
+      "expected_output": [
+        {
+          "category": "appliance",
+          "product": "refrigerator",
+          "total_spend": 299.99
+        },
+        {
+          "category": "appliance",
+          "product": "washing machine",
+          "total_spend": 219.8
+        },
+        {
+          "category": "electronics",
+          "product": "vacuum",
+          "total_spend": 341.0
+        },
+        {
+          "category": "electronics",
+          "product": "wireless headset",
+          "total_spend": 249.9
+        }
+      ],
+      "category": "edge"
+    },
+    {
+      "test_case_id": "tc_4_empty_result",
+      "description": "Input where no rows satisfy problem criteria, verifying empty result handling",
+      "input_data": {
+        "product_spend": []
+      },
+      "expected_output": [],
+      "category": "edge"
+    },
+    {
+      "test_case_id": "tc_5_ties_and_nulls",
+      "description": "Tied ranking metrics, unmatched join keys, and NULL values in nullable attributes",
+      "input_data": {
+        "product_spend": [
+          {
+            "category": "appliance",
+            "product": "refrigerator",
+            "user_id": "165",
+            "spend": "246.00",
+            "transaction_date": "12/26/2021 12:00:00"
+          },
+          {
+            "category": "appliance",
+            "product": "refrigerator",
+            "user_id": "123",
+            "spend": "299.99",
+            "transaction_date": "03/02/2022 12:00:00"
+          },
+          {
+            "category": "appliance",
+            "product": "washing machine",
+            "user_id": "123",
+            "spend": "219.80",
+            "transaction_date": "03/02/2022 12:00:00"
+          },
+          {
+            "category": "electronics",
+            "product": "vacuum",
+            "user_id": "178",
+            "spend": "152.00",
+            "transaction_date": "04/05/2022 12:00:00"
+          },
+          {
+            "category": "electronics",
+            "product": "wireless headset",
+            "user_id": "156",
+            "spend": "249.90",
+            "transaction_date": "07/08/2022 12:00:00"
+          },
+          {
+            "category": "electronics",
+            "product": "vacuum",
+            "user_id": "145",
+            "spend": "189.00",
+            "transaction_date": "07/15/2022 12:00:00"
+          },
+          {
+            "category": "appliance",
+            "product": "refrigerator",
+            "user_id": 9165,
+            "spend": "246.00",
+            "transaction_date": "12/26/2021 12:00:00"
+          },
+          {
+            "category": null,
+            "product": "refrigerator",
+            "user_id": 9623,
+            "spend": "299.99",
+            "transaction_date": "03/02/2022 12:00:00"
+          }
+        ]
+      },
+      "expected_output": [
+        {
+          "category": null,
+          "product": "refrigerator",
+          "total_spend": 299.99
+        },
+        {
+          "category": "appliance",
+          "product": "refrigerator",
+          "total_spend": 299.99
+        },
+        {
+          "category": "appliance",
+          "product": "washing machine",
+          "total_spend": 219.8
+        },
+        {
+          "category": "electronics",
+          "product": "vacuum",
+          "total_spend": 341.0
+        },
+        {
+          "category": "electronics",
+          "product": "wireless headset",
+          "total_spend": 249.9
+        }
+      ],
+      "category": "edge"
+    }
+  ],
+  "order_sensitive": false,
+  "expected_output": [
+    {
+      "category": "appliance",
+      "product": "refrigerator",
+      "total_spend": 299.99
+    },
+    {
+      "category": "appliance",
+      "product": "washing machine",
+      "total_spend": 219.8
+    },
+    {
+      "category": "electronics",
+      "product": "vacuum",
+      "total_spend": 341.0
+    },
+    {
+      "category": "electronics",
+      "product": "wireless headset",
+      "total_spend": 249.9
+    }
+  ]
+}

@@ -1,0 +1,488 @@
+{
+  "question_id": "q_052_best_selling_products",
+  "slug": "best-selling-products",
+  "title": "Best-Selling Product",
+  "difficulty": "Medium",
+  "company": "Amazon",
+  "premium": false,
+  "question": "Write an SQL query to find the best-selling product in each product category. If there are two or more products with the same sales quantity, go by whichever product which has the higher review rating.\n\nReturn the category name and product name in alphabetical order of the category.",
+  "notes": [
+    "The dataset you are querying against may have different input & output - this is just an example!"
+  ],
+  "tables": [
+    {
+      "table_name": "products",
+      "columns": [
+        {
+          "column_name": "product_id",
+          "data_type": "INT"
+        },
+        {
+          "column_name": "product_name",
+          "data_type": "VARCHAR(255)"
+        },
+        {
+          "column_name": "category_name",
+          "data_type": "VARCHAR(255)"
+        }
+      ]
+    },
+    {
+      "table_name": "product_sales",
+      "columns": [
+        {
+          "column_name": "product_id",
+          "data_type": "INT"
+        },
+        {
+          "column_name": "sales_quantity",
+          "data_type": "INT"
+        },
+        {
+          "column_name": "rating",
+          "data_type": "INT"
+        }
+      ]
+    }
+  ],
+  "sample_data": {
+    "products": [
+      {
+        "product_id": "3690",
+        "product_name": "Game of Thrones",
+        "category_name": "Books"
+      },
+      {
+        "product_id": "5520",
+        "product_name": "Refrigerator",
+        "category_name": "Home Appliances"
+      },
+      {
+        "product_id": "5952",
+        "product_name": "Dishwasher",
+        "category_name": "Home Appliances"
+      },
+      {
+        "product_id": "3561",
+        "product_name": "IKGAI",
+        "category_name": "Books"
+      }
+    ],
+    "product_sales": [
+      {
+        "product_id": "3690",
+        "sales_quantity": "300",
+        "rating": "4.9"
+      },
+      {
+        "product_id": "5520",
+        "sales_quantity": "70",
+        "rating": "3.8"
+      },
+      {
+        "product_id": "5952",
+        "sales_quantity": "70",
+        "rating": "4.0"
+      },
+      {
+        "product_id": "3561",
+        "sales_quantity": "290",
+        "rating": "4.5"
+      }
+    ]
+  },
+  "sample_output": [
+    {
+      "category_name": "Books",
+      "product_name": "Game of Thrones"
+    },
+    {
+      "category_name": "Home Appliances",
+      "product_name": "Dishwasher"
+    }
+  ],
+  "reference_sql": "WITH ranked AS (\n  SELECT p.category_name, p.product_name, ps.sales_quantity,\n         ROW_NUMBER() OVER (PARTITION BY p.category_name ORDER BY ps.sales_quantity DESC) AS rn\n  FROM products p\n  JOIN product_sales ps ON p.product_id = ps.product_id\n)\nSELECT category_name, product_name, sales_quantity\nFROM ranked\nWHERE rn = 1\nORDER BY category_name;",
+  "tags": [
+    "amazon",
+    "ecommerce",
+    "medium"
+  ],
+  "related_questions": [],
+  "sources": [
+    [
+      "DataLemur page (free)",
+      "https://datalemur.com/questions/best-selling-products"
+    ],
+    [
+      "DataLemur PDF",
+      "Page 56"
+    ]
+  ],
+  "test_cases": [
+    {
+      "test_case_id": "tc_1_baseline",
+      "description": "Baseline sample input data from problem description",
+      "input_data": {
+        "products": [
+          {
+            "product_id": "3690",
+            "product_name": "Game of Thrones",
+            "category_name": "Books"
+          },
+          {
+            "product_id": "5520",
+            "product_name": "Refrigerator",
+            "category_name": "Home Appliances"
+          },
+          {
+            "product_id": "5952",
+            "product_name": "Dishwasher",
+            "category_name": "Home Appliances"
+          },
+          {
+            "product_id": "3561",
+            "product_name": "IKGAI",
+            "category_name": "Books"
+          }
+        ],
+        "product_sales": [
+          {
+            "product_id": "3690",
+            "sales_quantity": "300",
+            "rating": "4.9"
+          },
+          {
+            "product_id": "5520",
+            "sales_quantity": "70",
+            "rating": "3.8"
+          },
+          {
+            "product_id": "5952",
+            "sales_quantity": "70",
+            "rating": "4.0"
+          },
+          {
+            "product_id": "3561",
+            "sales_quantity": "290",
+            "rating": "4.5"
+          }
+        ]
+      },
+      "expected_output": [
+        {
+          "category_name": "Books",
+          "product_name": "Game of Thrones",
+          "sales_quantity": 300
+        },
+        {
+          "category_name": "Home Appliances",
+          "product_name": "Refrigerator",
+          "sales_quantity": 70
+        }
+      ],
+      "category": "normal"
+    },
+    {
+      "test_case_id": "tc_2_high_volume",
+      "description": "Multiple entities with scaled volume and multi-group distributions",
+      "input_data": {
+        "products": [
+          {
+            "product_id": "3690",
+            "product_name": "Game of Thrones",
+            "category_name": "Books"
+          },
+          {
+            "product_id": "5520",
+            "product_name": "Refrigerator",
+            "category_name": "Home Appliances"
+          },
+          {
+            "product_id": "5952",
+            "product_name": "Dishwasher",
+            "category_name": "Home Appliances"
+          },
+          {
+            "product_id": "3561",
+            "product_name": "IKGAI",
+            "category_name": "Books"
+          },
+          {
+            "product_id": 4690,
+            "product_name": "Game of Thrones",
+            "category_name": "Books"
+          },
+          {
+            "product_id": 6520,
+            "product_name": "Refrigerator",
+            "category_name": "Home Appliances"
+          },
+          {
+            "product_id": 6952,
+            "product_name": "Dishwasher",
+            "category_name": "Home Appliances"
+          },
+          {
+            "product_id": 4561,
+            "product_name": "IKGAI",
+            "category_name": "Books"
+          }
+        ],
+        "product_sales": [
+          {
+            "product_id": "3690",
+            "sales_quantity": "300",
+            "rating": "4.9"
+          },
+          {
+            "product_id": "5520",
+            "sales_quantity": "70",
+            "rating": "3.8"
+          },
+          {
+            "product_id": "5952",
+            "sales_quantity": "70",
+            "rating": "4.0"
+          },
+          {
+            "product_id": "3561",
+            "sales_quantity": "290",
+            "rating": "4.5"
+          },
+          {
+            "product_id": 4690,
+            "sales_quantity": 450.0,
+            "rating": "4.9"
+          },
+          {
+            "product_id": 6520,
+            "sales_quantity": 105.0,
+            "rating": "3.8"
+          },
+          {
+            "product_id": 6952,
+            "sales_quantity": 105.0,
+            "rating": "4.0"
+          },
+          {
+            "product_id": 4561,
+            "sales_quantity": 435.0,
+            "rating": "4.5"
+          }
+        ]
+      },
+      "expected_output": [
+        {
+          "category_name": "Books",
+          "product_name": "Game of Thrones",
+          "sales_quantity": 450
+        },
+        {
+          "category_name": "Home Appliances",
+          "product_name": "Refrigerator",
+          "sales_quantity": 105
+        }
+      ],
+      "category": "volume"
+    },
+    {
+      "test_case_id": "tc_3_disqualifying_rows",
+      "description": "Dataset containing disqualifying rows, edge values, and cancelled/zero records",
+      "input_data": {
+        "products": [
+          {
+            "product_id": "3690",
+            "product_name": "Game of Thrones",
+            "category_name": "Books"
+          },
+          {
+            "product_id": "5520",
+            "product_name": "Refrigerator",
+            "category_name": "Home Appliances"
+          },
+          {
+            "product_id": "5952",
+            "product_name": "Dishwasher",
+            "category_name": "Home Appliances"
+          },
+          {
+            "product_id": "3561",
+            "product_name": "IKGAI",
+            "category_name": "Books"
+          },
+          {
+            "product_id": 8690,
+            "product_name": "Game of Thrones",
+            "category_name": "Books"
+          },
+          {
+            "product_id": 10520,
+            "product_name": "Refrigerator",
+            "category_name": "Home Appliances"
+          }
+        ],
+        "product_sales": [
+          {
+            "product_id": "3690",
+            "sales_quantity": "300",
+            "rating": "4.9"
+          },
+          {
+            "product_id": "5520",
+            "sales_quantity": "70",
+            "rating": "3.8"
+          },
+          {
+            "product_id": "5952",
+            "sales_quantity": "70",
+            "rating": "4.0"
+          },
+          {
+            "product_id": "3561",
+            "sales_quantity": "290",
+            "rating": "4.5"
+          },
+          {
+            "product_id": 8690,
+            "sales_quantity": "300",
+            "rating": 1
+          },
+          {
+            "product_id": 10520,
+            "sales_quantity": "70",
+            "rating": 1
+          }
+        ]
+      },
+      "expected_output": [
+        {
+          "category_name": "Books",
+          "product_name": "Game of Thrones",
+          "sales_quantity": 300
+        },
+        {
+          "category_name": "Home Appliances",
+          "product_name": "Refrigerator",
+          "sales_quantity": 70
+        }
+      ],
+      "category": "edge"
+    },
+    {
+      "test_case_id": "tc_4_empty_result",
+      "description": "Input where no rows satisfy problem criteria, verifying empty result handling",
+      "input_data": {
+        "products": [],
+        "product_sales": []
+      },
+      "expected_output": [],
+      "category": "edge"
+    },
+    {
+      "test_case_id": "tc_5_ties_and_nulls",
+      "description": "Tied ranking metrics, unmatched join keys, and NULL values in nullable attributes",
+      "input_data": {
+        "products": [
+          {
+            "product_id": "3690",
+            "product_name": "Game of Thrones",
+            "category_name": "Books"
+          },
+          {
+            "product_id": "5520",
+            "product_name": "Refrigerator",
+            "category_name": "Home Appliances"
+          },
+          {
+            "product_id": "5952",
+            "product_name": "Dishwasher",
+            "category_name": "Home Appliances"
+          },
+          {
+            "product_id": "3561",
+            "product_name": "IKGAI",
+            "category_name": "Books"
+          },
+          {
+            "product_id": 12690,
+            "product_name": "Game of Thrones Duplicate",
+            "category_name": "Books Duplicate"
+          },
+          {
+            "product_id": 15020,
+            "product_name": "Refrigerator",
+            "category_name": null
+          }
+        ],
+        "product_sales": [
+          {
+            "product_id": "3690",
+            "sales_quantity": "300",
+            "rating": "4.9"
+          },
+          {
+            "product_id": "5520",
+            "sales_quantity": "70",
+            "rating": "3.8"
+          },
+          {
+            "product_id": "5952",
+            "sales_quantity": "70",
+            "rating": "4.0"
+          },
+          {
+            "product_id": "3561",
+            "sales_quantity": "290",
+            "rating": "4.5"
+          },
+          {
+            "product_id": 12690,
+            "sales_quantity": "300",
+            "rating": "4.9"
+          },
+          {
+            "product_id": 15020,
+            "sales_quantity": "70",
+            "rating": "3.8"
+          }
+        ]
+      },
+      "expected_output": [
+        {
+          "category_name": null,
+          "product_name": "Refrigerator",
+          "sales_quantity": 70
+        },
+        {
+          "category_name": "Books",
+          "product_name": "Game of Thrones",
+          "sales_quantity": 300
+        },
+        {
+          "category_name": "Books Duplicate",
+          "product_name": "Game of Thrones Duplicate",
+          "sales_quantity": 300
+        },
+        {
+          "category_name": "Home Appliances",
+          "product_name": "Refrigerator",
+          "sales_quantity": 70
+        }
+      ],
+      "category": "edge"
+    }
+  ],
+  "order_sensitive": false,
+  "expected_output": [
+    {
+      "category_name": "Books",
+      "product_name": "Game of Thrones",
+      "sales_quantity": 300
+    },
+    {
+      "category_name": "Home Appliances",
+      "product_name": "Refrigerator",
+      "sales_quantity": 70
+    }
+  ]
+}

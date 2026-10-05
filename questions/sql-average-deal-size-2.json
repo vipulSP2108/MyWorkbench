@@ -1,0 +1,291 @@
+{
+  "question_id": "q_069_sql_average_deal_size_2",
+  "slug": "sql-average-deal-size-2",
+  "title": "Average Deal Size (Part 2)",
+  "difficulty": "Medium",
+  "company": "Salesforce",
+  "premium": true,
+  "question": "Salesforce evaluates deal sizing by client tier (seat count). Write a query to compute the average deal size for closed-won deals grouped by seat count. Round the output to 2 decimal places and order by seat count in ascending order.",
+  "notes": [],
+  "tables": [
+    {
+      "table_name": "deals",
+      "columns": [
+        {
+          "column_name": "deal_id",
+          "data_type": "INT"
+        },
+        {
+          "column_name": "employee_id",
+          "data_type": "INT"
+        },
+        {
+          "column_name": "num_seats",
+          "data_type": "INT"
+        },
+        {
+          "column_name": "deal_size",
+          "data_type": "DECIMAL(10,2)"
+        },
+        {
+          "column_name": "status",
+          "data_type": "VARCHAR(255)"
+        }
+      ]
+    }
+  ],
+  "sample_data": {
+    "deals": [
+      {
+        "deal_id": 1,
+        "employee_id": 10,
+        "num_seats": 50,
+        "deal_size": "25000.00",
+        "status": "Won"
+      },
+      {
+        "deal_id": 2,
+        "employee_id": 11,
+        "num_seats": 50,
+        "deal_size": "35000.00",
+        "status": "Won"
+      },
+      {
+        "deal_id": 3,
+        "employee_id": 12,
+        "num_seats": 100,
+        "deal_size": "80000.00",
+        "status": "Lost"
+      }
+    ]
+  },
+  "sample_output": [
+    {
+      "num_seats": 50,
+      "avg_deal_size": "30000.00"
+    }
+  ],
+  "reference_sql": "SELECT \n  CASE \n    WHEN num_seats < 20 THEN 'Small'\n    WHEN num_seats BETWEEN 20 AND 99 THEN 'Medium'\n    ELSE 'Large'\n  END AS tier,\n  ROUND(AVG(deal_size), 2) AS avg_deal_size\nFROM deals\nWHERE status = 'Won'\nGROUP BY \n  CASE \n    WHEN num_seats < 20 THEN 'Small'\n    WHEN num_seats BETWEEN 20 AND 99 THEN 'Medium'\n    ELSE 'Large'\n  END\nORDER BY avg_deal_size DESC, tier ASC;",
+  "tags": [
+    "aggregation",
+    "ecommerce",
+    "math",
+    "medium",
+    "salesforce"
+  ],
+  "related_questions": [],
+  "sources": [
+    [
+      "Text supplied by you (not checkable against the locked page)",
+      "https://datalemur.com/questions/sql-average-deal-size-2"
+    ],
+    [
+      "DataLemur PDF",
+      "Page 73"
+    ]
+  ],
+  "test_cases": [
+    {
+      "test_case_id": "tc_1_baseline",
+      "description": "Baseline sample input data from problem description",
+      "input_data": {
+        "deals": [
+          {
+            "deal_id": 1,
+            "employee_id": 10,
+            "num_seats": 50,
+            "deal_size": "25000.00",
+            "status": "Won"
+          },
+          {
+            "deal_id": 2,
+            "employee_id": 11,
+            "num_seats": 50,
+            "deal_size": "35000.00",
+            "status": "Won"
+          },
+          {
+            "deal_id": 3,
+            "employee_id": 12,
+            "num_seats": 100,
+            "deal_size": "80000.00",
+            "status": "Lost"
+          }
+        ]
+      },
+      "expected_output": [
+        {
+          "tier": "Medium",
+          "avg_deal_size": 30000.0
+        }
+      ],
+      "category": "normal"
+    },
+    {
+      "test_case_id": "tc_2_high_volume",
+      "description": "Multiple entities with scaled volume and multi-group distributions",
+      "input_data": {
+        "deals": [
+          {
+            "deal_id": 1,
+            "employee_id": 10,
+            "num_seats": 50,
+            "deal_size": "25000.00",
+            "status": "Won"
+          },
+          {
+            "deal_id": 2,
+            "employee_id": 11,
+            "num_seats": 50,
+            "deal_size": "35000.00",
+            "status": "Won"
+          },
+          {
+            "deal_id": 3,
+            "employee_id": 12,
+            "num_seats": 100,
+            "deal_size": "80000.00",
+            "status": "Lost"
+          },
+          {
+            "deal_id": 1001,
+            "employee_id": 1010,
+            "num_seats": 50,
+            "deal_size": "25000.00",
+            "status": "Won"
+          },
+          {
+            "deal_id": 1002,
+            "employee_id": 1011,
+            "num_seats": 50,
+            "deal_size": "35000.00",
+            "status": "Won"
+          },
+          {
+            "deal_id": 1003,
+            "employee_id": 1012,
+            "num_seats": 100,
+            "deal_size": "80000.00",
+            "status": "Lost"
+          }
+        ]
+      },
+      "expected_output": [
+        {
+          "tier": "Medium",
+          "avg_deal_size": 30000.0
+        }
+      ],
+      "category": "volume"
+    },
+    {
+      "test_case_id": "tc_3_disqualifying_rows",
+      "description": "Dataset containing disqualifying rows, edge values, and cancelled/zero records",
+      "input_data": {
+        "deals": [
+          {
+            "deal_id": 1,
+            "employee_id": 10,
+            "num_seats": 50,
+            "deal_size": "25000.00",
+            "status": "Won"
+          },
+          {
+            "deal_id": 2,
+            "employee_id": 11,
+            "num_seats": 50,
+            "deal_size": "35000.00",
+            "status": "Won"
+          },
+          {
+            "deal_id": 3,
+            "employee_id": 12,
+            "num_seats": 100,
+            "deal_size": "80000.00",
+            "status": "Lost"
+          },
+          {
+            "deal_id": 5001,
+            "employee_id": 5010,
+            "num_seats": 50,
+            "deal_size": "25000.00",
+            "status": "Cancelled"
+          }
+        ]
+      },
+      "expected_output": [
+        {
+          "tier": "Medium",
+          "avg_deal_size": 30000.0
+        }
+      ],
+      "category": "edge"
+    },
+    {
+      "test_case_id": "tc_4_empty_result",
+      "description": "Input where no rows satisfy problem criteria, verifying empty result handling",
+      "input_data": {
+        "deals": []
+      },
+      "expected_output": [],
+      "category": "edge"
+    },
+    {
+      "test_case_id": "tc_5_ties_and_nulls",
+      "description": "Tied ranking metrics, unmatched join keys, and NULL values in nullable attributes",
+      "input_data": {
+        "deals": [
+          {
+            "deal_id": 1,
+            "employee_id": 10,
+            "num_seats": 50,
+            "deal_size": "25000.00",
+            "status": "Won"
+          },
+          {
+            "deal_id": 2,
+            "employee_id": 11,
+            "num_seats": 50,
+            "deal_size": "35000.00",
+            "status": "Won"
+          },
+          {
+            "deal_id": 3,
+            "employee_id": 12,
+            "num_seats": 100,
+            "deal_size": "80000.00",
+            "status": "Lost"
+          },
+          {
+            "deal_id": 9001,
+            "employee_id": 9010,
+            "num_seats": 50,
+            "deal_size": "25000.00",
+            "status": "Won"
+          },
+          {
+            "deal_id": 9502,
+            "employee_id": 9511,
+            "num_seats": 50,
+            "deal_size": "35000.00",
+            "status": "Won"
+          }
+        ]
+      },
+      "expected_output": [
+        {
+          "tier": "Medium",
+          "avg_deal_size": 30000.0
+        }
+      ],
+      "category": "edge"
+    }
+  ],
+  "order_sensitive": true,
+  "expected_output": [
+    {
+      "tier": "Medium",
+      "avg_deal_size": 30000.0
+    }
+  ]
+}

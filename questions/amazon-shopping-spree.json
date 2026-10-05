@@ -1,0 +1,308 @@
+{
+  "question_id": "q_053_amazon_shopping_spree",
+  "slug": "amazon-shopping-spree",
+  "title": "User Shopping Sprees",
+  "difficulty": "Medium",
+  "company": "Amazon",
+  "premium": false,
+  "question": "In an effort to identify high-value customers, Amazon asked for your help to obtain data about users who go on shopping sprees. A shopping spree occurs when a user makes purchases on 3 or more consecutive days.\n\nList the user IDs who have gone on at least 1 shopping spree in ascending order.",
+  "notes": [
+    "In this example, user_id 2 is the only one who has gone on a shopping spree.",
+    "The dataset you are querying against may have different input & output - this is just an example!"
+  ],
+  "tables": [
+    {
+      "table_name": "transactions",
+      "columns": [
+        {
+          "column_name": "user_id",
+          "data_type": "INT"
+        },
+        {
+          "column_name": "amount",
+          "data_type": "DECIMAL(10,2)"
+        },
+        {
+          "column_name": "transaction_date",
+          "data_type": "DATETIME"
+        }
+      ]
+    }
+  ],
+  "sample_data": {
+    "transactions": [
+      {
+        "user_id": "1",
+        "amount": "9.99",
+        "transaction_date": "08/01/2022 10:00:00"
+      },
+      {
+        "user_id": "1",
+        "amount": "55",
+        "transaction_date": "08/17/2022 10:00:00"
+      },
+      {
+        "user_id": "2",
+        "amount": "149.5",
+        "transaction_date": "08/05/2022 10:00:00"
+      },
+      {
+        "user_id": "2",
+        "amount": "4.89",
+        "transaction_date": "08/06/2022 10:00:00"
+      },
+      {
+        "user_id": "2",
+        "amount": "34",
+        "transaction_date": "08/07/2022 10:00:00"
+      }
+    ]
+  },
+  "sample_output": [
+    {
+      "user_id": "2"
+    }
+  ],
+  "reference_sql": "WITH dates AS (\n  SELECT DISTINCT user_id, CAST(transaction_date AS DATE) AS tx_date\n  FROM transactions\n),\nstreaks AS (\n  SELECT user_id, tx_date,\n         LEAD(tx_date, 1) OVER (PARTITION BY user_id ORDER BY tx_date) AS d1,\n         LEAD(tx_date, 2) OVER (PARTITION BY user_id ORDER BY tx_date) AS d2\n  FROM dates\n)\nSELECT DISTINCT user_id\nFROM streaks\nWHERE DATEDIFF(d1, tx_date) = 1 AND DATEDIFF(d2, d1) = 1\nORDER BY user_id;",
+  "tags": [
+    "amazon",
+    "date-manipulation",
+    "ecommerce",
+    "finance",
+    "lead-lag",
+    "medium",
+    "window-function"
+  ],
+  "related_questions": [],
+  "sources": [
+    [
+      "DataLemur page (free)",
+      "https://datalemur.com/questions/amazon-shopping-spree"
+    ],
+    [
+      "DataLemur PDF",
+      "Page 57"
+    ]
+  ],
+  "test_cases": [
+    {
+      "test_case_id": "tc_1_baseline",
+      "description": "Baseline sample input data from problem description",
+      "input_data": {
+        "transactions": [
+          {
+            "user_id": "1",
+            "amount": "9.99",
+            "transaction_date": "08/01/2022 10:00:00"
+          },
+          {
+            "user_id": "1",
+            "amount": "55",
+            "transaction_date": "08/17/2022 10:00:00"
+          },
+          {
+            "user_id": "2",
+            "amount": "149.5",
+            "transaction_date": "08/05/2022 10:00:00"
+          },
+          {
+            "user_id": "2",
+            "amount": "4.89",
+            "transaction_date": "08/06/2022 10:00:00"
+          },
+          {
+            "user_id": "2",
+            "amount": "34",
+            "transaction_date": "08/07/2022 10:00:00"
+          }
+        ]
+      },
+      "expected_output": [
+        {
+          "user_id": 2
+        }
+      ],
+      "category": "normal"
+    },
+    {
+      "test_case_id": "tc_2_high_volume",
+      "description": "Multiple entities with scaled volume and multi-group distributions",
+      "input_data": {
+        "transactions": [
+          {
+            "user_id": "1",
+            "amount": "9.99",
+            "transaction_date": "08/01/2022 10:00:00"
+          },
+          {
+            "user_id": "1",
+            "amount": "55",
+            "transaction_date": "08/17/2022 10:00:00"
+          },
+          {
+            "user_id": "2",
+            "amount": "149.5",
+            "transaction_date": "08/05/2022 10:00:00"
+          },
+          {
+            "user_id": "2",
+            "amount": "4.89",
+            "transaction_date": "08/06/2022 10:00:00"
+          },
+          {
+            "user_id": "2",
+            "amount": "34",
+            "transaction_date": "08/07/2022 10:00:00"
+          },
+          {
+            "user_id": 1001,
+            "amount": 14.98,
+            "transaction_date": "08/06/2022 10:00:00"
+          },
+          {
+            "user_id": 1001,
+            "amount": 82.5,
+            "transaction_date": "08/22/2022 10:00:00"
+          },
+          {
+            "user_id": 1002,
+            "amount": 224.25,
+            "transaction_date": "08/10/2022 10:00:00"
+          },
+          {
+            "user_id": 1002,
+            "amount": 7.33,
+            "transaction_date": "08/11/2022 10:00:00"
+          },
+          {
+            "user_id": 1002,
+            "amount": 51.0,
+            "transaction_date": "08/12/2022 10:00:00"
+          }
+        ]
+      },
+      "expected_output": [
+        {
+          "user_id": 2
+        },
+        {
+          "user_id": 1002
+        }
+      ],
+      "category": "volume"
+    },
+    {
+      "test_case_id": "tc_3_disqualifying_rows",
+      "description": "Dataset containing disqualifying rows, edge values, and cancelled/zero records",
+      "input_data": {
+        "transactions": [
+          {
+            "user_id": "1",
+            "amount": "9.99",
+            "transaction_date": "08/01/2022 10:00:00"
+          },
+          {
+            "user_id": "1",
+            "amount": "55",
+            "transaction_date": "08/17/2022 10:00:00"
+          },
+          {
+            "user_id": "2",
+            "amount": "149.5",
+            "transaction_date": "08/05/2022 10:00:00"
+          },
+          {
+            "user_id": "2",
+            "amount": "4.89",
+            "transaction_date": "08/06/2022 10:00:00"
+          },
+          {
+            "user_id": "2",
+            "amount": "34",
+            "transaction_date": "08/07/2022 10:00:00"
+          },
+          {
+            "user_id": 5001,
+            "amount": 0,
+            "transaction_date": "08/01/2017 10:00:00"
+          },
+          {
+            "user_id": 5001,
+            "amount": 0,
+            "transaction_date": "08/17/2017 10:00:00"
+          }
+        ]
+      },
+      "expected_output": [
+        {
+          "user_id": 2
+        }
+      ],
+      "category": "edge"
+    },
+    {
+      "test_case_id": "tc_4_empty_result",
+      "description": "Input where no rows satisfy problem criteria, verifying empty result handling",
+      "input_data": {
+        "transactions": []
+      },
+      "expected_output": [],
+      "category": "edge"
+    },
+    {
+      "test_case_id": "tc_5_ties_and_nulls",
+      "description": "Tied ranking metrics, unmatched join keys, and NULL values in nullable attributes",
+      "input_data": {
+        "transactions": [
+          {
+            "user_id": "1",
+            "amount": "9.99",
+            "transaction_date": "08/01/2022 10:00:00"
+          },
+          {
+            "user_id": "1",
+            "amount": "55",
+            "transaction_date": "08/17/2022 10:00:00"
+          },
+          {
+            "user_id": "2",
+            "amount": "149.5",
+            "transaction_date": "08/05/2022 10:00:00"
+          },
+          {
+            "user_id": "2",
+            "amount": "4.89",
+            "transaction_date": "08/06/2022 10:00:00"
+          },
+          {
+            "user_id": "2",
+            "amount": "34",
+            "transaction_date": "08/07/2022 10:00:00"
+          },
+          {
+            "user_id": 9001,
+            "amount": "9.99",
+            "transaction_date": "08/01/2022 10:00:00"
+          },
+          {
+            "user_id": 9501,
+            "amount": "55",
+            "transaction_date": "08/17/2022 10:00:00"
+          }
+        ]
+      },
+      "expected_output": [
+        {
+          "user_id": 2
+        }
+      ],
+      "category": "edge"
+    }
+  ],
+  "order_sensitive": true,
+  "expected_output": [
+    {
+      "user_id": 2
+    }
+  ]
+}

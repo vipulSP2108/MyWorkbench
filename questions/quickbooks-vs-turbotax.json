@@ -1,0 +1,260 @@
+{
+  "question_id": "q_013_quickbooks_vs_turbotax",
+  "slug": "quickbooks-vs-turbotax",
+  "title": "QuickBooks vs TurboTax",
+  "difficulty": "Easy",
+  "company": "Intuit",
+  "premium": true,
+  "question": "Intuit wants to compare adoption between QuickBooks and TurboTax. Write a query to calculate the total number of tax filings made using TurboTax versus QuickBooks.",
+  "notes": [],
+  "tables": [
+    {
+      "table_name": "filed_taxes",
+      "columns": [
+        {
+          "column_name": "filing_id",
+          "data_type": "INT"
+        },
+        {
+          "column_name": "user_id",
+          "data_type": "INT"
+        },
+        {
+          "column_name": "product",
+          "data_type": "VARCHAR(255)"
+        },
+        {
+          "column_name": "tax_year",
+          "data_type": "INT"
+        }
+      ]
+    }
+  ],
+  "sample_data": {
+    "filed_taxes": [
+      {
+        "filing_id": 1,
+        "user_id": 101,
+        "product": "TurboTax Deluxe",
+        "tax_year": 2021
+      },
+      {
+        "filing_id": 2,
+        "user_id": 102,
+        "product": "QuickBooks Online",
+        "tax_year": 2021
+      },
+      {
+        "filing_id": 3,
+        "user_id": 103,
+        "product": "TurboTax Premier",
+        "tax_year": 2021
+      },
+      {
+        "filing_id": 4,
+        "user_id": 104,
+        "product": "QuickBooks Self-Employed",
+        "tax_year": 2021
+      }
+    ]
+  },
+  "sample_output": [
+    {
+      "turbotax_total": 2,
+      "quickbooks_total": 2
+    }
+  ],
+  "reference_sql": "SELECT \n  SUM(CASE WHEN product LIKE '%QuickBooks%' THEN 1 ELSE 0 END) AS quickbooks_users,\n  SUM(CASE WHEN product LIKE '%TurboTax%' THEN 1 ELSE 0 END) AS turbotax_users\nFROM filed_taxes;",
+  "tags": [
+    "aggregation",
+    "easy",
+    "intuit"
+  ],
+  "related_questions": [],
+  "sources": [
+    [
+      "Text supplied by you (not checkable against the locked page)",
+      "https://datalemur.com/questions/quickbooks-vs-turbotax"
+    ],
+    [
+      "DataLemur PDF",
+      "Page 17"
+    ]
+  ],
+  "test_cases": [
+    {
+      "test_case_id": "tc_1_baseline",
+      "description": "Baseline sample input data from problem description",
+      "input_data": {
+        "filed_taxes": [
+          {
+            "filing_id": 1,
+            "user_id": 101,
+            "product": "TurboTax Deluxe",
+            "tax_year": 2021
+          },
+          {
+            "filing_id": 2,
+            "user_id": 102,
+            "product": "QuickBooks Online",
+            "tax_year": 2021
+          },
+          {
+            "filing_id": 3,
+            "user_id": 103,
+            "product": "TurboTax Premier",
+            "tax_year": 2021
+          },
+          {
+            "filing_id": 4,
+            "user_id": 104,
+            "product": "QuickBooks Self-Employed",
+            "tax_year": 2021
+          }
+        ]
+      },
+      "expected_output": [
+        {
+          "quickbooks_users": 2,
+          "turbotax_users": 2
+        }
+      ],
+      "category": "normal"
+    },
+    {
+      "test_case_id": "tc_2_high_volume",
+      "description": "Multiple entities with scaled volume and multi-group distributions",
+      "input_data": {
+        "filed_taxes": [
+          {
+            "filing_id": 1,
+            "user_id": 101,
+            "product": "TurboTax Deluxe",
+            "tax_year": 2021
+          },
+          {
+            "filing_id": 2,
+            "user_id": 102,
+            "product": "QuickBooks Online",
+            "tax_year": 2021
+          },
+          {
+            "filing_id": 3,
+            "user_id": 103,
+            "product": "TurboTax Premier",
+            "tax_year": 2021
+          },
+          {
+            "filing_id": 4,
+            "user_id": 104,
+            "product": "QuickBooks Self-Employed",
+            "tax_year": 2021
+          },
+          {
+            "filing_id": 1001,
+            "user_id": 1101,
+            "product": "TurboTax Deluxe",
+            "tax_year": 2021
+          },
+          {
+            "filing_id": 1002,
+            "user_id": 1102,
+            "product": "QuickBooks Online",
+            "tax_year": 2021
+          },
+          {
+            "filing_id": 1003,
+            "user_id": 1103,
+            "product": "TurboTax Premier",
+            "tax_year": 2021
+          },
+          {
+            "filing_id": 1004,
+            "user_id": 1104,
+            "product": "QuickBooks Self-Employed",
+            "tax_year": 2021
+          }
+        ]
+      },
+      "expected_output": [
+        {
+          "quickbooks_users": 4,
+          "turbotax_users": 4
+        }
+      ],
+      "category": "volume"
+    },
+    {
+      "test_case_id": "tc_3_disqualifying_rows",
+      "description": "Dataset containing disqualifying rows, edge values, and cancelled/zero records",
+      "input_data": {
+        "filed_taxes": [
+          {
+            "filing_id": 1,
+            "user_id": 101,
+            "product": "TurboTax Deluxe",
+            "tax_year": 2021
+          },
+          {
+            "filing_id": 2,
+            "user_id": 102,
+            "product": "QuickBooks Online",
+            "tax_year": 2021
+          },
+          {
+            "filing_id": 3,
+            "user_id": 103,
+            "product": "TurboTax Premier",
+            "tax_year": 2021
+          },
+          {
+            "filing_id": 4,
+            "user_id": 104,
+            "product": "QuickBooks Self-Employed",
+            "tax_year": 2021
+          },
+          {
+            "filing_id": 5001,
+            "user_id": 5101,
+            "product": "TurboTax Deluxe",
+            "tax_year": 2021
+          },
+          {
+            "filing_id": 5002,
+            "user_id": 5102,
+            "product": "QuickBooks Online",
+            "tax_year": 2021
+          }
+        ]
+      },
+      "expected_output": [
+        {
+          "quickbooks_users": 3,
+          "turbotax_users": 3
+        }
+      ],
+      "category": "edge"
+    },
+    {
+      "test_case_id": "tc_4_empty_result",
+      "description": "Input where no rows satisfy problem criteria, verifying empty result handling",
+      "input_data": {
+        "filed_taxes": []
+      },
+      "expected_output": [
+        {
+          "quickbooks_users": null,
+          "turbotax_users": null
+        }
+      ],
+      "category": "edge"
+    }
+  ],
+  "order_sensitive": false,
+  "expected_output": [
+    {
+      "quickbooks_users": 2,
+      "turbotax_users": 2
+    }
+  ]
+}

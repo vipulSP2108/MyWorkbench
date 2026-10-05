@@ -1,0 +1,623 @@
+{
+  "question_id": "q_042_fill_missing_product",
+  "slug": "fill-missing-product",
+  "title": "Fill Missing Client Data",
+  "difficulty": "Medium",
+  "company": "Accenture",
+  "premium": true,
+  "question": "When accessing Accenture's retailer client's database, you notice that the category column in the products table contains null values.\n\nWrite a query that returns the updated product table with all the category values filled in, assuming the first product in each category always has a defined category value.",
+  "notes": [],
+  "tables": [
+    {
+      "table_name": "products",
+      "columns": [
+        {
+          "column_name": "product_id",
+          "data_type": "INT"
+        },
+        {
+          "column_name": "category",
+          "data_type": "VARCHAR(255)"
+        },
+        {
+          "column_name": "name",
+          "data_type": "VARCHAR(255)"
+        }
+      ]
+    }
+  ],
+  "sample_data": {
+    "products": [
+      {
+        "product_id": 1,
+        "category": "Shoes",
+        "name": "Sperry Boat Shoe"
+      },
+      {
+        "product_id": 2,
+        "category": "",
+        "name": "Adidas Stan Smith"
+      },
+      {
+        "product_id": 3,
+        "category": "",
+        "name": "Vans Authentic"
+      },
+      {
+        "product_id": 4,
+        "category": "Jeans",
+        "name": "Levi 511"
+      },
+      {
+        "product_id": 5,
+        "category": "",
+        "name": "Wrangler Straight Fit"
+      },
+      {
+        "product_id": 6,
+        "category": "Shirts",
+        "name": "Lacoste Classic Polo"
+      },
+      {
+        "product_id": 7,
+        "category": "",
+        "name": "Nautica Linen Shirt"
+      }
+    ]
+  },
+  "sample_output": [
+    {
+      "product_id": 1,
+      "category": "Shoes",
+      "name": "Sperry Boat Shoe"
+    },
+    {
+      "product_id": 2,
+      "category": "Shoes",
+      "name": "Adidas Stan Smith"
+    },
+    {
+      "product_id": 3,
+      "category": "Shoes",
+      "name": "Vans Authentic"
+    },
+    {
+      "product_id": 4,
+      "category": "Jeans",
+      "name": "Levi 511"
+    },
+    {
+      "product_id": 5,
+      "category": "Jeans",
+      "name": "Wrangler Straight Fit"
+    },
+    {
+      "product_id": 6,
+      "category": "Shirts",
+      "name": "Lacoste Classic Polo"
+    },
+    {
+      "product_id": 7,
+      "category": "Shirts",
+      "name": "Nautica Linen Shirt"
+    }
+  ],
+  "reference_sql": "WITH filled AS (\n  SELECT \n    product_id,\n    COALESCE(category, FIRST_VALUE(category) OVER (ORDER BY product_id)) AS category,\n    name\n  FROM products\n)\nSELECT product_id, category, name FROM filled ORDER BY product_id;",
+  "tags": [
+    "accenture",
+    "aggregation",
+    "cte",
+    "date-manipulation",
+    "ecommerce",
+    "medium",
+    "window-function"
+  ],
+  "related_questions": [],
+  "sources": [
+    [
+      "DataLemur blog: 8 Accenture SQL questions (#2)",
+      "https://datalemur.com/blog/accenture-sql-interview-questions"
+    ],
+    [
+      "DataLemur page (locked)",
+      "https://datalemur.com/questions/fill-missing-product"
+    ],
+    [
+      "DataLemur PDF",
+      "Page 46"
+    ]
+  ],
+  "test_cases": [
+    {
+      "test_case_id": "tc_1_baseline",
+      "description": "Baseline sample input data from problem description",
+      "input_data": {
+        "products": [
+          {
+            "product_id": 1,
+            "category": "Shoes",
+            "name": "Sperry Boat Shoe"
+          },
+          {
+            "product_id": 2,
+            "category": "",
+            "name": "Adidas Stan Smith"
+          },
+          {
+            "product_id": 3,
+            "category": "",
+            "name": "Vans Authentic"
+          },
+          {
+            "product_id": 4,
+            "category": "Jeans",
+            "name": "Levi 511"
+          },
+          {
+            "product_id": 5,
+            "category": "",
+            "name": "Wrangler Straight Fit"
+          },
+          {
+            "product_id": 6,
+            "category": "Shirts",
+            "name": "Lacoste Classic Polo"
+          },
+          {
+            "product_id": 7,
+            "category": "",
+            "name": "Nautica Linen Shirt"
+          }
+        ]
+      },
+      "expected_output": [
+        {
+          "product_id": 1,
+          "category": "Shoes",
+          "name": "Sperry Boat Shoe"
+        },
+        {
+          "product_id": 2,
+          "category": "Shoes",
+          "name": "Adidas Stan Smith"
+        },
+        {
+          "product_id": 3,
+          "category": "Shoes",
+          "name": "Vans Authentic"
+        },
+        {
+          "product_id": 4,
+          "category": "Jeans",
+          "name": "Levi 511"
+        },
+        {
+          "product_id": 5,
+          "category": "Shoes",
+          "name": "Wrangler Straight Fit"
+        },
+        {
+          "product_id": 6,
+          "category": "Shirts",
+          "name": "Lacoste Classic Polo"
+        },
+        {
+          "product_id": 7,
+          "category": "Shoes",
+          "name": "Nautica Linen Shirt"
+        }
+      ],
+      "category": "normal"
+    },
+    {
+      "test_case_id": "tc_2_high_volume",
+      "description": "Multiple entities with scaled volume and multi-group distributions",
+      "input_data": {
+        "products": [
+          {
+            "product_id": 1,
+            "category": "Shoes",
+            "name": "Sperry Boat Shoe"
+          },
+          {
+            "product_id": 2,
+            "category": "",
+            "name": "Adidas Stan Smith"
+          },
+          {
+            "product_id": 3,
+            "category": "",
+            "name": "Vans Authentic"
+          },
+          {
+            "product_id": 4,
+            "category": "Jeans",
+            "name": "Levi 511"
+          },
+          {
+            "product_id": 5,
+            "category": "",
+            "name": "Wrangler Straight Fit"
+          },
+          {
+            "product_id": 6,
+            "category": "Shirts",
+            "name": "Lacoste Classic Polo"
+          },
+          {
+            "product_id": 7,
+            "category": "",
+            "name": "Nautica Linen Shirt"
+          },
+          {
+            "product_id": 1001,
+            "category": "Shoes",
+            "name": "Sperry Boat Shoe"
+          },
+          {
+            "product_id": 1002,
+            "category": "",
+            "name": "Adidas Stan Smith"
+          },
+          {
+            "product_id": 1003,
+            "category": "",
+            "name": "Vans Authentic"
+          },
+          {
+            "product_id": 1004,
+            "category": "Jeans",
+            "name": "Levi 511"
+          },
+          {
+            "product_id": 1005,
+            "category": "",
+            "name": "Wrangler Straight Fit"
+          },
+          {
+            "product_id": 1006,
+            "category": "Shirts",
+            "name": "Lacoste Classic Polo"
+          },
+          {
+            "product_id": 1007,
+            "category": "",
+            "name": "Nautica Linen Shirt"
+          }
+        ]
+      },
+      "expected_output": [
+        {
+          "product_id": 1,
+          "category": "Shoes",
+          "name": "Sperry Boat Shoe"
+        },
+        {
+          "product_id": 2,
+          "category": "Shoes",
+          "name": "Adidas Stan Smith"
+        },
+        {
+          "product_id": 3,
+          "category": "Shoes",
+          "name": "Vans Authentic"
+        },
+        {
+          "product_id": 4,
+          "category": "Jeans",
+          "name": "Levi 511"
+        },
+        {
+          "product_id": 5,
+          "category": "Shoes",
+          "name": "Wrangler Straight Fit"
+        },
+        {
+          "product_id": 6,
+          "category": "Shirts",
+          "name": "Lacoste Classic Polo"
+        },
+        {
+          "product_id": 7,
+          "category": "Shoes",
+          "name": "Nautica Linen Shirt"
+        },
+        {
+          "product_id": 1001,
+          "category": "Shoes",
+          "name": "Sperry Boat Shoe"
+        },
+        {
+          "product_id": 1002,
+          "category": "Shoes",
+          "name": "Adidas Stan Smith"
+        },
+        {
+          "product_id": 1003,
+          "category": "Shoes",
+          "name": "Vans Authentic"
+        },
+        {
+          "product_id": 1004,
+          "category": "Jeans",
+          "name": "Levi 511"
+        },
+        {
+          "product_id": 1005,
+          "category": "Shoes",
+          "name": "Wrangler Straight Fit"
+        },
+        {
+          "product_id": 1006,
+          "category": "Shirts",
+          "name": "Lacoste Classic Polo"
+        },
+        {
+          "product_id": 1007,
+          "category": "Shoes",
+          "name": "Nautica Linen Shirt"
+        }
+      ],
+      "category": "volume"
+    },
+    {
+      "test_case_id": "tc_3_disqualifying_rows",
+      "description": "Dataset containing disqualifying rows, edge values, and cancelled/zero records",
+      "input_data": {
+        "products": [
+          {
+            "product_id": 1,
+            "category": "Shoes",
+            "name": "Sperry Boat Shoe"
+          },
+          {
+            "product_id": 2,
+            "category": "",
+            "name": "Adidas Stan Smith"
+          },
+          {
+            "product_id": 3,
+            "category": "",
+            "name": "Vans Authentic"
+          },
+          {
+            "product_id": 4,
+            "category": "Jeans",
+            "name": "Levi 511"
+          },
+          {
+            "product_id": 5,
+            "category": "",
+            "name": "Wrangler Straight Fit"
+          },
+          {
+            "product_id": 6,
+            "category": "Shirts",
+            "name": "Lacoste Classic Polo"
+          },
+          {
+            "product_id": 7,
+            "category": "",
+            "name": "Nautica Linen Shirt"
+          },
+          {
+            "product_id": 5001,
+            "category": "Shoes",
+            "name": "Sperry Boat Shoe"
+          },
+          {
+            "product_id": 5002,
+            "category": "",
+            "name": "Adidas Stan Smith"
+          },
+          {
+            "product_id": 5003,
+            "category": "",
+            "name": "Vans Authentic"
+          }
+        ]
+      },
+      "expected_output": [
+        {
+          "product_id": 1,
+          "category": "Shoes",
+          "name": "Sperry Boat Shoe"
+        },
+        {
+          "product_id": 2,
+          "category": "Shoes",
+          "name": "Adidas Stan Smith"
+        },
+        {
+          "product_id": 3,
+          "category": "Shoes",
+          "name": "Vans Authentic"
+        },
+        {
+          "product_id": 4,
+          "category": "Jeans",
+          "name": "Levi 511"
+        },
+        {
+          "product_id": 5,
+          "category": "Shoes",
+          "name": "Wrangler Straight Fit"
+        },
+        {
+          "product_id": 6,
+          "category": "Shirts",
+          "name": "Lacoste Classic Polo"
+        },
+        {
+          "product_id": 7,
+          "category": "Shoes",
+          "name": "Nautica Linen Shirt"
+        },
+        {
+          "product_id": 5001,
+          "category": "Shoes",
+          "name": "Sperry Boat Shoe"
+        },
+        {
+          "product_id": 5002,
+          "category": "Shoes",
+          "name": "Adidas Stan Smith"
+        },
+        {
+          "product_id": 5003,
+          "category": "Shoes",
+          "name": "Vans Authentic"
+        }
+      ],
+      "category": "edge"
+    },
+    {
+      "test_case_id": "tc_4_empty_result",
+      "description": "Input where no rows satisfy problem criteria, verifying empty result handling",
+      "input_data": {
+        "products": []
+      },
+      "expected_output": [],
+      "category": "edge"
+    },
+    {
+      "test_case_id": "tc_5_ties_and_nulls",
+      "description": "Tied ranking metrics, unmatched join keys, and NULL values in nullable attributes",
+      "input_data": {
+        "products": [
+          {
+            "product_id": 1,
+            "category": "Shoes",
+            "name": "Sperry Boat Shoe"
+          },
+          {
+            "product_id": 2,
+            "category": "",
+            "name": "Adidas Stan Smith"
+          },
+          {
+            "product_id": 3,
+            "category": "",
+            "name": "Vans Authentic"
+          },
+          {
+            "product_id": 4,
+            "category": "Jeans",
+            "name": "Levi 511"
+          },
+          {
+            "product_id": 5,
+            "category": "",
+            "name": "Wrangler Straight Fit"
+          },
+          {
+            "product_id": 6,
+            "category": "Shirts",
+            "name": "Lacoste Classic Polo"
+          },
+          {
+            "product_id": 7,
+            "category": "",
+            "name": "Nautica Linen Shirt"
+          },
+          {
+            "product_id": 9001,
+            "category": "Shoes",
+            "name": "Sperry Boat Shoe Duplicate"
+          },
+          {
+            "product_id": 9502,
+            "category": null,
+            "name": "Adidas Stan Smith"
+          }
+        ]
+      },
+      "expected_output": [
+        {
+          "product_id": 1,
+          "category": "Shoes",
+          "name": "Sperry Boat Shoe"
+        },
+        {
+          "product_id": 2,
+          "category": "Shoes",
+          "name": "Adidas Stan Smith"
+        },
+        {
+          "product_id": 3,
+          "category": "Shoes",
+          "name": "Vans Authentic"
+        },
+        {
+          "product_id": 4,
+          "category": "Jeans",
+          "name": "Levi 511"
+        },
+        {
+          "product_id": 5,
+          "category": "Shoes",
+          "name": "Wrangler Straight Fit"
+        },
+        {
+          "product_id": 6,
+          "category": "Shirts",
+          "name": "Lacoste Classic Polo"
+        },
+        {
+          "product_id": 7,
+          "category": "Shoes",
+          "name": "Nautica Linen Shirt"
+        },
+        {
+          "product_id": 9001,
+          "category": "Shoes",
+          "name": "Sperry Boat Shoe Duplicate"
+        },
+        {
+          "product_id": 9502,
+          "category": "Shoes",
+          "name": "Adidas Stan Smith"
+        }
+      ],
+      "category": "edge"
+    }
+  ],
+  "order_sensitive": true,
+  "expected_output": [
+    {
+      "product_id": 1,
+      "category": "Shoes",
+      "name": "Sperry Boat Shoe"
+    },
+    {
+      "product_id": 2,
+      "category": "Shoes",
+      "name": "Adidas Stan Smith"
+    },
+    {
+      "product_id": 3,
+      "category": "Shoes",
+      "name": "Vans Authentic"
+    },
+    {
+      "product_id": 4,
+      "category": "Jeans",
+      "name": "Levi 511"
+    },
+    {
+      "product_id": 5,
+      "category": "Shoes",
+      "name": "Wrangler Straight Fit"
+    },
+    {
+      "product_id": 6,
+      "category": "Shirts",
+      "name": "Lacoste Classic Polo"
+    },
+    {
+      "product_id": 7,
+      "category": "Shoes",
+      "name": "Nautica Linen Shirt"
+    }
+  ]
+}

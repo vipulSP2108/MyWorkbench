@@ -1,0 +1,364 @@
+{
+  "question_id": "q_046_frequently_purchased_pairs",
+  "slug": "frequently-purchased-pairs",
+  "title": "Frequently Purchased Pairs",
+  "difficulty": "Medium",
+  "company": "Walmart",
+  "premium": true,
+  "question": "Walmart SQL interview problem: find pairs of products that are frequently purchased together (described by DataLemur as a\nself-join problem).",
+  "notes": [],
+  "tables": [
+    {
+      "table_name": "products",
+      "columns": [
+        {
+          "column_name": "product_id",
+          "data_type": "INT"
+        },
+        {
+          "column_name": "product_name",
+          "data_type": "VARCHAR(255)"
+        },
+        {
+          "column_name": "user_id",
+          "data_type": "INT"
+        }
+      ]
+    }
+  ],
+  "sample_data": {
+    "products": [
+      {
+        "product_id": "1",
+        "product_name": "Bread",
+        "transaction_id": "1",
+        "user_id": "10"
+      },
+      {
+        "product_id": "2",
+        "product_name": "Butter",
+        "transaction_id": "1",
+        "user_id": "10"
+      },
+      {
+        "product_id": "3",
+        "product_name": "Jam",
+        "transaction_id": "1",
+        "user_id": "10"
+      },
+      {
+        "product_id": "1",
+        "product_name": "Milk",
+        "transaction_id": "2",
+        "user_id": "11"
+      }
+    ]
+  },
+  "sample_output": [
+    {
+      "product_1": "Bread",
+      "product_2": "Butter",
+      "combo_num": "3"
+    },
+    {
+      "product_1": "Bread",
+      "product_2": "Jam",
+      "combo_num": "2"
+    },
+    {
+      "product_1": "Butter",
+      "product_2": "Jam",
+      "combo_num": "1"
+    }
+  ],
+  "reference_sql": "SELECT a.product_name AS product1, b.product_name AS product2\nFROM products a\nJOIN products b ON a.user_id = b.user_id AND a.product_id < b.product_id\nGROUP BY a.product_name, b.product_name\nORDER BY a.product_name, b.product_name;",
+  "tags": [
+    "aggregation",
+    "cte",
+    "ecommerce",
+    "join",
+    "medium",
+    "walmart"
+  ],
+  "related_questions": [],
+  "sources": [
+    [
+      "DataLemur blog: Uber SQL questions (#7 mentions it)",
+      "https://datalemur.com/blog/uber-sql-interview-questions"
+    ],
+    [
+      "DataLemur blog: Bloomberg SQL questions (#5 mentions it)",
+      "https://datalemur.com/blog/bloomberg-sql-interview-questions"
+    ],
+    [
+      "DataLemur page (locked)",
+      "https://datalemur.com/questions/frequently-purchased-pairs"
+    ],
+    [
+      "DataLemur PDF",
+      "Page 50"
+    ]
+  ],
+  "test_cases": [
+    {
+      "test_case_id": "tc_1_baseline",
+      "description": "Baseline sample input data from problem description",
+      "input_data": {
+        "products": [
+          {
+            "product_id": "1",
+            "product_name": "Bread",
+            "transaction_id": "1",
+            "user_id": "10"
+          },
+          {
+            "product_id": "2",
+            "product_name": "Butter",
+            "transaction_id": "1",
+            "user_id": "10"
+          },
+          {
+            "product_id": "3",
+            "product_name": "Jam",
+            "transaction_id": "1",
+            "user_id": "10"
+          },
+          {
+            "product_id": "1",
+            "product_name": "Milk",
+            "transaction_id": "2",
+            "user_id": "11"
+          }
+        ]
+      },
+      "expected_output": [
+        {
+          "product1": "Bread",
+          "product2": "Butter"
+        },
+        {
+          "product1": "Bread",
+          "product2": "Jam"
+        },
+        {
+          "product1": "Butter",
+          "product2": "Jam"
+        }
+      ],
+      "category": "normal"
+    },
+    {
+      "test_case_id": "tc_2_high_volume",
+      "description": "Multiple entities with scaled volume and multi-group distributions",
+      "input_data": {
+        "products": [
+          {
+            "product_id": "1",
+            "product_name": "Bread",
+            "transaction_id": "1",
+            "user_id": "10"
+          },
+          {
+            "product_id": "2",
+            "product_name": "Butter",
+            "transaction_id": "1",
+            "user_id": "10"
+          },
+          {
+            "product_id": "3",
+            "product_name": "Jam",
+            "transaction_id": "1",
+            "user_id": "10"
+          },
+          {
+            "product_id": "1",
+            "product_name": "Milk",
+            "transaction_id": "2",
+            "user_id": "11"
+          },
+          {
+            "product_id": 1001,
+            "product_name": "Bread",
+            "transaction_id": 1001,
+            "user_id": 1010
+          },
+          {
+            "product_id": 1002,
+            "product_name": "Butter",
+            "transaction_id": 1001,
+            "user_id": 1010
+          },
+          {
+            "product_id": 1003,
+            "product_name": "Jam",
+            "transaction_id": 1001,
+            "user_id": 1010
+          },
+          {
+            "product_id": 1001,
+            "product_name": "Milk",
+            "transaction_id": 1002,
+            "user_id": 1011
+          }
+        ]
+      },
+      "expected_output": [
+        {
+          "product1": "Bread",
+          "product2": "Butter"
+        },
+        {
+          "product1": "Bread",
+          "product2": "Jam"
+        },
+        {
+          "product1": "Butter",
+          "product2": "Jam"
+        }
+      ],
+      "category": "volume"
+    },
+    {
+      "test_case_id": "tc_3_disqualifying_rows",
+      "description": "Dataset containing disqualifying rows, edge values, and cancelled/zero records",
+      "input_data": {
+        "products": [
+          {
+            "product_id": "1",
+            "product_name": "Bread",
+            "transaction_id": "1",
+            "user_id": "10"
+          },
+          {
+            "product_id": "2",
+            "product_name": "Butter",
+            "transaction_id": "1",
+            "user_id": "10"
+          },
+          {
+            "product_id": "3",
+            "product_name": "Jam",
+            "transaction_id": "1",
+            "user_id": "10"
+          },
+          {
+            "product_id": "1",
+            "product_name": "Milk",
+            "transaction_id": "2",
+            "user_id": "11"
+          },
+          {
+            "product_id": 5001,
+            "product_name": "Bread",
+            "transaction_id": 5001,
+            "user_id": 5010
+          },
+          {
+            "product_id": 5002,
+            "product_name": "Butter",
+            "transaction_id": 5001,
+            "user_id": 5010
+          }
+        ]
+      },
+      "expected_output": [
+        {
+          "product1": "Bread",
+          "product2": "Butter"
+        },
+        {
+          "product1": "Bread",
+          "product2": "Jam"
+        },
+        {
+          "product1": "Butter",
+          "product2": "Jam"
+        }
+      ],
+      "category": "edge"
+    },
+    {
+      "test_case_id": "tc_4_empty_result",
+      "description": "Input where no rows satisfy problem criteria, verifying empty result handling",
+      "input_data": {
+        "products": []
+      },
+      "expected_output": [],
+      "category": "edge"
+    },
+    {
+      "test_case_id": "tc_5_ties_and_nulls",
+      "description": "Tied ranking metrics, unmatched join keys, and NULL values in nullable attributes",
+      "input_data": {
+        "products": [
+          {
+            "product_id": "1",
+            "product_name": "Bread",
+            "transaction_id": "1",
+            "user_id": "10"
+          },
+          {
+            "product_id": "2",
+            "product_name": "Butter",
+            "transaction_id": "1",
+            "user_id": "10"
+          },
+          {
+            "product_id": "3",
+            "product_name": "Jam",
+            "transaction_id": "1",
+            "user_id": "10"
+          },
+          {
+            "product_id": "1",
+            "product_name": "Milk",
+            "transaction_id": "2",
+            "user_id": "11"
+          },
+          {
+            "product_id": 9001,
+            "product_name": "Bread Duplicate",
+            "transaction_id": 9001,
+            "user_id": 9010
+          },
+          {
+            "product_id": 9502,
+            "product_name": "Butter",
+            "transaction_id": 9501,
+            "user_id": 9510
+          }
+        ]
+      },
+      "expected_output": [
+        {
+          "product1": "Bread",
+          "product2": "Butter"
+        },
+        {
+          "product1": "Bread",
+          "product2": "Jam"
+        },
+        {
+          "product1": "Butter",
+          "product2": "Jam"
+        }
+      ],
+      "category": "edge"
+    }
+  ],
+  "order_sensitive": true,
+  "expected_output": [
+    {
+      "product1": "Bread",
+      "product2": "Butter"
+    },
+    {
+      "product1": "Bread",
+      "product2": "Jam"
+    },
+    {
+      "product1": "Butter",
+      "product2": "Jam"
+    }
+  ]
+}

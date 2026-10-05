@@ -1,0 +1,331 @@
+{
+  "question_id": "q_025_subject_matter_experts",
+  "slug": "subject-matter-experts",
+  "title": "Subject Matter Experts",
+  "difficulty": "Easy",
+  "company": "Accenture",
+  "premium": true,
+  "question": "Identify Subject Matter Experts (SMEs) at Accenture from their work experience in specific domains. An employee is an SME if they meet either criterion: (1) 8 or more years of work experience in a single domain, or (2) 12 or more years of work experience across two different domains.\n\nReturn the employee IDs of all the subject matter experts.",
+  "notes": [],
+  "tables": [
+    {
+      "table_name": "employee_expertise",
+      "columns": [
+        {
+          "column_name": "employee_id",
+          "data_type": "INT"
+        },
+        {
+          "column_name": "domain",
+          "data_type": "VARCHAR(255)"
+        },
+        {
+          "column_name": "years_of_experience",
+          "data_type": "INT"
+        }
+      ]
+    }
+  ],
+  "sample_data": {
+    "employee_expertise": [
+      {
+        "employee_id": 101,
+        "domain": "Digital Transformation",
+        "years_of_experience": 9
+      },
+      {
+        "employee_id": 102,
+        "domain": "Supply Chain",
+        "years_of_experience": 6
+      },
+      {
+        "employee_id": 102,
+        "domain": "IoT",
+        "years_of_experience": 7
+      },
+      {
+        "employee_id": 103,
+        "domain": "Change Management",
+        "years_of_experience": 4
+      },
+      {
+        "employee_id": 104,
+        "domain": "DevOps",
+        "years_of_experience": 5
+      },
+      {
+        "employee_id": 104,
+        "domain": "Cloud Migration",
+        "years_of_experience": 5
+      },
+      {
+        "employee_id": 104,
+        "domain": "Agile Transformation",
+        "years_of_experience": 5
+      }
+    ]
+  },
+  "sample_output": [
+    {
+      "employee_id": 101
+    },
+    {
+      "employee_id": 102
+    }
+  ],
+  "reference_sql": "SELECT employee_id\nFROM employee_expertise\nGROUP BY employee_id\nHAVING MAX(years_of_experience) >= 8 \n    OR (COUNT(DISTINCT domain) = 2 AND SUM(years_of_experience) >= 12)\nORDER BY employee_id;",
+  "tags": [
+    "accenture",
+    "aggregation",
+    "date-manipulation",
+    "easy",
+    "hr"
+  ],
+  "related_questions": [],
+  "sources": [
+    [
+      "DataLemur blog: 8 Accenture SQL questions (#1)",
+      "https://datalemur.com/blog/accenture-sql-interview-questions"
+    ],
+    [
+      "DataLemur page (locked)",
+      "https://datalemur.com/questions/subject-matter-experts"
+    ],
+    [
+      "DataLemur PDF",
+      "Page 29"
+    ]
+  ],
+  "test_cases": [
+    {
+      "test_case_id": "tc_1_baseline",
+      "description": "Baseline sample input data from problem description",
+      "input_data": {
+        "employee_expertise": [
+          {
+            "employee_id": 101,
+            "domain": "Digital Transformation",
+            "years_of_experience": 9
+          },
+          {
+            "employee_id": 102,
+            "domain": "Supply Chain",
+            "years_of_experience": 6
+          },
+          {
+            "employee_id": 102,
+            "domain": "IoT",
+            "years_of_experience": 7
+          },
+          {
+            "employee_id": 103,
+            "domain": "Change Management",
+            "years_of_experience": 4
+          },
+          {
+            "employee_id": 104,
+            "domain": "DevOps",
+            "years_of_experience": 5
+          },
+          {
+            "employee_id": 104,
+            "domain": "Cloud Migration",
+            "years_of_experience": 5
+          },
+          {
+            "employee_id": 104,
+            "domain": "Agile Transformation",
+            "years_of_experience": 5
+          }
+        ]
+      },
+      "expected_output": [
+        {
+          "employee_id": 101
+        },
+        {
+          "employee_id": 102
+        }
+      ],
+      "category": "normal"
+    },
+    {
+      "test_case_id": "tc_2_high_volume",
+      "description": "Multiple entities with scaled volume and multi-group distributions",
+      "input_data": {
+        "employee_expertise": [
+          {
+            "employee_id": 101,
+            "domain": "Digital Transformation",
+            "years_of_experience": 9
+          },
+          {
+            "employee_id": 102,
+            "domain": "Supply Chain",
+            "years_of_experience": 6
+          },
+          {
+            "employee_id": 102,
+            "domain": "IoT",
+            "years_of_experience": 7
+          },
+          {
+            "employee_id": 103,
+            "domain": "Change Management",
+            "years_of_experience": 4
+          },
+          {
+            "employee_id": 104,
+            "domain": "DevOps",
+            "years_of_experience": 5
+          },
+          {
+            "employee_id": 104,
+            "domain": "Cloud Migration",
+            "years_of_experience": 5
+          },
+          {
+            "employee_id": 104,
+            "domain": "Agile Transformation",
+            "years_of_experience": 5
+          },
+          {
+            "employee_id": 1101,
+            "domain": "Digital Transformation",
+            "years_of_experience": 9
+          },
+          {
+            "employee_id": 1102,
+            "domain": "Supply Chain",
+            "years_of_experience": 6
+          },
+          {
+            "employee_id": 1102,
+            "domain": "IoT",
+            "years_of_experience": 7
+          },
+          {
+            "employee_id": 1103,
+            "domain": "Change Management",
+            "years_of_experience": 4
+          },
+          {
+            "employee_id": 1104,
+            "domain": "DevOps",
+            "years_of_experience": 5
+          },
+          {
+            "employee_id": 1104,
+            "domain": "Cloud Migration",
+            "years_of_experience": 5
+          },
+          {
+            "employee_id": 1104,
+            "domain": "Agile Transformation",
+            "years_of_experience": 5
+          }
+        ]
+      },
+      "expected_output": [
+        {
+          "employee_id": 101
+        },
+        {
+          "employee_id": 102
+        },
+        {
+          "employee_id": 1101
+        },
+        {
+          "employee_id": 1102
+        }
+      ],
+      "category": "volume"
+    },
+    {
+      "test_case_id": "tc_3_disqualifying_rows",
+      "description": "Dataset containing disqualifying rows, edge values, and cancelled/zero records",
+      "input_data": {
+        "employee_expertise": [
+          {
+            "employee_id": 101,
+            "domain": "Digital Transformation",
+            "years_of_experience": 9
+          },
+          {
+            "employee_id": 102,
+            "domain": "Supply Chain",
+            "years_of_experience": 6
+          },
+          {
+            "employee_id": 102,
+            "domain": "IoT",
+            "years_of_experience": 7
+          },
+          {
+            "employee_id": 103,
+            "domain": "Change Management",
+            "years_of_experience": 4
+          },
+          {
+            "employee_id": 104,
+            "domain": "DevOps",
+            "years_of_experience": 5
+          },
+          {
+            "employee_id": 104,
+            "domain": "Cloud Migration",
+            "years_of_experience": 5
+          },
+          {
+            "employee_id": 104,
+            "domain": "Agile Transformation",
+            "years_of_experience": 5
+          },
+          {
+            "employee_id": 5101,
+            "domain": "Digital Transformation",
+            "years_of_experience": 1
+          },
+          {
+            "employee_id": 5102,
+            "domain": "Supply Chain",
+            "years_of_experience": 1
+          },
+          {
+            "employee_id": 5102,
+            "domain": "IoT",
+            "years_of_experience": 1
+          }
+        ]
+      },
+      "expected_output": [
+        {
+          "employee_id": 101
+        },
+        {
+          "employee_id": 102
+        }
+      ],
+      "category": "edge"
+    },
+    {
+      "test_case_id": "tc_4_empty_result",
+      "description": "Input where no rows satisfy problem criteria, verifying empty result handling",
+      "input_data": {
+        "employee_expertise": []
+      },
+      "expected_output": [],
+      "category": "edge"
+    }
+  ],
+  "order_sensitive": true,
+  "expected_output": [
+    {
+      "employee_id": 101
+    },
+    {
+      "employee_id": 102
+    }
+  ]
+}

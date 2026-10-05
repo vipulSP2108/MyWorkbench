@@ -1,0 +1,343 @@
+{
+  "question_id": "q_004_tesla_unfinished_parts",
+  "slug": "tesla-unfinished-parts",
+  "title": "Unfinished Parts",
+  "difficulty": "Easy",
+  "company": "Tesla",
+  "premium": false,
+  "question": "Tesla is investigating production bottlenecks and they need your help to extract the relevant data. Write a query to determine which parts have begun the assembly process but are not yet finished.\n\nAssumptions:\n\nThis question is straightforward, so let's approach it with simplicity in both thinking and solution.\n\n*Effective April 11th 2023, the problem statement and assumptions were updated to enhance clarity.*",
+  "notes": [
+    "parts_assembly table contains all parts currently in production, each at varying stages of the assembly process.",
+    "An unfinished part is one that lacks a finish_date.",
+    "The bumpers in step 3 and 4 are the only item that remains unfinished as it lacks a recorded finish date.",
+    "The dataset you are querying against may have different input & output - this is just an example!"
+  ],
+  "tables": [
+    {
+      "table_name": "parts_assembly",
+      "columns": [
+        {
+          "column_name": "part",
+          "data_type": "VARCHAR(255)"
+        },
+        {
+          "column_name": "finish_date",
+          "data_type": "DATETIME"
+        },
+        {
+          "column_name": "assembly_step",
+          "data_type": "INT"
+        }
+      ]
+    }
+  ],
+  "sample_data": {
+    "parts_assembly": [
+      {
+        "part": "battery",
+        "finish_date": "01/22/2022 00:00:00",
+        "assembly_step": "1"
+      },
+      {
+        "part": "battery",
+        "finish_date": "02/22/2022 00:00:00",
+        "assembly_step": "2"
+      },
+      {
+        "part": "battery",
+        "finish_date": "03/22/2022 00:00:00",
+        "assembly_step": "3"
+      },
+      {
+        "part": "bumper",
+        "finish_date": "01/22/2022 00:00:00",
+        "assembly_step": "1"
+      },
+      {
+        "part": "bumper",
+        "finish_date": "02/22/2022 00:00:00",
+        "assembly_step": "2"
+      },
+      {
+        "part": "bumper",
+        "finish_date": "",
+        "assembly_step": "3"
+      },
+      {
+        "part": "bumper",
+        "finish_date": "",
+        "assembly_step": "4"
+      }
+    ]
+  },
+  "sample_output": [
+    {
+      "part": "bumper",
+      "assembly_step": "3"
+    },
+    {
+      "part": "bumper",
+      "assembly_step": "4"
+    }
+  ],
+  "reference_sql": "SELECT part, assembly_step\nFROM parts_assembly\nWHERE finish_date IS NULL\nORDER BY part, assembly_step;",
+  "tags": [
+    "date-manipulation",
+    "easy",
+    "ecommerce",
+    "tesla"
+  ],
+  "related_questions": [],
+  "sources": [
+    [
+      "DataLemur page (free)",
+      "https://datalemur.com/questions/tesla-unfinished-parts"
+    ],
+    [
+      "DataLemur PDF",
+      "Page 8"
+    ]
+  ],
+  "test_cases": [
+    {
+      "test_case_id": "tc_1_baseline",
+      "description": "Baseline sample input data from problem description",
+      "input_data": {
+        "parts_assembly": [
+          {
+            "part": "battery",
+            "finish_date": "01/22/2022 00:00:00",
+            "assembly_step": "1"
+          },
+          {
+            "part": "battery",
+            "finish_date": "02/22/2022 00:00:00",
+            "assembly_step": "2"
+          },
+          {
+            "part": "battery",
+            "finish_date": "03/22/2022 00:00:00",
+            "assembly_step": "3"
+          },
+          {
+            "part": "bumper",
+            "finish_date": "01/22/2022 00:00:00",
+            "assembly_step": "1"
+          },
+          {
+            "part": "bumper",
+            "finish_date": "02/22/2022 00:00:00",
+            "assembly_step": "2"
+          },
+          {
+            "part": "bumper",
+            "finish_date": "",
+            "assembly_step": "3"
+          },
+          {
+            "part": "bumper",
+            "finish_date": "",
+            "assembly_step": "4"
+          }
+        ]
+      },
+      "expected_output": [
+        {
+          "part": "bumper",
+          "assembly_step": 3
+        },
+        {
+          "part": "bumper",
+          "assembly_step": 4
+        }
+      ],
+      "category": "normal"
+    },
+    {
+      "test_case_id": "tc_2_high_volume",
+      "description": "Multiple entities with scaled volume and multi-group distributions",
+      "input_data": {
+        "parts_assembly": [
+          {
+            "part": "battery",
+            "finish_date": "01/22/2022 00:00:00",
+            "assembly_step": "1"
+          },
+          {
+            "part": "battery",
+            "finish_date": "02/22/2022 00:00:00",
+            "assembly_step": "2"
+          },
+          {
+            "part": "battery",
+            "finish_date": "03/22/2022 00:00:00",
+            "assembly_step": "3"
+          },
+          {
+            "part": "bumper",
+            "finish_date": "01/22/2022 00:00:00",
+            "assembly_step": "1"
+          },
+          {
+            "part": "bumper",
+            "finish_date": "02/22/2022 00:00:00",
+            "assembly_step": "2"
+          },
+          {
+            "part": "bumper",
+            "finish_date": "",
+            "assembly_step": "3"
+          },
+          {
+            "part": "bumper",
+            "finish_date": "",
+            "assembly_step": "4"
+          },
+          {
+            "part": "battery",
+            "finish_date": "01/27/2022 00:00:00",
+            "assembly_step": "1"
+          },
+          {
+            "part": "battery",
+            "finish_date": "02/27/2022 00:00:00",
+            "assembly_step": "2"
+          },
+          {
+            "part": "battery",
+            "finish_date": "03/27/2022 00:00:00",
+            "assembly_step": "3"
+          },
+          {
+            "part": "bumper",
+            "finish_date": "01/27/2022 00:00:00",
+            "assembly_step": "1"
+          },
+          {
+            "part": "bumper",
+            "finish_date": "02/27/2022 00:00:00",
+            "assembly_step": "2"
+          },
+          {
+            "part": "bumper",
+            "finish_date": "",
+            "assembly_step": "3"
+          },
+          {
+            "part": "bumper",
+            "finish_date": "",
+            "assembly_step": "4"
+          }
+        ]
+      },
+      "expected_output": [
+        {
+          "part": "bumper",
+          "assembly_step": 3
+        },
+        {
+          "part": "bumper",
+          "assembly_step": 3
+        },
+        {
+          "part": "bumper",
+          "assembly_step": 4
+        },
+        {
+          "part": "bumper",
+          "assembly_step": 4
+        }
+      ],
+      "category": "volume"
+    },
+    {
+      "test_case_id": "tc_3_disqualifying_rows",
+      "description": "Dataset containing disqualifying rows, edge values, and cancelled/zero records",
+      "input_data": {
+        "parts_assembly": [
+          {
+            "part": "battery",
+            "finish_date": "01/22/2022 00:00:00",
+            "assembly_step": "1"
+          },
+          {
+            "part": "battery",
+            "finish_date": "02/22/2022 00:00:00",
+            "assembly_step": "2"
+          },
+          {
+            "part": "battery",
+            "finish_date": "03/22/2022 00:00:00",
+            "assembly_step": "3"
+          },
+          {
+            "part": "bumper",
+            "finish_date": "01/22/2022 00:00:00",
+            "assembly_step": "1"
+          },
+          {
+            "part": "bumper",
+            "finish_date": "02/22/2022 00:00:00",
+            "assembly_step": "2"
+          },
+          {
+            "part": "bumper",
+            "finish_date": "",
+            "assembly_step": "3"
+          },
+          {
+            "part": "bumper",
+            "finish_date": "",
+            "assembly_step": "4"
+          },
+          {
+            "part": "battery",
+            "finish_date": "01/22/2017 00:00:00",
+            "assembly_step": "1"
+          },
+          {
+            "part": "battery",
+            "finish_date": "02/22/2017 00:00:00",
+            "assembly_step": "2"
+          },
+          {
+            "part": "battery",
+            "finish_date": "03/22/2017 00:00:00",
+            "assembly_step": "3"
+          }
+        ]
+      },
+      "expected_output": [
+        {
+          "part": "bumper",
+          "assembly_step": 3
+        },
+        {
+          "part": "bumper",
+          "assembly_step": 4
+        }
+      ],
+      "category": "edge"
+    },
+    {
+      "test_case_id": "tc_4_empty_result",
+      "description": "Input where no rows satisfy problem criteria, verifying empty result handling",
+      "input_data": {
+        "parts_assembly": []
+      },
+      "expected_output": [],
+      "category": "edge"
+    }
+  ],
+  "order_sensitive": false,
+  "expected_output": [
+    {
+      "part": "bumper",
+      "assembly_step": 3
+    },
+    {
+      "part": "bumper",
+      "assembly_step": 4
+    }
+  ]
+}

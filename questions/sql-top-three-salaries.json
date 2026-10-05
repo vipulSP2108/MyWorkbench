@@ -1,0 +1,882 @@
+{
+  "question_id": "q_040_sql_top_three_salaries",
+  "slug": "sql-top-three-salaries",
+  "title": "Top Three Salaries",
+  "difficulty": "Medium",
+  "company": "FAANG",
+  "premium": false,
+  "question": "As part of an ongoing analysis of salary distribution within the company, your manager has requested a report identifying high earners in each department. A 'high earner' within a department is defined as an employee with a salary ranking among the top three salaries within that department.\n\nYou're tasked with identifying these high earners across all departments. Write a query to display the employee's name along with their department name and salary. In case of duplicates, sort the results of department name in ascending order, then by salary in descending order. If multiple employees have the same salary, then order them alphabetically.\n\nNote: Ensure to utilize the appropriate ranking window function to handle duplicate salaries effectively.\n\n*As of June 18th, we have removed the requirement for unique salaries and revised the sorting order for the results.*",
+  "notes": [
+    "The output displays the high earners in each department.",
+    "In the Data Analytics deaprtment, James Anderson leads with a salary of \\$4,000, followed by Emma Thompson earning \\$3,800, and Daniel Rodriguez with \\$2,230.",
+    "In the Data Science department, both Noah Johnson and William Davis earn \\$6,800, with Noah listed before William due to alphabetical ordering.",
+    "The dataset you are querying against may have different input & output - this is just an example!"
+  ],
+  "tables": [
+    {
+      "table_name": "employee",
+      "columns": [
+        {
+          "column_name": "employee_id",
+          "data_type": "INT"
+        },
+        {
+          "column_name": "name",
+          "data_type": "VARCHAR(255)"
+        },
+        {
+          "column_name": "salary",
+          "data_type": "INT"
+        },
+        {
+          "column_name": "department_id",
+          "data_type": "INT"
+        },
+        {
+          "column_name": "manager_id",
+          "data_type": "INT"
+        }
+      ]
+    },
+    {
+      "table_name": "department",
+      "columns": [
+        {
+          "column_name": "department_id",
+          "data_type": "INT"
+        },
+        {
+          "column_name": "department_name",
+          "data_type": "VARCHAR(255)"
+        }
+      ]
+    }
+  ],
+  "sample_data": {
+    "employee": [
+      {
+        "employee_id": "1",
+        "name": "Emma Thompson",
+        "salary": "3800",
+        "department_id": "1",
+        "manager_id": "6"
+      },
+      {
+        "employee_id": "2",
+        "name": "Daniel Rodriguez",
+        "salary": "2230",
+        "department_id": "1",
+        "manager_id": "7"
+      },
+      {
+        "employee_id": "3",
+        "name": "Olivia Smith",
+        "salary": "2000",
+        "department_id": "1",
+        "manager_id": "8"
+      },
+      {
+        "employee_id": "4",
+        "name": "Noah Johnson",
+        "salary": "6800",
+        "department_id": "2",
+        "manager_id": "9"
+      },
+      {
+        "employee_id": "5",
+        "name": "Sophia Martinez",
+        "salary": "1750",
+        "department_id": "1",
+        "manager_id": "11"
+      },
+      {
+        "employee_id": "6",
+        "name": "Liam Brown",
+        "salary": "13000",
+        "department_id": "3",
+        "manager_id": ""
+      },
+      {
+        "employee_id": "7",
+        "name": "Ava Garcia",
+        "salary": "12500",
+        "department_id": "3",
+        "manager_id": ""
+      },
+      {
+        "employee_id": "8",
+        "name": "William Davis",
+        "salary": "6800",
+        "department_id": "2",
+        "manager_id": ""
+      },
+      {
+        "employee_id": "9",
+        "name": "Isabella Wilson",
+        "salary": "11000",
+        "department_id": "3",
+        "manager_id": ""
+      },
+      {
+        "employee_id": "10",
+        "name": "James Anderson",
+        "salary": "4000",
+        "department_id": "1",
+        "manager_id": "11"
+      }
+    ],
+    "department": [
+      {
+        "department_id": "1",
+        "department_name": "Data Analytics"
+      },
+      {
+        "department_id": "2",
+        "department_name": "Data Science"
+      }
+    ]
+  },
+  "sample_output": [
+    {
+      "department_name": "Data Analytics",
+      "name": "James Anderson",
+      "salary": "4000"
+    },
+    {
+      "department_name": "Data Analytics",
+      "name": "Emma Thompson",
+      "salary": "3800"
+    },
+    {
+      "department_name": "Data Analytics",
+      "name": "Daniel Rodriguez",
+      "salary": "2230"
+    },
+    {
+      "department_name": "Data Science",
+      "name": "Noah Johnson",
+      "salary": "6800"
+    },
+    {
+      "department_name": "Data Science",
+      "name": "William Davis",
+      "salary": "6800"
+    }
+  ],
+  "reference_sql": "WITH ranked AS (\n  SELECT \n    d.department_name,\n    e.name,\n    e.salary,\n    DENSE_RANK() OVER (PARTITION BY e.department_id ORDER BY e.salary DESC) AS rnk\n  FROM employee e\n  JOIN department d ON e.department_id = d.department_id\n)\nSELECT department_name, name, salary\nFROM ranked\nWHERE rnk <= 3\nORDER BY department_name, salary DESC, name;",
+  "tags": [
+    "ecommerce",
+    "faang",
+    "finance",
+    "healthcare",
+    "hr",
+    "medium",
+    "ranking",
+    "self-join",
+    "window-function"
+  ],
+  "related_questions": [],
+  "sources": [
+    [
+      "DataLemur page (free)",
+      "https://datalemur.com/questions/sql-top-three-salaries"
+    ],
+    [
+      "DataLemur PDF",
+      "Page 44"
+    ]
+  ],
+  "test_cases": [
+    {
+      "test_case_id": "tc_1_baseline",
+      "description": "Baseline sample input data from problem description",
+      "input_data": {
+        "employee": [
+          {
+            "employee_id": "1",
+            "name": "Emma Thompson",
+            "salary": "3800",
+            "department_id": "1",
+            "manager_id": "6"
+          },
+          {
+            "employee_id": "2",
+            "name": "Daniel Rodriguez",
+            "salary": "2230",
+            "department_id": "1",
+            "manager_id": "7"
+          },
+          {
+            "employee_id": "3",
+            "name": "Olivia Smith",
+            "salary": "2000",
+            "department_id": "1",
+            "manager_id": "8"
+          },
+          {
+            "employee_id": "4",
+            "name": "Noah Johnson",
+            "salary": "6800",
+            "department_id": "2",
+            "manager_id": "9"
+          },
+          {
+            "employee_id": "5",
+            "name": "Sophia Martinez",
+            "salary": "1750",
+            "department_id": "1",
+            "manager_id": "11"
+          },
+          {
+            "employee_id": "6",
+            "name": "Liam Brown",
+            "salary": "13000",
+            "department_id": "3",
+            "manager_id": ""
+          },
+          {
+            "employee_id": "7",
+            "name": "Ava Garcia",
+            "salary": "12500",
+            "department_id": "3",
+            "manager_id": ""
+          },
+          {
+            "employee_id": "8",
+            "name": "William Davis",
+            "salary": "6800",
+            "department_id": "2",
+            "manager_id": ""
+          },
+          {
+            "employee_id": "9",
+            "name": "Isabella Wilson",
+            "salary": "11000",
+            "department_id": "3",
+            "manager_id": ""
+          },
+          {
+            "employee_id": "10",
+            "name": "James Anderson",
+            "salary": "4000",
+            "department_id": "1",
+            "manager_id": "11"
+          }
+        ],
+        "department": [
+          {
+            "department_id": "1",
+            "department_name": "Data Analytics"
+          },
+          {
+            "department_id": "2",
+            "department_name": "Data Science"
+          }
+        ]
+      },
+      "expected_output": [
+        {
+          "department_name": "Data Analytics",
+          "name": "James Anderson",
+          "salary": 4000
+        },
+        {
+          "department_name": "Data Analytics",
+          "name": "Emma Thompson",
+          "salary": 3800
+        },
+        {
+          "department_name": "Data Analytics",
+          "name": "Daniel Rodriguez",
+          "salary": 2230
+        },
+        {
+          "department_name": "Data Science",
+          "name": "Noah Johnson",
+          "salary": 6800
+        },
+        {
+          "department_name": "Data Science",
+          "name": "William Davis",
+          "salary": 6800
+        }
+      ],
+      "category": "normal"
+    },
+    {
+      "test_case_id": "tc_2_high_volume",
+      "description": "Multiple entities with scaled volume and multi-group distributions",
+      "input_data": {
+        "employee": [
+          {
+            "employee_id": "1",
+            "name": "Emma Thompson",
+            "salary": "3800",
+            "department_id": "1",
+            "manager_id": "6"
+          },
+          {
+            "employee_id": "2",
+            "name": "Daniel Rodriguez",
+            "salary": "2230",
+            "department_id": "1",
+            "manager_id": "7"
+          },
+          {
+            "employee_id": "3",
+            "name": "Olivia Smith",
+            "salary": "2000",
+            "department_id": "1",
+            "manager_id": "8"
+          },
+          {
+            "employee_id": "4",
+            "name": "Noah Johnson",
+            "salary": "6800",
+            "department_id": "2",
+            "manager_id": "9"
+          },
+          {
+            "employee_id": "5",
+            "name": "Sophia Martinez",
+            "salary": "1750",
+            "department_id": "1",
+            "manager_id": "11"
+          },
+          {
+            "employee_id": "6",
+            "name": "Liam Brown",
+            "salary": "13000",
+            "department_id": "3",
+            "manager_id": ""
+          },
+          {
+            "employee_id": "7",
+            "name": "Ava Garcia",
+            "salary": "12500",
+            "department_id": "3",
+            "manager_id": ""
+          },
+          {
+            "employee_id": "8",
+            "name": "William Davis",
+            "salary": "6800",
+            "department_id": "2",
+            "manager_id": ""
+          },
+          {
+            "employee_id": "9",
+            "name": "Isabella Wilson",
+            "salary": "11000",
+            "department_id": "3",
+            "manager_id": ""
+          },
+          {
+            "employee_id": "10",
+            "name": "James Anderson",
+            "salary": "4000",
+            "department_id": "1",
+            "manager_id": "11"
+          },
+          {
+            "employee_id": 1001,
+            "name": "Emma Thompson",
+            "salary": 5700.0,
+            "department_id": 1001,
+            "manager_id": 1006
+          },
+          {
+            "employee_id": 1002,
+            "name": "Daniel Rodriguez",
+            "salary": 3345.0,
+            "department_id": 1001,
+            "manager_id": 1007
+          },
+          {
+            "employee_id": 1003,
+            "name": "Olivia Smith",
+            "salary": 3000.0,
+            "department_id": 1001,
+            "manager_id": 1008
+          },
+          {
+            "employee_id": 1004,
+            "name": "Noah Johnson",
+            "salary": 10200.0,
+            "department_id": 1002,
+            "manager_id": 1009
+          },
+          {
+            "employee_id": 1005,
+            "name": "Sophia Martinez",
+            "salary": 2625.0,
+            "department_id": 1001,
+            "manager_id": 1011
+          },
+          {
+            "employee_id": 1006,
+            "name": "Liam Brown",
+            "salary": 19500.0,
+            "department_id": 1003,
+            "manager_id": ""
+          },
+          {
+            "employee_id": 1007,
+            "name": "Ava Garcia",
+            "salary": 18750.0,
+            "department_id": 1003,
+            "manager_id": ""
+          },
+          {
+            "employee_id": 1008,
+            "name": "William Davis",
+            "salary": 10200.0,
+            "department_id": 1002,
+            "manager_id": ""
+          },
+          {
+            "employee_id": 1009,
+            "name": "Isabella Wilson",
+            "salary": 16500.0,
+            "department_id": 1003,
+            "manager_id": ""
+          },
+          {
+            "employee_id": 1010,
+            "name": "James Anderson",
+            "salary": 6000.0,
+            "department_id": 1001,
+            "manager_id": 1011
+          }
+        ],
+        "department": [
+          {
+            "department_id": "1",
+            "department_name": "Data Analytics"
+          },
+          {
+            "department_id": "2",
+            "department_name": "Data Science"
+          },
+          {
+            "department_id": 1001,
+            "department_name": "Data Analytics"
+          },
+          {
+            "department_id": 1002,
+            "department_name": "Data Science"
+          }
+        ]
+      },
+      "expected_output": [
+        {
+          "department_name": "Data Analytics",
+          "name": "James Anderson",
+          "salary": 6000
+        },
+        {
+          "department_name": "Data Analytics",
+          "name": "Emma Thompson",
+          "salary": 5700
+        },
+        {
+          "department_name": "Data Analytics",
+          "name": "James Anderson",
+          "salary": 4000
+        },
+        {
+          "department_name": "Data Analytics",
+          "name": "Emma Thompson",
+          "salary": 3800
+        },
+        {
+          "department_name": "Data Analytics",
+          "name": "Daniel Rodriguez",
+          "salary": 3345
+        },
+        {
+          "department_name": "Data Analytics",
+          "name": "Daniel Rodriguez",
+          "salary": 2230
+        },
+        {
+          "department_name": "Data Science",
+          "name": "Noah Johnson",
+          "salary": 10200
+        },
+        {
+          "department_name": "Data Science",
+          "name": "William Davis",
+          "salary": 10200
+        },
+        {
+          "department_name": "Data Science",
+          "name": "Noah Johnson",
+          "salary": 6800
+        },
+        {
+          "department_name": "Data Science",
+          "name": "William Davis",
+          "salary": 6800
+        }
+      ],
+      "category": "volume"
+    },
+    {
+      "test_case_id": "tc_3_disqualifying_rows",
+      "description": "Dataset containing disqualifying rows, edge values, and cancelled/zero records",
+      "input_data": {
+        "employee": [
+          {
+            "employee_id": "1",
+            "name": "Emma Thompson",
+            "salary": "3800",
+            "department_id": "1",
+            "manager_id": "6"
+          },
+          {
+            "employee_id": "2",
+            "name": "Daniel Rodriguez",
+            "salary": "2230",
+            "department_id": "1",
+            "manager_id": "7"
+          },
+          {
+            "employee_id": "3",
+            "name": "Olivia Smith",
+            "salary": "2000",
+            "department_id": "1",
+            "manager_id": "8"
+          },
+          {
+            "employee_id": "4",
+            "name": "Noah Johnson",
+            "salary": "6800",
+            "department_id": "2",
+            "manager_id": "9"
+          },
+          {
+            "employee_id": "5",
+            "name": "Sophia Martinez",
+            "salary": "1750",
+            "department_id": "1",
+            "manager_id": "11"
+          },
+          {
+            "employee_id": "6",
+            "name": "Liam Brown",
+            "salary": "13000",
+            "department_id": "3",
+            "manager_id": ""
+          },
+          {
+            "employee_id": "7",
+            "name": "Ava Garcia",
+            "salary": "12500",
+            "department_id": "3",
+            "manager_id": ""
+          },
+          {
+            "employee_id": "8",
+            "name": "William Davis",
+            "salary": "6800",
+            "department_id": "2",
+            "manager_id": ""
+          },
+          {
+            "employee_id": "9",
+            "name": "Isabella Wilson",
+            "salary": "11000",
+            "department_id": "3",
+            "manager_id": ""
+          },
+          {
+            "employee_id": "10",
+            "name": "James Anderson",
+            "salary": "4000",
+            "department_id": "1",
+            "manager_id": "11"
+          },
+          {
+            "employee_id": 5001,
+            "name": "Emma Thompson",
+            "salary": 0,
+            "department_id": 5001,
+            "manager_id": 5006
+          },
+          {
+            "employee_id": 5002,
+            "name": "Daniel Rodriguez",
+            "salary": 0,
+            "department_id": 5001,
+            "manager_id": 5007
+          },
+          {
+            "employee_id": 5003,
+            "name": "Olivia Smith",
+            "salary": 0,
+            "department_id": 5001,
+            "manager_id": 5008
+          },
+          {
+            "employee_id": 5004,
+            "name": "Noah Johnson",
+            "salary": 0,
+            "department_id": 5002,
+            "manager_id": 5009
+          },
+          {
+            "employee_id": 5005,
+            "name": "Sophia Martinez",
+            "salary": 0,
+            "department_id": 5001,
+            "manager_id": 5011
+          }
+        ],
+        "department": [
+          {
+            "department_id": "1",
+            "department_name": "Data Analytics"
+          },
+          {
+            "department_id": "2",
+            "department_name": "Data Science"
+          },
+          {
+            "department_id": 5001,
+            "department_name": "Data Analytics"
+          }
+        ]
+      },
+      "expected_output": [
+        {
+          "department_name": "Data Analytics",
+          "name": "James Anderson",
+          "salary": 4000
+        },
+        {
+          "department_name": "Data Analytics",
+          "name": "Emma Thompson",
+          "salary": 3800
+        },
+        {
+          "department_name": "Data Analytics",
+          "name": "Daniel Rodriguez",
+          "salary": 2230
+        },
+        {
+          "department_name": "Data Analytics",
+          "name": "Daniel Rodriguez",
+          "salary": 0
+        },
+        {
+          "department_name": "Data Analytics",
+          "name": "Emma Thompson",
+          "salary": 0
+        },
+        {
+          "department_name": "Data Analytics",
+          "name": "Olivia Smith",
+          "salary": 0
+        },
+        {
+          "department_name": "Data Analytics",
+          "name": "Sophia Martinez",
+          "salary": 0
+        },
+        {
+          "department_name": "Data Science",
+          "name": "Noah Johnson",
+          "salary": 6800
+        },
+        {
+          "department_name": "Data Science",
+          "name": "William Davis",
+          "salary": 6800
+        }
+      ],
+      "category": "edge"
+    },
+    {
+      "test_case_id": "tc_4_empty_result",
+      "description": "Input where no rows satisfy problem criteria, verifying empty result handling",
+      "input_data": {
+        "employee": [],
+        "department": []
+      },
+      "expected_output": [],
+      "category": "edge"
+    },
+    {
+      "test_case_id": "tc_5_ties_and_nulls",
+      "description": "Tied ranking metrics, unmatched join keys, and NULL values in nullable attributes",
+      "input_data": {
+        "employee": [
+          {
+            "employee_id": "1",
+            "name": "Emma Thompson",
+            "salary": "3800",
+            "department_id": "1",
+            "manager_id": "6"
+          },
+          {
+            "employee_id": "2",
+            "name": "Daniel Rodriguez",
+            "salary": "2230",
+            "department_id": "1",
+            "manager_id": "7"
+          },
+          {
+            "employee_id": "3",
+            "name": "Olivia Smith",
+            "salary": "2000",
+            "department_id": "1",
+            "manager_id": "8"
+          },
+          {
+            "employee_id": "4",
+            "name": "Noah Johnson",
+            "salary": "6800",
+            "department_id": "2",
+            "manager_id": "9"
+          },
+          {
+            "employee_id": "5",
+            "name": "Sophia Martinez",
+            "salary": "1750",
+            "department_id": "1",
+            "manager_id": "11"
+          },
+          {
+            "employee_id": "6",
+            "name": "Liam Brown",
+            "salary": "13000",
+            "department_id": "3",
+            "manager_id": ""
+          },
+          {
+            "employee_id": "7",
+            "name": "Ava Garcia",
+            "salary": "12500",
+            "department_id": "3",
+            "manager_id": ""
+          },
+          {
+            "employee_id": "8",
+            "name": "William Davis",
+            "salary": "6800",
+            "department_id": "2",
+            "manager_id": ""
+          },
+          {
+            "employee_id": "9",
+            "name": "Isabella Wilson",
+            "salary": "11000",
+            "department_id": "3",
+            "manager_id": ""
+          },
+          {
+            "employee_id": "10",
+            "name": "James Anderson",
+            "salary": "4000",
+            "department_id": "1",
+            "manager_id": "11"
+          },
+          {
+            "employee_id": 9001,
+            "name": "Emma Thompson Duplicate",
+            "salary": "3800",
+            "department_id": 9001,
+            "manager_id": 9006
+          },
+          {
+            "employee_id": 9502,
+            "name": "Daniel Rodriguez",
+            "salary": "2230",
+            "department_id": 9501,
+            "manager_id": 9507
+          }
+        ],
+        "department": [
+          {
+            "department_id": "1",
+            "department_name": "Data Analytics"
+          },
+          {
+            "department_id": "2",
+            "department_name": "Data Science"
+          },
+          {
+            "department_id": 9001,
+            "department_name": "Data Analytics Duplicate"
+          },
+          {
+            "department_id": 9502,
+            "department_name": "Data Science"
+          }
+        ]
+      },
+      "expected_output": [
+        {
+          "department_name": "Data Analytics",
+          "name": "James Anderson",
+          "salary": 4000
+        },
+        {
+          "department_name": "Data Analytics",
+          "name": "Emma Thompson",
+          "salary": 3800
+        },
+        {
+          "department_name": "Data Analytics",
+          "name": "Daniel Rodriguez",
+          "salary": 2230
+        },
+        {
+          "department_name": "Data Analytics Duplicate",
+          "name": "Emma Thompson Duplicate",
+          "salary": 3800
+        },
+        {
+          "department_name": "Data Science",
+          "name": "Noah Johnson",
+          "salary": 6800
+        },
+        {
+          "department_name": "Data Science",
+          "name": "William Davis",
+          "salary": 6800
+        }
+      ],
+      "category": "edge"
+    }
+  ],
+  "order_sensitive": true,
+  "expected_output": [
+    {
+      "department_name": "Data Analytics",
+      "name": "James Anderson",
+      "salary": 4000
+    },
+    {
+      "department_name": "Data Analytics",
+      "name": "Emma Thompson",
+      "salary": 3800
+    },
+    {
+      "department_name": "Data Analytics",
+      "name": "Daniel Rodriguez",
+      "salary": 2230
+    },
+    {
+      "department_name": "Data Science",
+      "name": "Noah Johnson",
+      "salary": 6800
+    },
+    {
+      "department_name": "Data Science",
+      "name": "William Davis",
+      "salary": 6800
+    }
+  ]
+}

@@ -1,0 +1,346 @@
+{
+  "question_id": "q_064_sql_first_transaction",
+  "slug": "sql-first-transaction",
+  "title": "First Transaction",
+  "difficulty": "Medium",
+  "company": "Etsy",
+  "premium": true,
+  "question": "You are given a table containing Etsy user transactions. Write a query that retrieves the customers whose first transaction was valued at $50 or more. Output the total number of users who meet this criteria.",
+  "notes": [],
+  "tables": [
+    {
+      "table_name": "user_transactions",
+      "columns": [
+        {
+          "column_name": "transaction_id",
+          "data_type": "INT"
+        },
+        {
+          "column_name": "user_id",
+          "data_type": "INT"
+        },
+        {
+          "column_name": "spend",
+          "data_type": "DECIMAL(10,2)"
+        },
+        {
+          "column_name": "transaction_date",
+          "data_type": "DATETIME"
+        }
+      ]
+    }
+  ],
+  "sample_data": {
+    "user_transactions": [
+      {
+        "transaction_id": 759274,
+        "user_id": 111,
+        "spend": "49.50",
+        "transaction_date": "02/03/2022 00:00:00"
+      },
+      {
+        "transaction_id": 850371,
+        "user_id": 111,
+        "spend": "51.00",
+        "transaction_date": "03/15/2022 00:00:00"
+      },
+      {
+        "transaction_id": 615348,
+        "user_id": 145,
+        "spend": "36.30",
+        "transaction_date": "03/22/2022 00:00:00"
+      },
+      {
+        "transaction_id": 137424,
+        "user_id": 156,
+        "spend": "151.00",
+        "transaction_date": "04/04/2022 00:00:00"
+      },
+      {
+        "transaction_id": 248475,
+        "user_id": 156,
+        "spend": "87.00",
+        "transaction_date": "04/16/2022 00:00:00"
+      }
+    ]
+  },
+  "sample_output": [
+    {
+      "users": 1
+    }
+  ],
+  "reference_sql": "WITH first_orders AS (\n  SELECT user_id, spend,\n         ROW_NUMBER() OVER (PARTITION BY user_id ORDER BY transaction_date) AS rn\n  FROM user_transactions\n)\nSELECT COUNT(user_id) AS users\nFROM first_orders\nWHERE rn = 1 AND spend >= 50;",
+  "tags": [
+    "aggregation",
+    "ecommerce",
+    "etsy",
+    "finance",
+    "medium"
+  ],
+  "related_questions": [],
+  "sources": [
+    [
+      "DataLemur blog: 8 Etsy SQL questions",
+      "https://datalemur.com/blog/etsy-sql-interview-questions"
+    ],
+    [
+      "DataLemur page (locked)",
+      "https://datalemur.com/questions/sql-first-transaction"
+    ],
+    [
+      "DataLemur PDF",
+      "Page 68"
+    ]
+  ],
+  "test_cases": [
+    {
+      "test_case_id": "tc_1_baseline",
+      "description": "Baseline sample input data from problem description",
+      "input_data": {
+        "user_transactions": [
+          {
+            "transaction_id": 759274,
+            "user_id": 111,
+            "spend": "49.50",
+            "transaction_date": "02/03/2022 00:00:00"
+          },
+          {
+            "transaction_id": 850371,
+            "user_id": 111,
+            "spend": "51.00",
+            "transaction_date": "03/15/2022 00:00:00"
+          },
+          {
+            "transaction_id": 615348,
+            "user_id": 145,
+            "spend": "36.30",
+            "transaction_date": "03/22/2022 00:00:00"
+          },
+          {
+            "transaction_id": 137424,
+            "user_id": 156,
+            "spend": "151.00",
+            "transaction_date": "04/04/2022 00:00:00"
+          },
+          {
+            "transaction_id": 248475,
+            "user_id": 156,
+            "spend": "87.00",
+            "transaction_date": "04/16/2022 00:00:00"
+          }
+        ]
+      },
+      "expected_output": [
+        {
+          "users": 1
+        }
+      ],
+      "category": "normal"
+    },
+    {
+      "test_case_id": "tc_2_high_volume",
+      "description": "Multiple entities with scaled volume and multi-group distributions",
+      "input_data": {
+        "user_transactions": [
+          {
+            "transaction_id": 759274,
+            "user_id": 111,
+            "spend": "49.50",
+            "transaction_date": "02/03/2022 00:00:00"
+          },
+          {
+            "transaction_id": 850371,
+            "user_id": 111,
+            "spend": "51.00",
+            "transaction_date": "03/15/2022 00:00:00"
+          },
+          {
+            "transaction_id": 615348,
+            "user_id": 145,
+            "spend": "36.30",
+            "transaction_date": "03/22/2022 00:00:00"
+          },
+          {
+            "transaction_id": 137424,
+            "user_id": 156,
+            "spend": "151.00",
+            "transaction_date": "04/04/2022 00:00:00"
+          },
+          {
+            "transaction_id": 248475,
+            "user_id": 156,
+            "spend": "87.00",
+            "transaction_date": "04/16/2022 00:00:00"
+          },
+          {
+            "transaction_id": 760274,
+            "user_id": 1111,
+            "spend": 74.25,
+            "transaction_date": "02/08/2022 00:00:00"
+          },
+          {
+            "transaction_id": 851371,
+            "user_id": 1111,
+            "spend": 76.5,
+            "transaction_date": "03/20/2022 00:00:00"
+          },
+          {
+            "transaction_id": 616348,
+            "user_id": 1145,
+            "spend": 54.45,
+            "transaction_date": "03/27/2022 00:00:00"
+          },
+          {
+            "transaction_id": 138424,
+            "user_id": 1156,
+            "spend": 226.5,
+            "transaction_date": "04/09/2022 00:00:00"
+          },
+          {
+            "transaction_id": 249475,
+            "user_id": 1156,
+            "spend": 130.5,
+            "transaction_date": "04/21/2022 00:00:00"
+          }
+        ]
+      },
+      "expected_output": [
+        {
+          "users": 4
+        }
+      ],
+      "category": "volume"
+    },
+    {
+      "test_case_id": "tc_3_disqualifying_rows",
+      "description": "Dataset containing disqualifying rows, edge values, and cancelled/zero records",
+      "input_data": {
+        "user_transactions": [
+          {
+            "transaction_id": 759274,
+            "user_id": 111,
+            "spend": "49.50",
+            "transaction_date": "02/03/2022 00:00:00"
+          },
+          {
+            "transaction_id": 850371,
+            "user_id": 111,
+            "spend": "51.00",
+            "transaction_date": "03/15/2022 00:00:00"
+          },
+          {
+            "transaction_id": 615348,
+            "user_id": 145,
+            "spend": "36.30",
+            "transaction_date": "03/22/2022 00:00:00"
+          },
+          {
+            "transaction_id": 137424,
+            "user_id": 156,
+            "spend": "151.00",
+            "transaction_date": "04/04/2022 00:00:00"
+          },
+          {
+            "transaction_id": 248475,
+            "user_id": 156,
+            "spend": "87.00",
+            "transaction_date": "04/16/2022 00:00:00"
+          },
+          {
+            "transaction_id": 764274,
+            "user_id": 5111,
+            "spend": 0,
+            "transaction_date": "02/03/2017 00:00:00"
+          },
+          {
+            "transaction_id": 855371,
+            "user_id": 5111,
+            "spend": 0,
+            "transaction_date": "03/15/2017 00:00:00"
+          }
+        ]
+      },
+      "expected_output": [
+        {
+          "users": 1
+        }
+      ],
+      "category": "edge"
+    },
+    {
+      "test_case_id": "tc_4_empty_result",
+      "description": "Input where no rows satisfy problem criteria, verifying empty result handling",
+      "input_data": {
+        "user_transactions": []
+      },
+      "expected_output": [
+        {
+          "users": 0
+        }
+      ],
+      "category": "edge"
+    },
+    {
+      "test_case_id": "tc_5_ties_and_nulls",
+      "description": "Tied ranking metrics, unmatched join keys, and NULL values in nullable attributes",
+      "input_data": {
+        "user_transactions": [
+          {
+            "transaction_id": 759274,
+            "user_id": 111,
+            "spend": "49.50",
+            "transaction_date": "02/03/2022 00:00:00"
+          },
+          {
+            "transaction_id": 850371,
+            "user_id": 111,
+            "spend": "51.00",
+            "transaction_date": "03/15/2022 00:00:00"
+          },
+          {
+            "transaction_id": 615348,
+            "user_id": 145,
+            "spend": "36.30",
+            "transaction_date": "03/22/2022 00:00:00"
+          },
+          {
+            "transaction_id": 137424,
+            "user_id": 156,
+            "spend": "151.00",
+            "transaction_date": "04/04/2022 00:00:00"
+          },
+          {
+            "transaction_id": 248475,
+            "user_id": 156,
+            "spend": "87.00",
+            "transaction_date": "04/16/2022 00:00:00"
+          },
+          {
+            "transaction_id": 768274,
+            "user_id": 9111,
+            "spend": "49.50",
+            "transaction_date": "02/03/2022 00:00:00"
+          },
+          {
+            "transaction_id": 859871,
+            "user_id": 9611,
+            "spend": "51.00",
+            "transaction_date": "03/15/2022 00:00:00"
+          }
+        ]
+      },
+      "expected_output": [
+        {
+          "users": 2
+        }
+      ],
+      "category": "edge"
+    }
+  ],
+  "order_sensitive": false,
+  "expected_output": [
+    {
+      "users": 1
+    }
+  ]
+}

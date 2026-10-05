@@ -1,0 +1,634 @@
+{
+  "question_id": "q_075_yoy_growth_rate",
+  "slug": "yoy-growth-rate",
+  "title": "Y-on-Y Growth Rate",
+  "difficulty": "Hard",
+  "company": "Wayfair",
+  "premium": false,
+  "question": "Assume you're given a table containing information about Wayfair user transactions for different products. Write a query to calculate the year-on-year growth rate for the total spend of each product, grouping the results by product ID.\n\nThe output should include the year in ascending order, product ID, current year's spend, previous year's spend and year-on-year growth percentage, rounded to 2 decimal places.",
+  "notes": [
+    "Product ID 123424 is analyzed for multiple years: 2019, 2020, 2021, and 2022.",
+    "In the year 2020, the current year's spend is 1000.20, and there is no previous year's spend recorded (indicated by an empty cell).",
+    "In the year 2021, the current year's spend is 1246.44, and the previous year's spend is 1000.20.",
+    "In the year 2022, the current year's spend is 2145.32, and the previous year's spend is 1246.44.",
+    "To calculate the year-on-year growth rate, we compare the current year's spend with the previous year's spend.For instance, the spend grew by 24.62% from 2020 to 2021, indicating a positive growth rate.",
+    "The dataset you are querying against may have different input & output - this is just an example!"
+  ],
+  "tables": [
+    {
+      "table_name": "user_transactions",
+      "columns": [
+        {
+          "column_name": "transaction_id",
+          "data_type": "INT"
+        },
+        {
+          "column_name": "product_id",
+          "data_type": "INT"
+        },
+        {
+          "column_name": "spend",
+          "data_type": "DECIMAL(10,2)"
+        },
+        {
+          "column_name": "transaction_date",
+          "data_type": "DATETIME"
+        }
+      ]
+    }
+  ],
+  "sample_data": {
+    "user_transactions": [
+      {
+        "transaction_id": "1341",
+        "product_id": "123424",
+        "spend": "1500.60",
+        "transaction_date": "12/31/2019 12:00:00"
+      },
+      {
+        "transaction_id": "1423",
+        "product_id": "123424",
+        "spend": "1000.20",
+        "transaction_date": "12/31/2020 12:00:00"
+      },
+      {
+        "transaction_id": "1623",
+        "product_id": "123424",
+        "spend": "1246.44",
+        "transaction_date": "12/31/2021 12:00:00"
+      },
+      {
+        "transaction_id": "1322",
+        "product_id": "123424",
+        "spend": "2145.32",
+        "transaction_date": "12/31/2022 12:00:00"
+      }
+    ]
+  },
+  "sample_output": [
+    {
+      "year": "2019",
+      "product_id": "123424",
+      "curr_year_spend": "1500.60",
+      "prev_year_spend": "NULL",
+      "yoy_rate": "NULL"
+    },
+    {
+      "year": "2020",
+      "product_id": "123424",
+      "curr_year_spend": "1000.20",
+      "prev_year_spend": "1500.60",
+      "yoy_rate": "-33.35"
+    },
+    {
+      "year": "2021",
+      "product_id": "123424",
+      "curr_year_spend": "1246.44",
+      "prev_year_spend": "1000.20",
+      "yoy_rate": "24.62"
+    },
+    {
+      "year": "2022",
+      "product_id": "123424",
+      "curr_year_spend": "2145.32",
+      "prev_year_spend": "1246.44",
+      "yoy_rate": "72.12"
+    }
+  ],
+  "reference_sql": "WITH yearly_spend AS (\n  SELECT \n    YEAR(transaction_date) AS yr,\n    product_id,\n    spend AS curr_year_spend,\n    LAG(spend) OVER (PARTITION BY product_id ORDER BY YEAR(transaction_date)) AS prev_year_spend\n  FROM user_transactions\n)\nSELECT \n  yr,\n  product_id,\n  curr_year_spend,\n  prev_year_spend,\n  ROUND(100.0 * (curr_year_spend - prev_year_spend) / prev_year_spend, 2) AS yoy_rate\nFROM yearly_spend\nORDER BY product_id, yr;",
+  "tags": [
+    "aggregation",
+    "date-manipulation",
+    "ecommerce",
+    "finance",
+    "hard",
+    "lead-lag",
+    "math",
+    "wayfair",
+    "window-function"
+  ],
+  "related_questions": [],
+  "sources": [
+    [
+      "DataLemur page (free)",
+      "https://datalemur.com/questions/yoy-growth-rate"
+    ],
+    [
+      "DataLemur PDF",
+      "Page 79"
+    ]
+  ],
+  "test_cases": [
+    {
+      "test_case_id": "tc_1_baseline",
+      "description": "Baseline sample input data from problem description",
+      "input_data": {
+        "user_transactions": [
+          {
+            "transaction_id": "1341",
+            "product_id": "123424",
+            "spend": "1500.60",
+            "transaction_date": "12/31/2019 12:00:00"
+          },
+          {
+            "transaction_id": "1423",
+            "product_id": "123424",
+            "spend": "1000.20",
+            "transaction_date": "12/31/2020 12:00:00"
+          },
+          {
+            "transaction_id": "1623",
+            "product_id": "123424",
+            "spend": "1246.44",
+            "transaction_date": "12/31/2021 12:00:00"
+          },
+          {
+            "transaction_id": "1322",
+            "product_id": "123424",
+            "spend": "2145.32",
+            "transaction_date": "12/31/2022 12:00:00"
+          }
+        ]
+      },
+      "expected_output": [
+        {
+          "yr": 2019,
+          "product_id": 123424,
+          "curr_year_spend": 1500.6,
+          "prev_year_spend": null,
+          "yoy_rate": null
+        },
+        {
+          "yr": 2020,
+          "product_id": 123424,
+          "curr_year_spend": 1000.2,
+          "prev_year_spend": 1500.6,
+          "yoy_rate": -33.35
+        },
+        {
+          "yr": 2021,
+          "product_id": 123424,
+          "curr_year_spend": 1246.44,
+          "prev_year_spend": 1000.2,
+          "yoy_rate": 24.62
+        },
+        {
+          "yr": 2022,
+          "product_id": 123424,
+          "curr_year_spend": 2145.32,
+          "prev_year_spend": 1246.44,
+          "yoy_rate": 72.12
+        }
+      ],
+      "category": "normal"
+    },
+    {
+      "test_case_id": "tc_2_high_volume",
+      "description": "Multiple entities with scaled volume and multi-group distributions",
+      "input_data": {
+        "user_transactions": [
+          {
+            "transaction_id": "1341",
+            "product_id": "123424",
+            "spend": "1500.60",
+            "transaction_date": "12/31/2019 12:00:00"
+          },
+          {
+            "transaction_id": "1423",
+            "product_id": "123424",
+            "spend": "1000.20",
+            "transaction_date": "12/31/2020 12:00:00"
+          },
+          {
+            "transaction_id": "1623",
+            "product_id": "123424",
+            "spend": "1246.44",
+            "transaction_date": "12/31/2021 12:00:00"
+          },
+          {
+            "transaction_id": "1322",
+            "product_id": "123424",
+            "spend": "2145.32",
+            "transaction_date": "12/31/2022 12:00:00"
+          },
+          {
+            "transaction_id": 2341,
+            "product_id": 124424,
+            "spend": 2250.9,
+            "transaction_date": "12/28/2019 12:00:00"
+          },
+          {
+            "transaction_id": 2423,
+            "product_id": 124424,
+            "spend": 1500.3,
+            "transaction_date": "12/28/2020 12:00:00"
+          },
+          {
+            "transaction_id": 2623,
+            "product_id": 124424,
+            "spend": 1869.66,
+            "transaction_date": "12/28/2021 12:00:00"
+          },
+          {
+            "transaction_id": 2322,
+            "product_id": 124424,
+            "spend": 3217.98,
+            "transaction_date": "12/28/2022 12:00:00"
+          }
+        ]
+      },
+      "expected_output": [
+        {
+          "yr": 2019,
+          "product_id": 123424,
+          "curr_year_spend": 1500.6,
+          "prev_year_spend": null,
+          "yoy_rate": null
+        },
+        {
+          "yr": 2020,
+          "product_id": 123424,
+          "curr_year_spend": 1000.2,
+          "prev_year_spend": 1500.6,
+          "yoy_rate": -33.35
+        },
+        {
+          "yr": 2021,
+          "product_id": 123424,
+          "curr_year_spend": 1246.44,
+          "prev_year_spend": 1000.2,
+          "yoy_rate": 24.62
+        },
+        {
+          "yr": 2022,
+          "product_id": 123424,
+          "curr_year_spend": 2145.32,
+          "prev_year_spend": 1246.44,
+          "yoy_rate": 72.12
+        },
+        {
+          "yr": 2019,
+          "product_id": 124424,
+          "curr_year_spend": 2250.9,
+          "prev_year_spend": null,
+          "yoy_rate": null
+        },
+        {
+          "yr": 2020,
+          "product_id": 124424,
+          "curr_year_spend": 1500.3,
+          "prev_year_spend": 2250.9,
+          "yoy_rate": -33.35
+        },
+        {
+          "yr": 2021,
+          "product_id": 124424,
+          "curr_year_spend": 1869.66,
+          "prev_year_spend": 1500.3,
+          "yoy_rate": 24.62
+        },
+        {
+          "yr": 2022,
+          "product_id": 124424,
+          "curr_year_spend": 3217.98,
+          "prev_year_spend": 1869.66,
+          "yoy_rate": 72.12
+        }
+      ],
+      "category": "volume"
+    },
+    {
+      "test_case_id": "tc_3_disqualifying_rows",
+      "description": "Dataset containing disqualifying rows, edge values, and cancelled/zero records",
+      "input_data": {
+        "user_transactions": [
+          {
+            "transaction_id": "1341",
+            "product_id": "123424",
+            "spend": "1500.60",
+            "transaction_date": "12/31/2019 12:00:00"
+          },
+          {
+            "transaction_id": "1423",
+            "product_id": "123424",
+            "spend": "1000.20",
+            "transaction_date": "12/31/2020 12:00:00"
+          },
+          {
+            "transaction_id": "1623",
+            "product_id": "123424",
+            "spend": "1246.44",
+            "transaction_date": "12/31/2021 12:00:00"
+          },
+          {
+            "transaction_id": "1322",
+            "product_id": "123424",
+            "spend": "2145.32",
+            "transaction_date": "12/31/2022 12:00:00"
+          },
+          {
+            "transaction_id": 6341,
+            "product_id": 128424,
+            "spend": 0,
+            "transaction_date": "12/28/2014 12:00:00"
+          },
+          {
+            "transaction_id": 6423,
+            "product_id": 128424,
+            "spend": 0,
+            "transaction_date": "12/28/2015 12:00:00"
+          }
+        ]
+      },
+      "expected_output": [
+        {
+          "yr": 2019,
+          "product_id": 123424,
+          "curr_year_spend": 1500.6,
+          "prev_year_spend": null,
+          "yoy_rate": null
+        },
+        {
+          "yr": 2020,
+          "product_id": 123424,
+          "curr_year_spend": 1000.2,
+          "prev_year_spend": 1500.6,
+          "yoy_rate": -33.35
+        },
+        {
+          "yr": 2021,
+          "product_id": 123424,
+          "curr_year_spend": 1246.44,
+          "prev_year_spend": 1000.2,
+          "yoy_rate": 24.62
+        },
+        {
+          "yr": 2022,
+          "product_id": 123424,
+          "curr_year_spend": 2145.32,
+          "prev_year_spend": 1246.44,
+          "yoy_rate": 72.12
+        },
+        {
+          "yr": 2014,
+          "product_id": 128424,
+          "curr_year_spend": 0.0,
+          "prev_year_spend": null,
+          "yoy_rate": null
+        },
+        {
+          "yr": 2015,
+          "product_id": 128424,
+          "curr_year_spend": 0.0,
+          "prev_year_spend": 0.0,
+          "yoy_rate": null
+        }
+      ],
+      "category": "edge"
+    },
+    {
+      "test_case_id": "tc_4_empty_result",
+      "description": "Input where no rows satisfy problem criteria, verifying empty result handling",
+      "input_data": {
+        "user_transactions": []
+      },
+      "expected_output": [],
+      "category": "edge"
+    },
+    {
+      "test_case_id": "tc_5_ties_and_nulls",
+      "description": "Tied ranking metrics, unmatched join keys, and NULL values in nullable attributes",
+      "input_data": {
+        "user_transactions": [
+          {
+            "transaction_id": "1341",
+            "product_id": "123424",
+            "spend": "1500.60",
+            "transaction_date": "12/31/2019 12:00:00"
+          },
+          {
+            "transaction_id": "1423",
+            "product_id": "123424",
+            "spend": "1000.20",
+            "transaction_date": "12/31/2020 12:00:00"
+          },
+          {
+            "transaction_id": "1623",
+            "product_id": "123424",
+            "spend": "1246.44",
+            "transaction_date": "12/31/2021 12:00:00"
+          },
+          {
+            "transaction_id": "1322",
+            "product_id": "123424",
+            "spend": "2145.32",
+            "transaction_date": "12/31/2022 12:00:00"
+          },
+          {
+            "transaction_id": 10341,
+            "product_id": 132424,
+            "spend": "1500.60",
+            "transaction_date": "12/31/2019 12:00:00"
+          },
+          {
+            "transaction_id": 10923,
+            "product_id": 132924,
+            "spend": "1000.20",
+            "transaction_date": "12/31/2020 12:00:00"
+          }
+        ]
+      },
+      "expected_output": [
+        {
+          "yr": 2019,
+          "product_id": 123424,
+          "curr_year_spend": 1500.6,
+          "prev_year_spend": null,
+          "yoy_rate": null
+        },
+        {
+          "yr": 2020,
+          "product_id": 123424,
+          "curr_year_spend": 1000.2,
+          "prev_year_spend": 1500.6,
+          "yoy_rate": -33.35
+        },
+        {
+          "yr": 2021,
+          "product_id": 123424,
+          "curr_year_spend": 1246.44,
+          "prev_year_spend": 1000.2,
+          "yoy_rate": 24.62
+        },
+        {
+          "yr": 2022,
+          "product_id": 123424,
+          "curr_year_spend": 2145.32,
+          "prev_year_spend": 1246.44,
+          "yoy_rate": 72.12
+        },
+        {
+          "yr": 2019,
+          "product_id": 132424,
+          "curr_year_spend": 1500.6,
+          "prev_year_spend": null,
+          "yoy_rate": null
+        },
+        {
+          "yr": 2020,
+          "product_id": 132924,
+          "curr_year_spend": 1000.2,
+          "prev_year_spend": null,
+          "yoy_rate": null
+        }
+      ],
+      "category": "edge"
+    },
+    {
+      "test_case_id": "tc_6_extreme_boundary",
+      "description": "Consecutive day sequences, month-end date rollovers, and high-frequency transactions",
+      "input_data": {
+        "user_transactions": [
+          {
+            "transaction_id": "1341",
+            "product_id": "123424",
+            "spend": "1500.60",
+            "transaction_date": "12/31/2019 12:00:00"
+          },
+          {
+            "transaction_id": "1423",
+            "product_id": "123424",
+            "spend": "1000.20",
+            "transaction_date": "12/31/2020 12:00:00"
+          },
+          {
+            "transaction_id": "1623",
+            "product_id": "123424",
+            "spend": "1246.44",
+            "transaction_date": "12/31/2021 12:00:00"
+          },
+          {
+            "transaction_id": "1322",
+            "product_id": "123424",
+            "spend": "2145.32",
+            "transaction_date": "12/31/2022 12:00:00"
+          },
+          {
+            "transaction_id": 9341,
+            "product_id": 131424,
+            "spend": 3001.2,
+            "transaction_date": "12/28/2019 12:00:00"
+          },
+          {
+            "transaction_id": 9423,
+            "product_id": 131424,
+            "spend": 2000.4,
+            "transaction_date": "12/28/2020 12:00:00"
+          },
+          {
+            "transaction_id": 9623,
+            "product_id": 131424,
+            "spend": 2492.88,
+            "transaction_date": "12/28/2021 12:00:00"
+          },
+          {
+            "transaction_id": 9322,
+            "product_id": 131424,
+            "spend": 4290.64,
+            "transaction_date": "12/28/2022 12:00:00"
+          }
+        ]
+      },
+      "expected_output": [
+        {
+          "yr": 2019,
+          "product_id": 123424,
+          "curr_year_spend": 1500.6,
+          "prev_year_spend": null,
+          "yoy_rate": null
+        },
+        {
+          "yr": 2020,
+          "product_id": 123424,
+          "curr_year_spend": 1000.2,
+          "prev_year_spend": 1500.6,
+          "yoy_rate": -33.35
+        },
+        {
+          "yr": 2021,
+          "product_id": 123424,
+          "curr_year_spend": 1246.44,
+          "prev_year_spend": 1000.2,
+          "yoy_rate": 24.62
+        },
+        {
+          "yr": 2022,
+          "product_id": 123424,
+          "curr_year_spend": 2145.32,
+          "prev_year_spend": 1246.44,
+          "yoy_rate": 72.12
+        },
+        {
+          "yr": 2019,
+          "product_id": 131424,
+          "curr_year_spend": 3001.2,
+          "prev_year_spend": null,
+          "yoy_rate": null
+        },
+        {
+          "yr": 2020,
+          "product_id": 131424,
+          "curr_year_spend": 2000.4,
+          "prev_year_spend": 3001.2,
+          "yoy_rate": -33.35
+        },
+        {
+          "yr": 2021,
+          "product_id": 131424,
+          "curr_year_spend": 2492.88,
+          "prev_year_spend": 2000.4,
+          "yoy_rate": 24.62
+        },
+        {
+          "yr": 2022,
+          "product_id": 131424,
+          "curr_year_spend": 4290.64,
+          "prev_year_spend": 2492.88,
+          "yoy_rate": 72.12
+        }
+      ],
+      "category": "boundary"
+    }
+  ],
+  "order_sensitive": true,
+  "expected_output": [
+    {
+      "yr": 2019,
+      "product_id": 123424,
+      "curr_year_spend": 1500.6,
+      "prev_year_spend": null,
+      "yoy_rate": null
+    },
+    {
+      "yr": 2020,
+      "product_id": 123424,
+      "curr_year_spend": 1000.2,
+      "prev_year_spend": 1500.6,
+      "yoy_rate": -33.35
+    },
+    {
+      "yr": 2021,
+      "product_id": 123424,
+      "curr_year_spend": 1246.44,
+      "prev_year_spend": 1000.2,
+      "yoy_rate": 24.62
+    },
+    {
+      "yr": 2022,
+      "product_id": 123424,
+      "curr_year_spend": 2145.32,
+      "prev_year_spend": 1246.44,
+      "yoy_rate": 72.12
+    }
+  ]
+}

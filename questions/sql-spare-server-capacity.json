@@ -1,0 +1,396 @@
+{
+  "question_id": "q_028_sql_spare_server_capacity",
+  "slug": "sql-spare-server-capacity",
+  "title": "Spare Server Capacity",
+  "difficulty": "Easy",
+  "company": "Microsoft",
+  "premium": true,
+  "question": "Microsoft Azure's capacity planning team wants to understand how much data its customers are using, and how much spare capacity is left in each of its data centers. You are given three tables: customers, datacenters and forecasted_demand.\n\nWrite a query to find each data center's total unused server capacity. Output the data center id in ascending order and the total spare capacity.\n\nNot available: the customers table, the forecasted_demand example rows, and the expected output. (The page also has a 'Definitions' section that I could not read.)",
+  "notes": [],
+  "tables": [
+    {
+      "table_name": "datacenters",
+      "columns": [
+        {
+          "column_name": "datacenter_id",
+          "data_type": "INT"
+        },
+        {
+          "column_name": "name",
+          "data_type": "VARCHAR(255)"
+        },
+        {
+          "column_name": "monthly_capacity",
+          "data_type": "INT"
+        }
+      ]
+    },
+    {
+      "table_name": "forecasted_demand",
+      "columns": [
+        {
+          "column_name": "customer_id",
+          "data_type": "INT"
+        },
+        {
+          "column_name": "datacenter_id",
+          "data_type": "INT"
+        },
+        {
+          "column_name": "monthly_demand",
+          "data_type": "INT"
+        }
+      ]
+    }
+  ],
+  "sample_data": {
+    "datacenters": [
+      {
+        "datacenter_id": 1,
+        "name": "London",
+        "monthly_capacity": 100
+      },
+      {
+        "datacenter_id": 3,
+        "name": "Amsterdam",
+        "monthly_capacity": 250
+      },
+      {
+        "datacenter_id": 4,
+        "name": "Hong Kong",
+        "monthly_capacity": 400
+      }
+    ],
+    "forecasted_demand": [
+      {
+        "customer_id": 1,
+        "datacenter_id": 1,
+        "monthly_demand": 60
+      },
+      {
+        "customer_id": 2,
+        "datacenter_id": 1,
+        "monthly_demand": 25
+      },
+      {
+        "customer_id": 3,
+        "datacenter_id": 2,
+        "monthly_demand": 40
+      },
+      {
+        "customer_id": 4,
+        "datacenter_id": 3,
+        "monthly_demand": 10
+      }
+    ]
+  },
+  "sample_output": [
+    {
+      "datacenter_id": "1",
+      "spare_capacity": "25"
+    },
+    {
+      "datacenter_id": "3",
+      "spare_capacity": "70"
+    },
+    {
+      "datacenter_id": "4",
+      "spare_capacity": "60"
+    }
+  ],
+  "reference_sql": "SELECT d.datacenter_id,\n       d.monthly_capacity - IFNULL(SUM(f.monthly_demand), 0) AS spare_capacity\nFROM datacenters d\nLEFT JOIN forecasted_demand f ON d.datacenter_id = f.datacenter_id\nGROUP BY d.datacenter_id, d.monthly_capacity\nORDER BY d.datacenter_id;",
+  "tags": [
+    "aggregation",
+    "conditional-logic",
+    "easy",
+    "ecommerce",
+    "join",
+    "left-join",
+    "microsoft",
+    "social-media"
+  ],
+  "related_questions": [],
+  "sources": [
+    [
+      "DataLemur page (locked)",
+      "https://datalemur.com/questions/sql-spare-server-capacity"
+    ],
+    [
+      "DataLemur PDF",
+      "Page 32"
+    ]
+  ],
+  "test_cases": [
+    {
+      "test_case_id": "tc_1_baseline",
+      "description": "Baseline sample input data from problem description",
+      "input_data": {
+        "datacenters": [
+          {
+            "datacenter_id": 1,
+            "name": "London",
+            "monthly_capacity": 100
+          },
+          {
+            "datacenter_id": 3,
+            "name": "Amsterdam",
+            "monthly_capacity": 250
+          },
+          {
+            "datacenter_id": 4,
+            "name": "Hong Kong",
+            "monthly_capacity": 400
+          }
+        ],
+        "forecasted_demand": [
+          {
+            "customer_id": 1,
+            "datacenter_id": 1,
+            "monthly_demand": 60
+          },
+          {
+            "customer_id": 2,
+            "datacenter_id": 1,
+            "monthly_demand": 25
+          },
+          {
+            "customer_id": 3,
+            "datacenter_id": 2,
+            "monthly_demand": 40
+          },
+          {
+            "customer_id": 4,
+            "datacenter_id": 3,
+            "monthly_demand": 10
+          }
+        ]
+      },
+      "expected_output": [
+        {
+          "datacenter_id": 1,
+          "spare_capacity": 15
+        },
+        {
+          "datacenter_id": 3,
+          "spare_capacity": 240
+        },
+        {
+          "datacenter_id": 4,
+          "spare_capacity": 400
+        }
+      ],
+      "category": "normal"
+    },
+    {
+      "test_case_id": "tc_2_high_volume",
+      "description": "Multiple entities with scaled volume and multi-group distributions",
+      "input_data": {
+        "datacenters": [
+          {
+            "datacenter_id": 1,
+            "name": "London",
+            "monthly_capacity": 100
+          },
+          {
+            "datacenter_id": 3,
+            "name": "Amsterdam",
+            "monthly_capacity": 250
+          },
+          {
+            "datacenter_id": 4,
+            "name": "Hong Kong",
+            "monthly_capacity": 400
+          },
+          {
+            "datacenter_id": 1001,
+            "name": "London",
+            "monthly_capacity": 100
+          },
+          {
+            "datacenter_id": 1003,
+            "name": "Amsterdam",
+            "monthly_capacity": 250
+          },
+          {
+            "datacenter_id": 1004,
+            "name": "Hong Kong",
+            "monthly_capacity": 400
+          }
+        ],
+        "forecasted_demand": [
+          {
+            "customer_id": 1,
+            "datacenter_id": 1,
+            "monthly_demand": 60
+          },
+          {
+            "customer_id": 2,
+            "datacenter_id": 1,
+            "monthly_demand": 25
+          },
+          {
+            "customer_id": 3,
+            "datacenter_id": 2,
+            "monthly_demand": 40
+          },
+          {
+            "customer_id": 4,
+            "datacenter_id": 3,
+            "monthly_demand": 10
+          },
+          {
+            "customer_id": 1001,
+            "datacenter_id": 1001,
+            "monthly_demand": 60
+          },
+          {
+            "customer_id": 1002,
+            "datacenter_id": 1001,
+            "monthly_demand": 25
+          },
+          {
+            "customer_id": 1003,
+            "datacenter_id": 1002,
+            "monthly_demand": 40
+          },
+          {
+            "customer_id": 1004,
+            "datacenter_id": 1003,
+            "monthly_demand": 10
+          }
+        ]
+      },
+      "expected_output": [
+        {
+          "datacenter_id": 1,
+          "spare_capacity": 15
+        },
+        {
+          "datacenter_id": 3,
+          "spare_capacity": 240
+        },
+        {
+          "datacenter_id": 4,
+          "spare_capacity": 400
+        },
+        {
+          "datacenter_id": 1001,
+          "spare_capacity": 15
+        },
+        {
+          "datacenter_id": 1003,
+          "spare_capacity": 240
+        },
+        {
+          "datacenter_id": 1004,
+          "spare_capacity": 400
+        }
+      ],
+      "category": "volume"
+    },
+    {
+      "test_case_id": "tc_3_disqualifying_rows",
+      "description": "Dataset containing disqualifying rows, edge values, and cancelled/zero records",
+      "input_data": {
+        "datacenters": [
+          {
+            "datacenter_id": 1,
+            "name": "London",
+            "monthly_capacity": 100
+          },
+          {
+            "datacenter_id": 3,
+            "name": "Amsterdam",
+            "monthly_capacity": 250
+          },
+          {
+            "datacenter_id": 4,
+            "name": "Hong Kong",
+            "monthly_capacity": 400
+          },
+          {
+            "datacenter_id": 5001,
+            "name": "London",
+            "monthly_capacity": 100
+          }
+        ],
+        "forecasted_demand": [
+          {
+            "customer_id": 1,
+            "datacenter_id": 1,
+            "monthly_demand": 60
+          },
+          {
+            "customer_id": 2,
+            "datacenter_id": 1,
+            "monthly_demand": 25
+          },
+          {
+            "customer_id": 3,
+            "datacenter_id": 2,
+            "monthly_demand": 40
+          },
+          {
+            "customer_id": 4,
+            "datacenter_id": 3,
+            "monthly_demand": 10
+          },
+          {
+            "customer_id": 5001,
+            "datacenter_id": 5001,
+            "monthly_demand": 60
+          },
+          {
+            "customer_id": 5002,
+            "datacenter_id": 5001,
+            "monthly_demand": 25
+          }
+        ]
+      },
+      "expected_output": [
+        {
+          "datacenter_id": 1,
+          "spare_capacity": 15
+        },
+        {
+          "datacenter_id": 3,
+          "spare_capacity": 240
+        },
+        {
+          "datacenter_id": 4,
+          "spare_capacity": 400
+        },
+        {
+          "datacenter_id": 5001,
+          "spare_capacity": 15
+        }
+      ],
+      "category": "edge"
+    },
+    {
+      "test_case_id": "tc_4_empty_result",
+      "description": "Input where no rows satisfy problem criteria, verifying empty result handling",
+      "input_data": {
+        "datacenters": [],
+        "forecasted_demand": []
+      },
+      "expected_output": [],
+      "category": "edge"
+    }
+  ],
+  "order_sensitive": true,
+  "expected_output": [
+    {
+      "datacenter_id": 1,
+      "spare_capacity": 15
+    },
+    {
+      "datacenter_id": 3,
+      "spare_capacity": 240
+    },
+    {
+      "datacenter_id": 4,
+      "spare_capacity": 400
+    }
+  ]
+}

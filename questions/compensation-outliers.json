@@ -1,0 +1,333 @@
+{
+  "question_id": "q_072_compensation_outliers",
+  "slug": "compensation-outliers",
+  "title": "Compensation Outliers",
+  "difficulty": "Medium",
+  "company": "Accenture",
+  "premium": true,
+  "question": "Accenture wants to flag compensation outliers. An employee is an outlier if their salary is either more than double (> 2x) or less than half (< 0.5x) of the average salary for their job title.\n\nWrite a query returning the employee ID, salary, and outlier status ('Overpaid' or 'Underpaid') for all outliers, ordered by employee ID.",
+  "notes": [
+    "Overpaid: salary > 2 * avg_salary for that job title",
+    "Underpaid: salary < 0.5 * avg_salary for that job title"
+  ],
+  "tables": [
+    {
+      "table_name": "employee_pay",
+      "columns": [
+        {
+          "column_name": "employee_id",
+          "data_type": "INT"
+        },
+        {
+          "column_name": "title",
+          "data_type": "VARCHAR(255)"
+        },
+        {
+          "column_name": "salary",
+          "data_type": "DECIMAL(10,2)"
+        },
+        {
+          "column_name": "department_id",
+          "data_type": "INT"
+        }
+      ]
+    }
+  ],
+  "sample_data": {
+    "employee_pay": [
+      {
+        "employee_id": 101,
+        "title": "Data Analyst",
+        "salary": 30000.0,
+        "department_id": 1
+      },
+      {
+        "employee_id": 102,
+        "title": "Data Analyst",
+        "salary": 35000.0,
+        "department_id": 1
+      },
+      {
+        "employee_id": 103,
+        "title": "Data Analyst",
+        "salary": 200000.0,
+        "department_id": 1
+      },
+      {
+        "employee_id": 201,
+        "title": "Data Engineer",
+        "salary": 100000.0,
+        "department_id": 2
+      },
+      {
+        "employee_id": 202,
+        "title": "Data Engineer",
+        "salary": 110000.0,
+        "department_id": 2
+      },
+      {
+        "employee_id": 203,
+        "title": "Data Engineer",
+        "salary": 40000.0,
+        "department_id": 2
+      }
+    ]
+  },
+  "sample_output": [
+    {
+      "employee_id": 101,
+      "salary": 30000.0,
+      "status": "Underpaid"
+    },
+    {
+      "employee_id": 102,
+      "salary": 35000.0,
+      "status": "Underpaid"
+    },
+    {
+      "employee_id": 103,
+      "salary": 200000.0,
+      "status": "Overpaid"
+    },
+    {
+      "employee_id": 203,
+      "salary": 40000.0,
+      "status": "Underpaid"
+    }
+  ],
+  "expected_output": [
+    {
+      "employee_id": 101,
+      "salary": 30000.0,
+      "status": "Underpaid"
+    },
+    {
+      "employee_id": 102,
+      "salary": 35000.0,
+      "status": "Underpaid"
+    },
+    {
+      "employee_id": 103,
+      "salary": 200000.0,
+      "status": "Overpaid"
+    },
+    {
+      "employee_id": 203,
+      "salary": 40000.0,
+      "status": "Underpaid"
+    }
+  ],
+  "reference_sql": "WITH SalaryStats AS (\n  SELECT \n    employee_id, \n    salary, \n    title,\n    AVG(salary) OVER (PARTITION BY title) as avg_salary\n  FROM employee_pay\n),\nOutlierStatus AS (\n  SELECT \n    employee_id, \n    salary,\n    CASE \n      WHEN salary > (avg_salary * 2) THEN 'Overpaid'\n      WHEN salary < (avg_salary / 2) THEN 'Underpaid'\n      ELSE NULL \n    END as status\n  FROM SalaryStats\n)\nSELECT employee_id, salary, status\nFROM OutlierStatus\nWHERE status IS NOT NULL\nORDER BY employee_id;",
+  "tags": [
+    "aggregation",
+    "accenture",
+    "finance",
+    "window-function",
+    "case-statement"
+  ],
+  "order_sensitive": true,
+  "test_cases": [
+    {
+      "test_case_id": "tc_1_baseline",
+      "description": "Baseline: Employee 103 is Overpaid (Data Analyst) and Employee 203 is Underpaid (Data Engineer)",
+      "input_data": {
+        "employee_pay": [
+          {
+            "employee_id": 101,
+            "title": "Data Analyst",
+            "salary": 30000.0,
+            "department_id": 1
+          },
+          {
+            "employee_id": 102,
+            "title": "Data Analyst",
+            "salary": 35000.0,
+            "department_id": 1
+          },
+          {
+            "employee_id": 103,
+            "title": "Data Analyst",
+            "salary": 200000.0,
+            "department_id": 1
+          },
+          {
+            "employee_id": 201,
+            "title": "Data Engineer",
+            "salary": 100000.0,
+            "department_id": 2
+          },
+          {
+            "employee_id": 202,
+            "title": "Data Engineer",
+            "salary": 110000.0,
+            "department_id": 2
+          },
+          {
+            "employee_id": 203,
+            "title": "Data Engineer",
+            "salary": 40000.0,
+            "department_id": 2
+          }
+        ]
+      },
+      "expected_output": [
+        {
+          "employee_id": 101,
+          "salary": 30000.0,
+          "status": "Underpaid"
+        },
+        {
+          "employee_id": 102,
+          "salary": 35000.0,
+          "status": "Underpaid"
+        },
+        {
+          "employee_id": 103,
+          "salary": 200000.0,
+          "status": "Overpaid"
+        },
+        {
+          "employee_id": 203,
+          "salary": 40000.0,
+          "status": "Underpaid"
+        }
+      ],
+      "category": "normal"
+    },
+    {
+      "test_case_id": "tc_2_no_outliers",
+      "description": "Edge case: Normal distribution where all salaries are within 0.5x to 2.0x of the title average",
+      "input_data": {
+        "employee_pay": [
+          {
+            "employee_id": 1,
+            "title": "Manager",
+            "salary": 90000.0,
+            "department_id": 1
+          },
+          {
+            "employee_id": 2,
+            "title": "Manager",
+            "salary": 95000.0,
+            "department_id": 1
+          },
+          {
+            "employee_id": 3,
+            "title": "Manager",
+            "salary": 100000.0,
+            "department_id": 1
+          }
+        ]
+      },
+      "expected_output": [],
+      "category": "edge"
+    },
+    {
+      "test_case_id": "tc_3_scrambled_order_volume",
+      "description": "Volume & Ordering: Multiple outliers inserted in scrambled order to enforce ORDER BY employee_id",
+      "category": "volume",
+      "input_data": {
+        "employee_pay": [
+          {
+            "employee_id": 909,
+            "title": "Consultant",
+            "salary": 350000.0,
+            "department_id": 1
+          },
+          {
+            "employee_id": 808,
+            "title": "Consultant",
+            "salary": 50000.0,
+            "department_id": 1
+          },
+          {
+            "employee_id": 505,
+            "title": "Consultant",
+            "salary": 100000.0,
+            "department_id": 1
+          },
+          {
+            "employee_id": 404,
+            "title": "Consultant",
+            "salary": 110000.0,
+            "department_id": 1
+          },
+          {
+            "employee_id": 101,
+            "title": "Architect",
+            "salary": 400000.0,
+            "department_id": 2
+          },
+          {
+            "employee_id": 202,
+            "title": "Architect",
+            "salary": 120000.0,
+            "department_id": 2
+          },
+          {
+            "employee_id": 303,
+            "title": "Architect",
+            "salary": 130000.0,
+            "department_id": 2
+          }
+        ]
+      },
+      "expected_output": [
+        {
+          "employee_id": 808,
+          "salary": 50000.0,
+          "status": "Underpaid"
+        },
+        {
+          "employee_id": 909,
+          "salary": 350000.0,
+          "status": "Overpaid"
+        }
+      ]
+    },
+    {
+      "test_case_id": "tc_4_exact_boundaries",
+      "description": "Boundary case: Exactly 2.0x and 0.5x salary boundaries are not outliers (must be strictly > 2x or < 0.5x)",
+      "category": "boundary",
+      "input_data": {
+        "employee_pay": [
+          {
+            "employee_id": 10,
+            "title": "Analyst",
+            "salary": 50000.0,
+            "department_id": 1
+          },
+          {
+            "employee_id": 20,
+            "title": "Analyst",
+            "salary": 100000.0,
+            "department_id": 1
+          },
+          {
+            "employee_id": 30,
+            "title": "Analyst",
+            "salary": 150000.0,
+            "department_id": 1
+          }
+        ]
+      },
+      "expected_output": []
+    },
+    {
+      "test_case_id": "tc_5_single_employee_title",
+      "description": "Edge case: Single employee in title has avg = salary (1.0x), never an outlier",
+      "category": "edge",
+      "input_data": {
+        "employee_pay": [
+          {
+            "employee_id": 99,
+            "title": "CEO",
+            "salary": 500000.0,
+            "department_id": 10
+          }
+        ]
+      },
+      "expected_output": []
+    }
+  ]
+}

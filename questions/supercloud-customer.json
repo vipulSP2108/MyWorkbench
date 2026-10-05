@@ -1,0 +1,487 @@
+{
+  "question_id": "q_047_supercloud_customer",
+  "slug": "supercloud-customer",
+  "title": "Supercloud Customer",
+  "difficulty": "Medium",
+  "company": "Microsoft",
+  "premium": false,
+  "question": "A Microsoft Azure Supercloud customer is defined as a customer who has purchased at least one product from every product category listed in the products table.\n\nWrite a query that identifies the customer IDs of these Supercloud customers.",
+  "notes": [
+    "Customer 1 bought from Analytics, Containers, and Compute categories of Azure, and thus is a Supercloud customer. Customer 2 isn't a Supercloud customer, since they don't buy any container services from Azure.",
+    "The dataset you are querying against may have different input & output - this is just an example!"
+  ],
+  "tables": [
+    {
+      "table_name": "customer_contracts",
+      "columns": [
+        {
+          "column_name": "customer_id",
+          "data_type": "INT"
+        },
+        {
+          "column_name": "product_id",
+          "data_type": "INT"
+        },
+        {
+          "column_name": "amount",
+          "data_type": "INT"
+        }
+      ]
+    },
+    {
+      "table_name": "products",
+      "columns": [
+        {
+          "column_name": "product_id",
+          "data_type": "INT"
+        },
+        {
+          "column_name": "product_category",
+          "data_type": "VARCHAR(255)"
+        },
+        {
+          "column_name": "product_name",
+          "data_type": "VARCHAR(255)"
+        }
+      ]
+    }
+  ],
+  "sample_data": {
+    "customer_contracts": [
+      {
+        "customer_id": "1",
+        "product_id": "1",
+        "amount": "1000"
+      },
+      {
+        "customer_id": "1",
+        "product_id": "3",
+        "amount": "2000"
+      },
+      {
+        "customer_id": "1",
+        "product_id": "5",
+        "amount": "1500"
+      },
+      {
+        "customer_id": "2",
+        "product_id": "2",
+        "amount": "3000"
+      },
+      {
+        "customer_id": "2",
+        "product_id": "6",
+        "amount": "2000"
+      }
+    ],
+    "products": [
+      {
+        "product_id": "1",
+        "product_category": "Analytics",
+        "product_name": "Azure Databricks"
+      },
+      {
+        "product_id": "2",
+        "product_category": "Analytics",
+        "product_name": "Azure Stream Analytics"
+      },
+      {
+        "product_id": "4",
+        "product_category": "Containers",
+        "product_name": "Azure Kubernetes Service"
+      },
+      {
+        "product_id": "5",
+        "product_category": "Containers",
+        "product_name": "Azure Service Fabric"
+      },
+      {
+        "product_id": "6",
+        "product_category": "Compute",
+        "product_name": "Virtual Machines"
+      },
+      {
+        "product_id": "7",
+        "product_category": "Compute",
+        "product_name": "Azure Functions"
+      },
+      {
+        "product_id": 3,
+        "product_category": "Compute",
+        "product_name": "Virtual Machines"
+      }
+    ]
+  },
+  "sample_output": [
+    {
+      "customer_id": 1
+    }
+  ],
+  "reference_sql": "SELECT c.customer_id\nFROM customer_contracts c\nJOIN products p ON c.product_id = p.product_id\nGROUP BY c.customer_id\nHAVING COUNT(DISTINCT p.product_category) = (SELECT COUNT(DISTINCT product_category) FROM products)\nORDER BY c.customer_id;",
+  "tags": [
+    "ecommerce",
+    "medium",
+    "microsoft"
+  ],
+  "related_questions": [],
+  "sources": [
+    [
+      "DataLemur page (free)",
+      "https://datalemur.com/questions/supercloud-customer"
+    ],
+    [
+      "DataLemur PDF",
+      "Page 51"
+    ]
+  ],
+  "test_cases": [
+    {
+      "test_case_id": "tc_1_baseline",
+      "description": "Baseline: Customer 1 has purchased products in all 3 product categories",
+      "input_data": {
+        "customer_contracts": [
+          {
+            "customer_id": "1",
+            "product_id": "1",
+            "amount": "1000"
+          },
+          {
+            "customer_id": "1",
+            "product_id": "3",
+            "amount": "2000"
+          },
+          {
+            "customer_id": "1",
+            "product_id": "5",
+            "amount": "1500"
+          },
+          {
+            "customer_id": "2",
+            "product_id": "2",
+            "amount": "3000"
+          },
+          {
+            "customer_id": "2",
+            "product_id": "6",
+            "amount": "2000"
+          }
+        ],
+        "products": [
+          {
+            "product_id": "1",
+            "product_category": "Analytics",
+            "product_name": "Azure Databricks"
+          },
+          {
+            "product_id": "2",
+            "product_category": "Analytics",
+            "product_name": "Azure Stream Analytics"
+          },
+          {
+            "product_id": "4",
+            "product_category": "Containers",
+            "product_name": "Azure Kubernetes Service"
+          },
+          {
+            "product_id": "5",
+            "product_category": "Containers",
+            "product_name": "Azure Service Fabric"
+          },
+          {
+            "product_id": "6",
+            "product_category": "Compute",
+            "product_name": "Virtual Machines"
+          },
+          {
+            "product_id": "7",
+            "product_category": "Compute",
+            "product_name": "Azure Functions"
+          },
+          {
+            "product_id": 3,
+            "product_category": "Compute",
+            "product_name": "Virtual Machines"
+          }
+        ]
+      },
+      "expected_output": [
+        {
+          "customer_id": 1
+        }
+      ],
+      "category": "normal"
+    },
+    {
+      "test_case_id": "tc_2_multiple_supercloud",
+      "description": "Tests multiple customers: customer 10 and customer 30 bought from all categories",
+      "input_data": {
+        "customer_contracts": [
+          {
+            "customer_id": 10,
+            "product_id": 1,
+            "amount": 500
+          },
+          {
+            "customer_id": 10,
+            "product_id": 3,
+            "amount": 600
+          },
+          {
+            "customer_id": 10,
+            "product_id": 5,
+            "amount": 700
+          },
+          {
+            "customer_id": 20,
+            "product_id": 1,
+            "amount": 500
+          },
+          {
+            "customer_id": 20,
+            "product_id": 2,
+            "amount": 600
+          },
+          {
+            "customer_id": 30,
+            "product_id": 2,
+            "amount": 500
+          },
+          {
+            "customer_id": 30,
+            "product_id": 4,
+            "amount": 600
+          },
+          {
+            "customer_id": 30,
+            "product_id": 6,
+            "amount": 700
+          }
+        ],
+        "products": [
+          {
+            "product_id": "1",
+            "product_category": "Analytics",
+            "product_name": "Azure Databricks"
+          },
+          {
+            "product_id": "2",
+            "product_category": "Analytics",
+            "product_name": "Azure Stream Analytics"
+          },
+          {
+            "product_id": "4",
+            "product_category": "Containers",
+            "product_name": "Azure Kubernetes Service"
+          },
+          {
+            "product_id": "5",
+            "product_category": "Containers",
+            "product_name": "Azure Service Fabric"
+          },
+          {
+            "product_id": "6",
+            "product_category": "Compute",
+            "product_name": "Virtual Machines"
+          },
+          {
+            "product_id": "7",
+            "product_category": "Compute",
+            "product_name": "Azure Functions"
+          },
+          {
+            "product_id": 3,
+            "product_category": "Compute",
+            "product_name": "Virtual Machines"
+          }
+        ]
+      },
+      "expected_output": [
+        {
+          "customer_id": 10
+        },
+        {
+          "customer_id": 30
+        }
+      ],
+      "category": "edge"
+    },
+    {
+      "test_case_id": "tc_3_none_qualify",
+      "description": "Edge case: No customer has contracts covering all product categories",
+      "input_data": {
+        "customer_contracts": [
+          {
+            "customer_id": 1,
+            "product_id": 1,
+            "amount": 100
+          },
+          {
+            "customer_id": 2,
+            "product_id": 5,
+            "amount": 200
+          }
+        ],
+        "products": [
+          {
+            "product_id": "1",
+            "product_category": "Analytics",
+            "product_name": "Azure Databricks"
+          },
+          {
+            "product_id": "2",
+            "product_category": "Analytics",
+            "product_name": "Azure Stream Analytics"
+          },
+          {
+            "product_id": "4",
+            "product_category": "Containers",
+            "product_name": "Azure Kubernetes Service"
+          },
+          {
+            "product_id": "5",
+            "product_category": "Containers",
+            "product_name": "Azure Service Fabric"
+          },
+          {
+            "product_id": "6",
+            "product_category": "Compute",
+            "product_name": "Virtual Machines"
+          },
+          {
+            "product_id": "7",
+            "product_category": "Compute",
+            "product_name": "Azure Functions"
+          },
+          {
+            "product_id": 3,
+            "product_category": "Compute",
+            "product_name": "Virtual Machines"
+          }
+        ]
+      },
+      "expected_output": [],
+      "category": "edge"
+    },
+    {
+      "test_case_id": "tc_4_many_purchases_missing_one_category",
+      "description": "Edge case: Customer makes 5 purchases but misses 1 category out of 4, thus excluded",
+      "category": "edge",
+      "input_data": {
+        "products": [
+          {
+            "product_id": 1,
+            "product_category": "Analytics",
+            "product_name": "Azure Synapse"
+          },
+          {
+            "product_id": 2,
+            "product_category": "Compute",
+            "product_name": "Virtual Machines"
+          },
+          {
+            "product_id": 3,
+            "product_category": "Containers",
+            "product_name": "AKS"
+          },
+          {
+            "product_id": 4,
+            "product_category": "Storage",
+            "product_name": "Blob Storage"
+          }
+        ],
+        "customer_contracts": [
+          {
+            "customer_id": 100,
+            "product_id": 1,
+            "amount": 1000
+          },
+          {
+            "customer_id": 100,
+            "product_id": 1,
+            "amount": 2000
+          },
+          {
+            "customer_id": 100,
+            "product_id": 2,
+            "amount": 1500
+          },
+          {
+            "customer_id": 100,
+            "product_id": 3,
+            "amount": 3000
+          },
+          {
+            "customer_id": 200,
+            "product_id": 1,
+            "amount": 500
+          },
+          {
+            "customer_id": 200,
+            "product_id": 2,
+            "amount": 600
+          },
+          {
+            "customer_id": 200,
+            "product_id": 3,
+            "amount": 700
+          },
+          {
+            "customer_id": 200,
+            "product_id": 4,
+            "amount": 800
+          }
+        ]
+      },
+      "expected_output": [
+        {
+          "customer_id": 200
+        }
+      ]
+    },
+    {
+      "test_case_id": "tc_5_single_category_catalog",
+      "description": "Boundary case: Catalog with only 1 category; anyone purchasing that category qualifies",
+      "category": "boundary",
+      "input_data": {
+        "products": [
+          {
+            "product_id": 10,
+            "product_category": "Cloud Database",
+            "product_name": "Azure SQL Database"
+          },
+          {
+            "product_id": 11,
+            "product_category": "Cloud Database",
+            "product_name": "Cosmos DB"
+          }
+        ],
+        "customer_contracts": [
+          {
+            "customer_id": 7,
+            "product_id": 10,
+            "amount": 2500
+          },
+          {
+            "customer_id": 8,
+            "product_id": 11,
+            "amount": 4000
+          }
+        ]
+      },
+      "expected_output": [
+        {
+          "customer_id": 7
+        },
+        {
+          "customer_id": 8
+        }
+      ]
+    }
+  ],
+  "order_sensitive": false,
+  "expected_output": [
+    {
+      "customer_id": 1
+    }
+  ]
+}

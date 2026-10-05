@@ -1,0 +1,393 @@
+{
+  "question_id": "q_088_sql_bloomberg_underperforming_stocks",
+  "slug": "sql-bloomberg-underperforming-stocks",
+  "title": "FAANG Underperforming Stocks (Part 3)",
+  "difficulty": "Hard",
+  "company": "Bloomberg",
+  "premium": true,
+  "question": "Bloomberg tracks monthly tech stock performance. A ticker is defined as underperforming in a calendar month if its average closing price for that month falls below the overall monthly average closing price across all FAANG stocks combined.\n\nWrite a query to output every underperforming ticker per month, along with the ticker's monthly average close and the overall portfolio average close. Order chronologically by month, then alphabetically by ticker. Round averages to 2 decimal places.",
+  "notes": [],
+  "tables": [
+    {
+      "table_name": "stock_prices",
+      "columns": [
+        {
+          "column_name": "date",
+          "data_type": "DATETIME"
+        },
+        {
+          "column_name": "ticker",
+          "data_type": "VARCHAR(255)"
+        },
+        {
+          "column_name": "open",
+          "data_type": "DECIMAL(10,2)"
+        },
+        {
+          "column_name": "high",
+          "data_type": "DECIMAL(10,2)"
+        },
+        {
+          "column_name": "low",
+          "data_type": "DECIMAL(10,2)"
+        },
+        {
+          "column_name": "close",
+          "data_type": "DECIMAL(10,2)"
+        }
+      ]
+    }
+  ],
+  "sample_data": {
+    "stock_prices": [
+      {
+        "date": "01/10/2023",
+        "ticker": "AAPL",
+        "open": "150.00",
+        "high": "155.00",
+        "low": "149.00",
+        "close": "152.00"
+      },
+      {
+        "date": "01/15/2023",
+        "ticker": "AMZN",
+        "open": "100.00",
+        "high": "102.00",
+        "low": "98.00",
+        "close": "99.00"
+      },
+      {
+        "date": "01/20/2023",
+        "ticker": "META",
+        "open": "120.00",
+        "high": "125.00",
+        "low": "118.00",
+        "close": "121.00"
+      }
+    ]
+  },
+  "sample_output": [
+    {
+      "issue_month": "01/2023",
+      "ticker": "AMZN",
+      "ticker_avg_close": "99.00",
+      "portfolio_avg_close": "124.00"
+    },
+    {
+      "issue_month": "01/2023",
+      "ticker": "META",
+      "ticker_avg_close": "121.00",
+      "portfolio_avg_close": "124.00"
+    }
+  ],
+  "reference_sql": "SELECT ticker, ROUND(AVG(close - open), 2) AS avg_return\nFROM stock_prices\nGROUP BY ticker\nHAVING AVG(close - open) < 0\nORDER BY avg_return ASC, ticker ASC;",
+  "tags": [
+    "aggregation",
+    "bloomberg",
+    "date-manipulation",
+    "ecommerce",
+    "finance",
+    "hard",
+    "healthcare",
+    "math"
+  ],
+  "related_questions": [
+    "sql-bloomberg-stock-min-max-1",
+    "sql-bloomberg-stock-monthly-change"
+  ],
+  "sources": [
+    [
+      "Text supplied by you (not checkable against the locked page)",
+      "https://datalemur.com/questions/sql-bloomberg-underperforming-stocks"
+    ],
+    [
+      "DataLemur PDF",
+      "Page 92"
+    ]
+  ],
+  "test_cases": [
+    {
+      "test_case_id": "tc_1_baseline",
+      "description": "Baseline sample input data from problem description",
+      "input_data": {
+        "stock_prices": [
+          {
+            "date": "01/10/2023",
+            "ticker": "AAPL",
+            "open": "150.00",
+            "high": "155.00",
+            "low": "149.00",
+            "close": "152.00"
+          },
+          {
+            "date": "01/15/2023",
+            "ticker": "AMZN",
+            "open": "100.00",
+            "high": "102.00",
+            "low": "98.00",
+            "close": "99.00"
+          },
+          {
+            "date": "01/20/2023",
+            "ticker": "META",
+            "open": "120.00",
+            "high": "125.00",
+            "low": "118.00",
+            "close": "121.00"
+          }
+        ]
+      },
+      "expected_output": [
+        {
+          "ticker": "AMZN",
+          "avg_return": -1.0
+        }
+      ],
+      "category": "normal"
+    },
+    {
+      "test_case_id": "tc_2_high_volume",
+      "description": "Multiple entities with scaled volume and multi-group distributions",
+      "input_data": {
+        "stock_prices": [
+          {
+            "date": "01/10/2023",
+            "ticker": "AAPL",
+            "open": "150.00",
+            "high": "155.00",
+            "low": "149.00",
+            "close": "152.00"
+          },
+          {
+            "date": "01/15/2023",
+            "ticker": "AMZN",
+            "open": "100.00",
+            "high": "102.00",
+            "low": "98.00",
+            "close": "99.00"
+          },
+          {
+            "date": "01/20/2023",
+            "ticker": "META",
+            "open": "120.00",
+            "high": "125.00",
+            "low": "118.00",
+            "close": "121.00"
+          },
+          {
+            "date": "01/15/2023",
+            "ticker": "AAPL",
+            "open": "150.00",
+            "high": "155.00",
+            "low": "149.00",
+            "close": "152.00"
+          },
+          {
+            "date": "01/20/2023",
+            "ticker": "AMZN",
+            "open": "100.00",
+            "high": "102.00",
+            "low": "98.00",
+            "close": "99.00"
+          },
+          {
+            "date": "01/25/2023",
+            "ticker": "META",
+            "open": "120.00",
+            "high": "125.00",
+            "low": "118.00",
+            "close": "121.00"
+          }
+        ]
+      },
+      "expected_output": [
+        {
+          "ticker": "AMZN",
+          "avg_return": -1.0
+        }
+      ],
+      "category": "volume"
+    },
+    {
+      "test_case_id": "tc_3_disqualifying_rows",
+      "description": "Dataset containing disqualifying rows, edge values, and cancelled/zero records",
+      "input_data": {
+        "stock_prices": [
+          {
+            "date": "01/10/2023",
+            "ticker": "AAPL",
+            "open": "150.00",
+            "high": "155.00",
+            "low": "149.00",
+            "close": "152.00"
+          },
+          {
+            "date": "01/15/2023",
+            "ticker": "AMZN",
+            "open": "100.00",
+            "high": "102.00",
+            "low": "98.00",
+            "close": "99.00"
+          },
+          {
+            "date": "01/20/2023",
+            "ticker": "META",
+            "open": "120.00",
+            "high": "125.00",
+            "low": "118.00",
+            "close": "121.00"
+          },
+          {
+            "date": "01/10/2018",
+            "ticker": "AAPL",
+            "open": "150.00",
+            "high": "155.00",
+            "low": "149.00",
+            "close": "152.00"
+          }
+        ]
+      },
+      "expected_output": [
+        {
+          "ticker": "AMZN",
+          "avg_return": -1.0
+        }
+      ],
+      "category": "edge"
+    },
+    {
+      "test_case_id": "tc_4_empty_result",
+      "description": "Input where no rows satisfy problem criteria, verifying empty result handling",
+      "input_data": {
+        "stock_prices": []
+      },
+      "expected_output": [],
+      "category": "edge"
+    },
+    {
+      "test_case_id": "tc_5_ties_and_nulls",
+      "description": "Tied ranking metrics, unmatched join keys, and NULL values in nullable attributes",
+      "input_data": {
+        "stock_prices": [
+          {
+            "date": "01/10/2023",
+            "ticker": "AAPL",
+            "open": "150.00",
+            "high": "155.00",
+            "low": "149.00",
+            "close": "152.00"
+          },
+          {
+            "date": "01/15/2023",
+            "ticker": "AMZN",
+            "open": "100.00",
+            "high": "102.00",
+            "low": "98.00",
+            "close": "99.00"
+          },
+          {
+            "date": "01/20/2023",
+            "ticker": "META",
+            "open": "120.00",
+            "high": "125.00",
+            "low": "118.00",
+            "close": "121.00"
+          },
+          {
+            "date": "01/10/2023",
+            "ticker": "AAPL",
+            "open": "150.00",
+            "high": "155.00",
+            "low": "149.00",
+            "close": "152.00"
+          },
+          {
+            "date": "01/15/2023",
+            "ticker": "AMZN",
+            "open": "100.00",
+            "high": "102.00",
+            "low": "98.00",
+            "close": "99.00"
+          }
+        ]
+      },
+      "expected_output": [
+        {
+          "ticker": "AMZN",
+          "avg_return": -1.0
+        }
+      ],
+      "category": "edge"
+    },
+    {
+      "test_case_id": "tc_6_extreme_boundary",
+      "description": "Consecutive day sequences, month-end date rollovers, and high-frequency transactions",
+      "input_data": {
+        "stock_prices": [
+          {
+            "date": "01/10/2023",
+            "ticker": "AAPL",
+            "open": "150.00",
+            "high": "155.00",
+            "low": "149.00",
+            "close": "152.00"
+          },
+          {
+            "date": "01/15/2023",
+            "ticker": "AMZN",
+            "open": "100.00",
+            "high": "102.00",
+            "low": "98.00",
+            "close": "99.00"
+          },
+          {
+            "date": "01/20/2023",
+            "ticker": "META",
+            "open": "120.00",
+            "high": "125.00",
+            "low": "118.00",
+            "close": "121.00"
+          },
+          {
+            "date": "01/11/2023",
+            "ticker": "AAPL",
+            "open": "150.00",
+            "high": "155.00",
+            "low": "149.00",
+            "close": "152.00"
+          },
+          {
+            "date": "01/16/2023",
+            "ticker": "AMZN",
+            "open": "100.00",
+            "high": "102.00",
+            "low": "98.00",
+            "close": "99.00"
+          },
+          {
+            "date": "01/21/2023",
+            "ticker": "META",
+            "open": "120.00",
+            "high": "125.00",
+            "low": "118.00",
+            "close": "121.00"
+          }
+        ]
+      },
+      "expected_output": [
+        {
+          "ticker": "AMZN",
+          "avg_return": -1.0
+        }
+      ],
+      "category": "boundary"
+    }
+  ],
+  "order_sensitive": true,
+  "expected_output": [
+    {
+      "ticker": "AMZN",
+      "avg_return": -1.0
+    }
+  ]
+}

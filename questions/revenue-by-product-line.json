@@ -1,0 +1,392 @@
+{
+  "question_id": "q_031_revenue_by_product_line",
+  "slug": "revenue-by-product-line",
+  "title": "Product Line Revenue",
+  "difficulty": "Easy",
+  "company": "NVIDIA",
+  "premium": true,
+  "question": "As a business analyst on the revenue forecasting team at NVIDIA, you are given a table of NVIDIA transactions in 2021.\n\nWrite a query to summarize the total sales revenue for each product line. The product line with the highest revenue should be at the top of the results.\n\nAssumption: there will be at least one sale of each product line.",
+  "notes": [],
+  "tables": [
+    {
+      "table_name": "product_info",
+      "columns": [
+        {
+          "column_name": "product_id",
+          "data_type": "INT"
+        },
+        {
+          "column_name": "product_name",
+          "data_type": "VARCHAR(255)"
+        },
+        {
+          "column_name": "product_line",
+          "data_type": "VARCHAR(255)"
+        }
+      ]
+    },
+    {
+      "table_name": "transactions",
+      "columns": [
+        {
+          "column_name": "transaction_id",
+          "data_type": "INT"
+        },
+        {
+          "column_name": "product_id",
+          "data_type": "INT"
+        },
+        {
+          "column_name": "amount",
+          "data_type": "INT"
+        }
+      ]
+    }
+  ],
+  "sample_data": {
+    "product_info": [
+      {
+        "product_id": 1,
+        "product_name": "Quadro RTX 8000",
+        "product_line": "GPU"
+      },
+      {
+        "product_id": 2,
+        "product_name": "Quadro RTX 6000",
+        "product_line": "GPU"
+      },
+      {
+        "product_id": 3,
+        "product_name": "GeForce RTX 3060",
+        "product_line": "GPU"
+      },
+      {
+        "product_id": 4,
+        "product_name": "BlueField-3",
+        "product_line": "DPU"
+      }
+    ],
+    "transactions": [
+      {
+        "transaction_id": 101,
+        "product_id": 1,
+        "amount": 5000
+      },
+      {
+        "transaction_id": 102,
+        "product_id": 2,
+        "amount": 4200
+      },
+      {
+        "transaction_id": 103,
+        "product_id": 3,
+        "amount": 9000
+      },
+      {
+        "transaction_id": 104,
+        "product_id": 4,
+        "amount": 7000
+      }
+    ]
+  },
+  "sample_output": [
+    {
+      "product_line": "GPU",
+      "total_revenue": 18200
+    },
+    {
+      "product_line": "DPU",
+      "total_revenue": 7000
+    }
+  ],
+  "reference_sql": "SELECT p.product_line,\n       SUM(t.amount) AS total_revenue\nFROM transactions t\nJOIN product_info p ON t.product_id = p.product_id\nGROUP BY p.product_line\nORDER BY total_revenue DESC, p.product_line ASC;",
+  "tags": [
+    "aggregation",
+    "easy",
+    "ecommerce",
+    "finance",
+    "join",
+    "nvidia"
+  ],
+  "related_questions": [],
+  "sources": [
+    [
+      "DataLemur blog: 9 NVIDIA SQL questions (#1)",
+      "https://datalemur.com/blog/nvidia-sql-interview-questions"
+    ],
+    [
+      "DataLemur page (locked)",
+      "https://datalemur.com/questions/revenue-by-product-line"
+    ],
+    [
+      "DataLemur PDF",
+      "Page 35"
+    ]
+  ],
+  "test_cases": [
+    {
+      "test_case_id": "tc_1_baseline",
+      "description": "Baseline sample input data from problem description",
+      "input_data": {
+        "product_info": [
+          {
+            "product_id": 1,
+            "product_name": "Quadro RTX 8000",
+            "product_line": "GPU"
+          },
+          {
+            "product_id": 2,
+            "product_name": "Quadro RTX 6000",
+            "product_line": "GPU"
+          },
+          {
+            "product_id": 3,
+            "product_name": "GeForce RTX 3060",
+            "product_line": "GPU"
+          },
+          {
+            "product_id": 4,
+            "product_name": "BlueField-3",
+            "product_line": "DPU"
+          }
+        ],
+        "transactions": [
+          {
+            "transaction_id": 101,
+            "product_id": 1,
+            "amount": 5000
+          },
+          {
+            "transaction_id": 102,
+            "product_id": 2,
+            "amount": 4200
+          },
+          {
+            "transaction_id": 103,
+            "product_id": 3,
+            "amount": 9000
+          },
+          {
+            "transaction_id": 104,
+            "product_id": 4,
+            "amount": 7000
+          }
+        ]
+      },
+      "expected_output": [
+        {
+          "product_line": "GPU",
+          "total_revenue": 18200
+        },
+        {
+          "product_line": "DPU",
+          "total_revenue": 7000
+        }
+      ],
+      "category": "normal"
+    },
+    {
+      "test_case_id": "tc_2_high_volume",
+      "description": "Multiple entities with scaled volume and multi-group distributions",
+      "input_data": {
+        "product_info": [
+          {
+            "product_id": 1,
+            "product_name": "Quadro RTX 8000",
+            "product_line": "GPU"
+          },
+          {
+            "product_id": 2,
+            "product_name": "Quadro RTX 6000",
+            "product_line": "GPU"
+          },
+          {
+            "product_id": 3,
+            "product_name": "GeForce RTX 3060",
+            "product_line": "GPU"
+          },
+          {
+            "product_id": 4,
+            "product_name": "BlueField-3",
+            "product_line": "DPU"
+          },
+          {
+            "product_id": 1001,
+            "product_name": "Quadro RTX 8000",
+            "product_line": "GPU"
+          },
+          {
+            "product_id": 1002,
+            "product_name": "Quadro RTX 6000",
+            "product_line": "GPU"
+          },
+          {
+            "product_id": 1003,
+            "product_name": "GeForce RTX 3060",
+            "product_line": "GPU"
+          },
+          {
+            "product_id": 1004,
+            "product_name": "BlueField-3",
+            "product_line": "DPU"
+          }
+        ],
+        "transactions": [
+          {
+            "transaction_id": 101,
+            "product_id": 1,
+            "amount": 5000
+          },
+          {
+            "transaction_id": 102,
+            "product_id": 2,
+            "amount": 4200
+          },
+          {
+            "transaction_id": 103,
+            "product_id": 3,
+            "amount": 9000
+          },
+          {
+            "transaction_id": 104,
+            "product_id": 4,
+            "amount": 7000
+          },
+          {
+            "transaction_id": 1101,
+            "product_id": 1001,
+            "amount": 7500.0
+          },
+          {
+            "transaction_id": 1102,
+            "product_id": 1002,
+            "amount": 6300.0
+          },
+          {
+            "transaction_id": 1103,
+            "product_id": 1003,
+            "amount": 13500.0
+          },
+          {
+            "transaction_id": 1104,
+            "product_id": 1004,
+            "amount": 10500.0
+          }
+        ]
+      },
+      "expected_output": [
+        {
+          "product_line": "GPU",
+          "total_revenue": 45500
+        },
+        {
+          "product_line": "DPU",
+          "total_revenue": 17500
+        }
+      ],
+      "category": "volume"
+    },
+    {
+      "test_case_id": "tc_3_disqualifying_rows",
+      "description": "Dataset containing disqualifying rows, edge values, and cancelled/zero records",
+      "input_data": {
+        "product_info": [
+          {
+            "product_id": 1,
+            "product_name": "Quadro RTX 8000",
+            "product_line": "GPU"
+          },
+          {
+            "product_id": 2,
+            "product_name": "Quadro RTX 6000",
+            "product_line": "GPU"
+          },
+          {
+            "product_id": 3,
+            "product_name": "GeForce RTX 3060",
+            "product_line": "GPU"
+          },
+          {
+            "product_id": 4,
+            "product_name": "BlueField-3",
+            "product_line": "DPU"
+          },
+          {
+            "product_id": 5001,
+            "product_name": "Quadro RTX 8000",
+            "product_line": "GPU"
+          },
+          {
+            "product_id": 5002,
+            "product_name": "Quadro RTX 6000",
+            "product_line": "GPU"
+          }
+        ],
+        "transactions": [
+          {
+            "transaction_id": 101,
+            "product_id": 1,
+            "amount": 5000
+          },
+          {
+            "transaction_id": 102,
+            "product_id": 2,
+            "amount": 4200
+          },
+          {
+            "transaction_id": 103,
+            "product_id": 3,
+            "amount": 9000
+          },
+          {
+            "transaction_id": 104,
+            "product_id": 4,
+            "amount": 7000
+          },
+          {
+            "transaction_id": 5101,
+            "product_id": 5001,
+            "amount": 0
+          },
+          {
+            "transaction_id": 5102,
+            "product_id": 5002,
+            "amount": 0
+          }
+        ]
+      },
+      "expected_output": [
+        {
+          "product_line": "GPU",
+          "total_revenue": 18200
+        },
+        {
+          "product_line": "DPU",
+          "total_revenue": 7000
+        }
+      ],
+      "category": "edge"
+    },
+    {
+      "test_case_id": "tc_4_empty_result",
+      "description": "Input where no rows satisfy problem criteria, verifying empty result handling",
+      "input_data": {
+        "product_info": [],
+        "transactions": []
+      },
+      "expected_output": [],
+      "category": "edge"
+    }
+  ],
+  "order_sensitive": true,
+  "expected_output": [
+    {
+      "product_line": "GPU",
+      "total_revenue": 18200
+    },
+    {
+      "product_line": "DPU",
+      "total_revenue": 7000
+    }
+  ]
+}

@@ -1,0 +1,380 @@
+{
+  "question_id": "q_074_user_retention",
+  "slug": "user-retention",
+  "title": "Active User Retention",
+  "difficulty": "Hard",
+  "company": "Facebook",
+  "premium": false,
+  "question": "Assume you're given a table containing information on Facebook user actions. Write a query to obtain number of monthly active users (MAUs) in July 2022, including the month in numerical format \"1, 2, 3\".\n\nHint:",
+  "notes": [
+    "An active user is defined as a user who has performed actions such as 'sign-in', 'like', or 'comment' in both the current month and the previous month.",
+    "In June 2022, there was only one monthly active user (MAU) with the user_id 445.",
+    "Please note that the output provided is for June 2022 as the user_actions table only contains event dates for that month. You should adapt the solution accordingly for July 2022.",
+    "The dataset you are querying against may have different input & output - this is just an example!"
+  ],
+  "tables": [
+    {
+      "table_name": "user_actions",
+      "columns": [
+        {
+          "column_name": "user_id",
+          "data_type": "INT"
+        },
+        {
+          "column_name": "event_id",
+          "data_type": "INT"
+        },
+        {
+          "column_name": "event_type",
+          "data_type": "VARCHAR(50)"
+        },
+        {
+          "column_name": "event_date",
+          "data_type": "DATETIME"
+        }
+      ]
+    }
+  ],
+  "sample_data": {
+    "user_actions": [
+      {
+        "user_id": 445,
+        "event_id": 101,
+        "event_type": "sign-in",
+        "event_date": "2022-06-03 10:00:00"
+      },
+      {
+        "user_id": 445,
+        "event_id": 102,
+        "event_type": "like",
+        "event_date": "2022-07-05 12:00:00"
+      },
+      {
+        "user_id": 648,
+        "event_id": 201,
+        "event_type": "comment",
+        "event_date": "2022-06-18 14:00:00"
+      },
+      {
+        "user_id": 648,
+        "event_id": 202,
+        "event_type": "sign-in",
+        "event_date": "2022-07-10 09:30:00"
+      },
+      {
+        "user_id": 742,
+        "event_id": 301,
+        "event_type": "sign-in",
+        "event_date": "2022-07-02 11:00:00"
+      },
+      {
+        "user_id": 999,
+        "event_id": 401,
+        "event_type": "like",
+        "event_date": "2022-05-20 08:00:00"
+      },
+      {
+        "user_id": 999,
+        "event_id": 402,
+        "event_type": "comment",
+        "event_date": "2022-06-15 15:00:00"
+      }
+    ]
+  },
+  "sample_output": [
+    {
+      "month": 7,
+      "monthly_active_users": 2
+    }
+  ],
+  "reference_sql": "WITH monthly_users AS (\n  SELECT DISTINCT \n    user_id, \n    MONTH(event_date) AS mth\n  FROM user_actions\n  WHERE event_type IN ('sign-in', 'like', 'comment')\n    AND YEAR(event_date) = 2022\n)\nSELECT \n  curr.mth AS month,\n  COUNT(DISTINCT curr.user_id) AS monthly_active_users\nFROM monthly_users curr\nJOIN monthly_users prev \n  ON curr.user_id = prev.user_id \n AND curr.mth = prev.mth + 1\nWHERE curr.mth = 7\nGROUP BY curr.mth;",
+  "tags": [
+    "date-manipulation",
+    "facebook",
+    "hard",
+    "social-media"
+  ],
+  "related_questions": [],
+  "sources": [
+    [
+      "DataLemur page (free)",
+      "https://datalemur.com/questions/user-retention"
+    ],
+    [
+      "DataLemur PDF",
+      "Page 78"
+    ]
+  ],
+  "test_cases": [
+    {
+      "test_case_id": "tc_1_baseline",
+      "description": "Baseline: Users 445 and 648 active in both June and July 2022 (MAU = 2)",
+      "input_data": {
+        "user_actions": [
+          {
+            "user_id": 445,
+            "event_id": 101,
+            "event_type": "sign-in",
+            "event_date": "2022-06-03 10:00:00"
+          },
+          {
+            "user_id": 445,
+            "event_id": 102,
+            "event_type": "like",
+            "event_date": "2022-07-05 12:00:00"
+          },
+          {
+            "user_id": 648,
+            "event_id": 201,
+            "event_type": "comment",
+            "event_date": "2022-06-18 14:00:00"
+          },
+          {
+            "user_id": 648,
+            "event_id": 202,
+            "event_type": "sign-in",
+            "event_date": "2022-07-10 09:30:00"
+          },
+          {
+            "user_id": 742,
+            "event_id": 301,
+            "event_type": "sign-in",
+            "event_date": "2022-07-02 11:00:00"
+          },
+          {
+            "user_id": 999,
+            "event_id": 401,
+            "event_type": "like",
+            "event_date": "2022-05-20 08:00:00"
+          },
+          {
+            "user_id": 999,
+            "event_id": 402,
+            "event_type": "comment",
+            "event_date": "2022-06-15 15:00:00"
+          }
+        ]
+      },
+      "expected_output": [
+        {
+          "month": 7,
+          "monthly_active_users": 2
+        }
+      ],
+      "category": "normal"
+    },
+    {
+      "test_case_id": "tc_2_scaled_and_event_filtering",
+      "description": "Tests 3 retained MAUs (users 1, 2, 3) while ignoring non-qualifying event types and 2021 dates",
+      "input_data": {
+        "user_actions": [
+          {
+            "user_id": 1,
+            "event_id": 1,
+            "event_type": "sign-in",
+            "event_date": "2022-06-01 10:00:00"
+          },
+          {
+            "user_id": 1,
+            "event_id": 2,
+            "event_type": "like",
+            "event_date": "2022-07-01 10:00:00"
+          },
+          {
+            "user_id": 2,
+            "event_id": 3,
+            "event_type": "comment",
+            "event_date": "2022-06-10 10:00:00"
+          },
+          {
+            "user_id": 2,
+            "event_id": 4,
+            "event_type": "comment",
+            "event_date": "2022-07-15 10:00:00"
+          },
+          {
+            "user_id": 3,
+            "event_id": 5,
+            "event_type": "like",
+            "event_date": "2022-06-25 10:00:00"
+          },
+          {
+            "user_id": 3,
+            "event_id": 6,
+            "event_type": "sign-in",
+            "event_date": "2022-07-28 10:00:00"
+          },
+          {
+            "user_id": 4,
+            "event_id": 7,
+            "event_type": "sign-in",
+            "event_date": "2022-06-05 10:00:00"
+          },
+          {
+            "user_id": 4,
+            "event_id": 8,
+            "event_type": "share",
+            "event_date": "2022-07-05 10:00:00"
+          },
+          {
+            "user_id": 5,
+            "event_id": 9,
+            "event_type": "sign-in",
+            "event_date": "2021-06-01 10:00:00"
+          },
+          {
+            "user_id": 5,
+            "event_id": 10,
+            "event_type": "sign-in",
+            "event_date": "2021-07-01 10:00:00"
+          }
+        ]
+      },
+      "expected_output": [
+        {
+          "month": 7,
+          "monthly_active_users": 3
+        }
+      ],
+      "category": "boundary"
+    },
+    {
+      "test_case_id": "tc_3_no_july_activity",
+      "description": "Edge case: Users active in May and June only, 0 retained users in July",
+      "input_data": {
+        "user_actions": [
+          {
+            "user_id": 10,
+            "event_id": 1,
+            "event_type": "sign-in",
+            "event_date": "2022-05-01 10:00:00"
+          },
+          {
+            "user_id": 10,
+            "event_id": 2,
+            "event_type": "like",
+            "event_date": "2022-06-01 10:00:00"
+          }
+        ]
+      },
+      "expected_output": [],
+      "category": "edge"
+    },
+    {
+      "test_case_id": "tc_4_new_july_users_no_june_activity",
+      "description": "Edge case: Users active in July 2022 but with no activity in June 2022 are not retained (returns empty/0)",
+      "category": "edge",
+      "input_data": {
+        "user_actions": [
+          {
+            "user_id": 101,
+            "event_id": 1,
+            "event_type": "sign-in",
+            "event_date": "2022-07-01 10:00:00"
+          },
+          {
+            "user_id": 102,
+            "event_id": 2,
+            "event_type": "like",
+            "event_date": "2022-07-15 11:00:00"
+          },
+          {
+            "user_id": 103,
+            "event_id": 3,
+            "event_type": "comment",
+            "event_date": "2022-07-20 12:00:00"
+          }
+        ]
+      },
+      "expected_output": []
+    },
+    {
+      "test_case_id": "tc_5_heavy_activity_user_deduplication_volume",
+      "description": "Volume: Users with dozens of events across June and July 2022 properly deduplicated to unique user count",
+      "category": "volume",
+      "input_data": {
+        "user_actions": [
+          {
+            "user_id": 1,
+            "event_id": 11,
+            "event_type": "sign-in",
+            "event_date": "2022-06-01 10:00:00"
+          },
+          {
+            "user_id": 1,
+            "event_id": 12,
+            "event_type": "like",
+            "event_date": "2022-06-15 11:00:00"
+          },
+          {
+            "user_id": 1,
+            "event_id": 13,
+            "event_type": "comment",
+            "event_date": "2022-06-25 12:00:00"
+          },
+          {
+            "user_id": 1,
+            "event_id": 14,
+            "event_type": "sign-in",
+            "event_date": "2022-07-02 10:00:00"
+          },
+          {
+            "user_id": 1,
+            "event_id": 15,
+            "event_type": "like",
+            "event_date": "2022-07-18 14:00:00"
+          },
+          {
+            "user_id": 2,
+            "event_id": 21,
+            "event_type": "like",
+            "event_date": "2022-06-10 09:00:00"
+          },
+          {
+            "user_id": 2,
+            "event_id": 22,
+            "event_type": "comment",
+            "event_date": "2022-06-20 15:00:00"
+          },
+          {
+            "user_id": 2,
+            "event_id": 23,
+            "event_type": "sign-in",
+            "event_date": "2022-07-05 08:00:00"
+          },
+          {
+            "user_id": 2,
+            "event_id": 24,
+            "event_type": "like",
+            "event_date": "2022-07-12 16:00:00"
+          },
+          {
+            "user_id": 2,
+            "event_id": 25,
+            "event_type": "comment",
+            "event_date": "2022-07-28 19:00:00"
+          },
+          {
+            "user_id": 3,
+            "event_id": 31,
+            "event_type": "sign-in",
+            "event_date": "2022-06-11 10:00:00"
+          }
+        ]
+      },
+      "expected_output": [
+        {
+          "month": 7,
+          "monthly_active_users": 2
+        }
+      ]
+    }
+  ],
+  "order_sensitive": false,
+  "expected_output": [
+    {
+      "month": 7,
+      "monthly_active_users": 2
+    }
+  ]
+}

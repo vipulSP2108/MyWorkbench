@@ -1,0 +1,556 @@
+{
+  "question_id": "q_059_international_call_percentage",
+  "slug": "international-call-percentage",
+  "title": "International Call Percentage",
+  "difficulty": "Medium",
+  "company": "Verizon",
+  "premium": false,
+  "question": "A phone call is considered an international call when the person calling is in a different country than the person receiving the call.\n\nWhat percentage of phone calls are international? Round the result to 1 decimal.\n\nAssumption:",
+  "notes": [
+    "The caller_id in phone_info table refers to both the caller and receiver.",
+    "There is a total of 4 calls with 2 of them being international calls (from caller_id 1 => receiver_id 5, and caller_id 5 => receiver_id 1). Thus, 2/4 = 50.0%",
+    "The dataset you are querying against may have different input & output - this is just an example!"
+  ],
+  "tables": [
+    {
+      "table_name": "phone_calls",
+      "columns": [
+        {
+          "column_name": "caller_id",
+          "data_type": "INT"
+        },
+        {
+          "column_name": "receiver_id",
+          "data_type": "INT"
+        },
+        {
+          "column_name": "call_time",
+          "data_type": "DATETIME"
+        }
+      ]
+    },
+    {
+      "table_name": "phone_info",
+      "columns": [
+        {
+          "column_name": "caller_id",
+          "data_type": "INT"
+        },
+        {
+          "column_name": "country_id",
+          "data_type": "INT"
+        },
+        {
+          "column_name": "network",
+          "data_type": "INT"
+        },
+        {
+          "column_name": "phone_number",
+          "data_type": "VARCHAR(255)"
+        }
+      ]
+    }
+  ],
+  "sample_data": {
+    "phone_calls": [
+      {
+        "caller_id": "1",
+        "receiver_id": "2",
+        "call_time": "2022-07-04 10:13:49"
+      },
+      {
+        "caller_id": "1",
+        "receiver_id": "5",
+        "call_time": "2022-08-21 23:54:56"
+      },
+      {
+        "caller_id": "5",
+        "receiver_id": "1",
+        "call_time": "2022-05-13 17:24:06"
+      },
+      {
+        "caller_id": "5",
+        "receiver_id": "6",
+        "call_time": "2022-03-18 12:11:49"
+      }
+    ],
+    "phone_info": [
+      {
+        "caller_id": "1",
+        "country_id": "US",
+        "network": "Verizon",
+        "phone_number": "+1-212-897-1964"
+      },
+      {
+        "caller_id": "2",
+        "country_id": "US",
+        "network": "Verizon",
+        "phone_number": "+1-703-346-9529"
+      },
+      {
+        "caller_id": "3",
+        "country_id": "US",
+        "network": "Verizon",
+        "phone_number": "+1-650-828-4774"
+      },
+      {
+        "caller_id": "4",
+        "country_id": "US",
+        "network": "Verizon",
+        "phone_number": "+1-415-224-6663"
+      },
+      {
+        "caller_id": "5",
+        "country_id": "IN",
+        "network": "Vodafone",
+        "phone_number": "+91 7503-907302"
+      },
+      {
+        "caller_id": "6",
+        "country_id": "IN",
+        "network": "Vodafone",
+        "phone_number": "+91 2287-664895"
+      }
+    ]
+  },
+  "sample_output": [
+    {
+      "international_calls_pct": "50.0"
+    }
+  ],
+  "reference_sql": "SELECT \n  ROUND(100.0 * SUM(CASE WHEN c.country_id != r.country_id THEN 1 ELSE 0 END) / COUNT(*), 1) AS international_calls_pct\nFROM phone_calls p\nJOIN phone_info c ON p.caller_id = c.caller_id\nJOIN phone_info r ON p.receiver_id = r.caller_id;",
+  "tags": [
+    "aggregation",
+    "healthcare",
+    "math",
+    "medium",
+    "verizon"
+  ],
+  "related_questions": [],
+  "sources": [
+    [
+      "DataLemur page (free)",
+      "https://datalemur.com/questions/international-call-percentage"
+    ],
+    [
+      "DataLemur PDF",
+      "Page 63"
+    ]
+  ],
+  "test_cases": [
+    {
+      "test_case_id": "tc_1_baseline",
+      "description": "Baseline sample input data from problem description",
+      "input_data": {
+        "phone_calls": [
+          {
+            "caller_id": "1",
+            "receiver_id": "2",
+            "call_time": "2022-07-04 10:13:49"
+          },
+          {
+            "caller_id": "1",
+            "receiver_id": "5",
+            "call_time": "2022-08-21 23:54:56"
+          },
+          {
+            "caller_id": "5",
+            "receiver_id": "1",
+            "call_time": "2022-05-13 17:24:06"
+          },
+          {
+            "caller_id": "5",
+            "receiver_id": "6",
+            "call_time": "2022-03-18 12:11:49"
+          }
+        ],
+        "phone_info": [
+          {
+            "caller_id": "1",
+            "country_id": "US",
+            "network": "Verizon",
+            "phone_number": "+1-212-897-1964"
+          },
+          {
+            "caller_id": "2",
+            "country_id": "US",
+            "network": "Verizon",
+            "phone_number": "+1-703-346-9529"
+          },
+          {
+            "caller_id": "3",
+            "country_id": "US",
+            "network": "Verizon",
+            "phone_number": "+1-650-828-4774"
+          },
+          {
+            "caller_id": "4",
+            "country_id": "US",
+            "network": "Verizon",
+            "phone_number": "+1-415-224-6663"
+          },
+          {
+            "caller_id": "5",
+            "country_id": "IN",
+            "network": "Vodafone",
+            "phone_number": "+91 7503-907302"
+          },
+          {
+            "caller_id": "6",
+            "country_id": "IN",
+            "network": "Vodafone",
+            "phone_number": "+91 2287-664895"
+          }
+        ]
+      },
+      "expected_output": [
+        {
+          "international_calls_pct": 0.0
+        }
+      ],
+      "category": "normal"
+    },
+    {
+      "test_case_id": "tc_2_high_volume",
+      "description": "Multiple entities with scaled volume and multi-group distributions",
+      "input_data": {
+        "phone_calls": [
+          {
+            "caller_id": "1",
+            "receiver_id": "2",
+            "call_time": "2022-07-04 10:13:49"
+          },
+          {
+            "caller_id": "1",
+            "receiver_id": "5",
+            "call_time": "2022-08-21 23:54:56"
+          },
+          {
+            "caller_id": "5",
+            "receiver_id": "1",
+            "call_time": "2022-05-13 17:24:06"
+          },
+          {
+            "caller_id": "5",
+            "receiver_id": "6",
+            "call_time": "2022-03-18 12:11:49"
+          },
+          {
+            "caller_id": 1001,
+            "receiver_id": 1002,
+            "call_time": "2022-07-09 10:13:49"
+          },
+          {
+            "caller_id": 1001,
+            "receiver_id": 1005,
+            "call_time": "2022-08-26 23:54:56"
+          },
+          {
+            "caller_id": 1005,
+            "receiver_id": 1001,
+            "call_time": "2022-05-18 17:24:06"
+          },
+          {
+            "caller_id": 1005,
+            "receiver_id": 1006,
+            "call_time": "2022-03-23 12:11:49"
+          }
+        ],
+        "phone_info": [
+          {
+            "caller_id": "1",
+            "country_id": "US",
+            "network": "Verizon",
+            "phone_number": "+1-212-897-1964"
+          },
+          {
+            "caller_id": "2",
+            "country_id": "US",
+            "network": "Verizon",
+            "phone_number": "+1-703-346-9529"
+          },
+          {
+            "caller_id": "3",
+            "country_id": "US",
+            "network": "Verizon",
+            "phone_number": "+1-650-828-4774"
+          },
+          {
+            "caller_id": "4",
+            "country_id": "US",
+            "network": "Verizon",
+            "phone_number": "+1-415-224-6663"
+          },
+          {
+            "caller_id": "5",
+            "country_id": "IN",
+            "network": "Vodafone",
+            "phone_number": "+91 7503-907302"
+          },
+          {
+            "caller_id": "6",
+            "country_id": "IN",
+            "network": "Vodafone",
+            "phone_number": "+91 2287-664895"
+          },
+          {
+            "caller_id": 1001,
+            "country_id": "US",
+            "network": "Verizon",
+            "phone_number": "+1-212-897-1964"
+          },
+          {
+            "caller_id": 1002,
+            "country_id": "US",
+            "network": "Verizon",
+            "phone_number": "+1-703-346-9529"
+          },
+          {
+            "caller_id": 1003,
+            "country_id": "US",
+            "network": "Verizon",
+            "phone_number": "+1-650-828-4774"
+          },
+          {
+            "caller_id": 1004,
+            "country_id": "US",
+            "network": "Verizon",
+            "phone_number": "+1-415-224-6663"
+          },
+          {
+            "caller_id": 1005,
+            "country_id": "IN",
+            "network": "Vodafone",
+            "phone_number": "+91 7503-907302"
+          },
+          {
+            "caller_id": 1006,
+            "country_id": "IN",
+            "network": "Vodafone",
+            "phone_number": "+91 2287-664895"
+          }
+        ]
+      },
+      "expected_output": [
+        {
+          "international_calls_pct": 0.0
+        }
+      ],
+      "category": "volume"
+    },
+    {
+      "test_case_id": "tc_3_disqualifying_rows",
+      "description": "Dataset containing disqualifying rows, edge values, and cancelled/zero records",
+      "input_data": {
+        "phone_calls": [
+          {
+            "caller_id": "1",
+            "receiver_id": "2",
+            "call_time": "2022-07-04 10:13:49"
+          },
+          {
+            "caller_id": "1",
+            "receiver_id": "5",
+            "call_time": "2022-08-21 23:54:56"
+          },
+          {
+            "caller_id": "5",
+            "receiver_id": "1",
+            "call_time": "2022-05-13 17:24:06"
+          },
+          {
+            "caller_id": "5",
+            "receiver_id": "6",
+            "call_time": "2022-03-18 12:11:49"
+          },
+          {
+            "caller_id": 5001,
+            "receiver_id": 5002,
+            "call_time": "2017-07-04 10:13:49"
+          },
+          {
+            "caller_id": 5001,
+            "receiver_id": 5005,
+            "call_time": "2017-08-21 23:54:56"
+          }
+        ],
+        "phone_info": [
+          {
+            "caller_id": "1",
+            "country_id": "US",
+            "network": "Verizon",
+            "phone_number": "+1-212-897-1964"
+          },
+          {
+            "caller_id": "2",
+            "country_id": "US",
+            "network": "Verizon",
+            "phone_number": "+1-703-346-9529"
+          },
+          {
+            "caller_id": "3",
+            "country_id": "US",
+            "network": "Verizon",
+            "phone_number": "+1-650-828-4774"
+          },
+          {
+            "caller_id": "4",
+            "country_id": "US",
+            "network": "Verizon",
+            "phone_number": "+1-415-224-6663"
+          },
+          {
+            "caller_id": "5",
+            "country_id": "IN",
+            "network": "Vodafone",
+            "phone_number": "+91 7503-907302"
+          },
+          {
+            "caller_id": "6",
+            "country_id": "IN",
+            "network": "Vodafone",
+            "phone_number": "+91 2287-664895"
+          },
+          {
+            "caller_id": 5001,
+            "country_id": "US",
+            "network": "Verizon",
+            "phone_number": "+1-212-897-1964"
+          },
+          {
+            "caller_id": 5002,
+            "country_id": "US",
+            "network": "Verizon",
+            "phone_number": "+1-703-346-9529"
+          },
+          {
+            "caller_id": 5003,
+            "country_id": "US",
+            "network": "Verizon",
+            "phone_number": "+1-650-828-4774"
+          }
+        ]
+      },
+      "expected_output": [
+        {
+          "international_calls_pct": 0.0
+        }
+      ],
+      "category": "edge"
+    },
+    {
+      "test_case_id": "tc_4_empty_result",
+      "description": "Input where no rows satisfy problem criteria, verifying empty result handling",
+      "input_data": {
+        "phone_calls": [],
+        "phone_info": []
+      },
+      "expected_output": [
+        {
+          "international_calls_pct": null
+        }
+      ],
+      "category": "edge"
+    },
+    {
+      "test_case_id": "tc_5_ties_and_nulls",
+      "description": "Tied ranking metrics, unmatched join keys, and NULL values in nullable attributes",
+      "input_data": {
+        "phone_calls": [
+          {
+            "caller_id": "1",
+            "receiver_id": "2",
+            "call_time": "2022-07-04 10:13:49"
+          },
+          {
+            "caller_id": "1",
+            "receiver_id": "5",
+            "call_time": "2022-08-21 23:54:56"
+          },
+          {
+            "caller_id": "5",
+            "receiver_id": "1",
+            "call_time": "2022-05-13 17:24:06"
+          },
+          {
+            "caller_id": "5",
+            "receiver_id": "6",
+            "call_time": "2022-03-18 12:11:49"
+          },
+          {
+            "caller_id": 9001,
+            "receiver_id": 9002,
+            "call_time": "2022-07-04 10:13:49"
+          },
+          {
+            "caller_id": 9501,
+            "receiver_id": 9505,
+            "call_time": "2022-08-21 23:54:56"
+          }
+        ],
+        "phone_info": [
+          {
+            "caller_id": "1",
+            "country_id": "US",
+            "network": "Verizon",
+            "phone_number": "+1-212-897-1964"
+          },
+          {
+            "caller_id": "2",
+            "country_id": "US",
+            "network": "Verizon",
+            "phone_number": "+1-703-346-9529"
+          },
+          {
+            "caller_id": "3",
+            "country_id": "US",
+            "network": "Verizon",
+            "phone_number": "+1-650-828-4774"
+          },
+          {
+            "caller_id": "4",
+            "country_id": "US",
+            "network": "Verizon",
+            "phone_number": "+1-415-224-6663"
+          },
+          {
+            "caller_id": "5",
+            "country_id": "IN",
+            "network": "Vodafone",
+            "phone_number": "+91 7503-907302"
+          },
+          {
+            "caller_id": "6",
+            "country_id": "IN",
+            "network": "Vodafone",
+            "phone_number": "+91 2287-664895"
+          },
+          {
+            "caller_id": 9001,
+            "country_id": "US",
+            "network": "Verizon",
+            "phone_number": "+1-212-897-1964"
+          },
+          {
+            "caller_id": 9502,
+            "country_id": "US",
+            "network": "Verizon",
+            "phone_number": "+1-703-346-9529"
+          }
+        ]
+      },
+      "expected_output": [
+        {
+          "international_calls_pct": 0.0
+        }
+      ],
+      "category": "edge"
+    }
+  ],
+  "order_sensitive": false,
+  "expected_output": [
+    {
+      "international_calls_pct": 0.0
+    }
+  ]
+}

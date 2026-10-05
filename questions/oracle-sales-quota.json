@@ -1,0 +1,357 @@
+{
+  "question_id": "q_034_oracle_sales_quota",
+  "slug": "oracle-sales-quota",
+  "title": "Who Made Quota?",
+  "difficulty": "Easy",
+  "company": "Oracle",
+  "premium": true,
+  "question": "As a data analyst on the Oracle Sales Operations team, you are given a list of salespeople's deals and the annual quota each needs to hit.\n\nWrite a query that outputs each employee id and whether they hit the quota or not ('yes' or 'no'). Order the results by employee id in ascending order.\n\nDefinitions: deals are the deals acquired by a salesperson in the year (each salesperson may have more than one). The quota is the total annual quota for each salesperson.",
+  "notes": [],
+  "tables": [
+    {
+      "table_name": "deals",
+      "columns": [
+        {
+          "column_name": "employee_id",
+          "data_type": "INT"
+        },
+        {
+          "column_name": "deal_size",
+          "data_type": "INT"
+        }
+      ]
+    },
+    {
+      "table_name": "sales_quotas",
+      "columns": [
+        {
+          "column_name": "employee_id",
+          "data_type": "INT"
+        },
+        {
+          "column_name": "quota",
+          "data_type": "INT"
+        }
+      ]
+    }
+  ],
+  "sample_data": {
+    "deals": [
+      {
+        "employee_id": 101,
+        "deal_size": 400000
+      },
+      {
+        "employee_id": 101,
+        "deal_size": 300000
+      },
+      {
+        "employee_id": 201,
+        "deal_size": 500000
+      },
+      {
+        "employee_id": 301,
+        "deal_size": 500000
+      }
+    ],
+    "sales_quotas": [
+      {
+        "employee_id": 101,
+        "quota": 500000
+      },
+      {
+        "employee_id": 201,
+        "quota": 400000
+      },
+      {
+        "employee_id": 301,
+        "quota": 600000
+      }
+    ]
+  },
+  "sample_output": [
+    {
+      "employee_id": 101,
+      "made_quota": "yes"
+    },
+    {
+      "employee_id": 201,
+      "made_quota": "yes"
+    },
+    {
+      "employee_id": 301,
+      "made_quota": "no"
+    }
+  ],
+  "reference_sql": "SELECT q.employee_id,\n       CASE WHEN IFNULL(SUM(d.deal_size), 0) >= q.quota THEN 1 ELSE 0 END AS made_quota\nFROM sales_quotas q\nLEFT JOIN deals d ON q.employee_id = d.employee_id\nGROUP BY q.employee_id, q.quota\nORDER BY q.employee_id;",
+  "tags": [
+    "aggregation",
+    "conditional-logic",
+    "cte",
+    "date-manipulation",
+    "easy",
+    "ecommerce",
+    "hr",
+    "join",
+    "left-join",
+    "math",
+    "oracle"
+  ],
+  "related_questions": [],
+  "sources": [
+    [
+      "DataLemur blog: 10 Oracle SQL questions (#1)",
+      "https://datalemur.com/blog/oracle-sql-interview-questions"
+    ],
+    [
+      "DataLemur page (locked)",
+      "https://datalemur.com/questions/oracle-sales-quota"
+    ],
+    [
+      "DataLemur PDF",
+      "Page 38"
+    ]
+  ],
+  "test_cases": [
+    {
+      "test_case_id": "tc_1_baseline",
+      "description": "Baseline sample input data from problem description",
+      "input_data": {
+        "deals": [
+          {
+            "employee_id": 101,
+            "deal_size": 400000
+          },
+          {
+            "employee_id": 101,
+            "deal_size": 300000
+          },
+          {
+            "employee_id": 201,
+            "deal_size": 500000
+          },
+          {
+            "employee_id": 301,
+            "deal_size": 500000
+          }
+        ],
+        "sales_quotas": [
+          {
+            "employee_id": 101,
+            "quota": 500000
+          },
+          {
+            "employee_id": 201,
+            "quota": 400000
+          },
+          {
+            "employee_id": 301,
+            "quota": 600000
+          }
+        ]
+      },
+      "expected_output": [
+        {
+          "employee_id": 101,
+          "made_quota": 1
+        },
+        {
+          "employee_id": 201,
+          "made_quota": 1
+        },
+        {
+          "employee_id": 301,
+          "made_quota": 0
+        }
+      ],
+      "category": "normal"
+    },
+    {
+      "test_case_id": "tc_2_high_volume",
+      "description": "Multiple entities with scaled volume and multi-group distributions",
+      "input_data": {
+        "deals": [
+          {
+            "employee_id": 101,
+            "deal_size": 400000
+          },
+          {
+            "employee_id": 101,
+            "deal_size": 300000
+          },
+          {
+            "employee_id": 201,
+            "deal_size": 500000
+          },
+          {
+            "employee_id": 301,
+            "deal_size": 500000
+          },
+          {
+            "employee_id": 1101,
+            "deal_size": 400000
+          },
+          {
+            "employee_id": 1101,
+            "deal_size": 300000
+          },
+          {
+            "employee_id": 1201,
+            "deal_size": 500000
+          },
+          {
+            "employee_id": 1301,
+            "deal_size": 500000
+          }
+        ],
+        "sales_quotas": [
+          {
+            "employee_id": 101,
+            "quota": 500000
+          },
+          {
+            "employee_id": 201,
+            "quota": 400000
+          },
+          {
+            "employee_id": 301,
+            "quota": 600000
+          },
+          {
+            "employee_id": 1101,
+            "quota": 500000
+          },
+          {
+            "employee_id": 1201,
+            "quota": 400000
+          },
+          {
+            "employee_id": 1301,
+            "quota": 600000
+          }
+        ]
+      },
+      "expected_output": [
+        {
+          "employee_id": 101,
+          "made_quota": 1
+        },
+        {
+          "employee_id": 201,
+          "made_quota": 1
+        },
+        {
+          "employee_id": 301,
+          "made_quota": 0
+        },
+        {
+          "employee_id": 1101,
+          "made_quota": 1
+        },
+        {
+          "employee_id": 1201,
+          "made_quota": 1
+        },
+        {
+          "employee_id": 1301,
+          "made_quota": 0
+        }
+      ],
+      "category": "volume"
+    },
+    {
+      "test_case_id": "tc_3_disqualifying_rows",
+      "description": "Dataset containing disqualifying rows, edge values, and cancelled/zero records",
+      "input_data": {
+        "deals": [
+          {
+            "employee_id": 101,
+            "deal_size": 400000
+          },
+          {
+            "employee_id": 101,
+            "deal_size": 300000
+          },
+          {
+            "employee_id": 201,
+            "deal_size": 500000
+          },
+          {
+            "employee_id": 301,
+            "deal_size": 500000
+          },
+          {
+            "employee_id": 5101,
+            "deal_size": 400000
+          },
+          {
+            "employee_id": 5101,
+            "deal_size": 300000
+          }
+        ],
+        "sales_quotas": [
+          {
+            "employee_id": 101,
+            "quota": 500000
+          },
+          {
+            "employee_id": 201,
+            "quota": 400000
+          },
+          {
+            "employee_id": 301,
+            "quota": 600000
+          },
+          {
+            "employee_id": 5101,
+            "quota": 500000
+          }
+        ]
+      },
+      "expected_output": [
+        {
+          "employee_id": 101,
+          "made_quota": 1
+        },
+        {
+          "employee_id": 201,
+          "made_quota": 1
+        },
+        {
+          "employee_id": 301,
+          "made_quota": 0
+        },
+        {
+          "employee_id": 5101,
+          "made_quota": 1
+        }
+      ],
+      "category": "edge"
+    },
+    {
+      "test_case_id": "tc_4_empty_result",
+      "description": "Input where no rows satisfy problem criteria, verifying empty result handling",
+      "input_data": {
+        "deals": [],
+        "sales_quotas": []
+      },
+      "expected_output": [],
+      "category": "edge"
+    }
+  ],
+  "order_sensitive": true,
+  "expected_output": [
+    {
+      "employee_id": 101,
+      "made_quota": 1
+    },
+    {
+      "employee_id": 201,
+      "made_quota": 1
+    },
+    {
+      "employee_id": 301,
+      "made_quota": 0
+    }
+  ]
+}

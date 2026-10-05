@@ -1,0 +1,743 @@
+{
+  "question_id": "q_073_sql_bloomberg_stock_monthly_change",
+  "slug": "sql-bloomberg-stock-monthly-change",
+  "title": "FAANG Stock Monthly Change (Part 2)",
+  "difficulty": "Medium",
+  "company": "Bloomberg",
+  "premium": true,
+  "question": "Series context: as a Bloomberg Data Analyst you have historical stock data for the FAANG stocks (Part 1 covers highest and lowest open prices by month).\n\nLikely ask (unverified): compare each stock's closing price month over month (the change from the previous month), per ticker.\n\nNot available: the exact wording, output columns, example rows and expected output.",
+  "notes": [],
+  "tables": [
+    {
+      "table_name": "stock_prices",
+      "columns": [
+        {
+          "column_name": "date",
+          "data_type": "DATETIME"
+        },
+        {
+          "column_name": "ticker",
+          "data_type": "VARCHAR(255)"
+        },
+        {
+          "column_name": "open",
+          "data_type": "DECIMAL(10,2)"
+        },
+        {
+          "column_name": "high",
+          "data_type": "DECIMAL(10,2)"
+        },
+        {
+          "column_name": "low",
+          "data_type": "DECIMAL(10,2)"
+        },
+        {
+          "column_name": "close",
+          "data_type": "DECIMAL(10,2)"
+        }
+      ]
+    }
+  ],
+  "sample_data": {
+    "stock_prices": [
+      {
+        "date": "01/03/2023",
+        "ticker": "AAPL",
+        "open": "125.00",
+        "high": "130.00",
+        "low": "124.00",
+        "close": "128.00"
+      },
+      {
+        "date": "01/31/2023",
+        "ticker": "AAPL",
+        "open": "140.00",
+        "high": "145.00",
+        "low": "139.00",
+        "close": "144.00"
+      },
+      {
+        "date": "02/28/2023",
+        "ticker": "AAPL",
+        "open": "146.00",
+        "high": "150.00",
+        "low": "145.00",
+        "close": "147.00"
+      },
+      {
+        "date": "03/31/2023",
+        "ticker": "AAPL",
+        "open": "160.00",
+        "high": "165.00",
+        "low": "158.00",
+        "close": "164.00"
+      },
+      {
+        "date": "01/31/2023",
+        "ticker": "AMZN",
+        "open": "100.00",
+        "high": "103.00",
+        "low": "98.00",
+        "close": "102.00"
+      },
+      {
+        "date": "02/28/2023",
+        "ticker": "AMZN",
+        "open": "95.00",
+        "high": "99.00",
+        "low": "93.00",
+        "close": "94.00"
+      },
+      {
+        "date": "03/31/2023",
+        "ticker": "AMZN",
+        "open": "98.00",
+        "high": "102.00",
+        "low": "97.00",
+        "close": "101.00"
+      }
+    ]
+  },
+  "sample_output": [
+    {
+      "ticker": "AAPL",
+      "month": "01/01/2023",
+      "month_close": "144.00",
+      "change_vs_prev_month": "NULL"
+    },
+    {
+      "ticker": "AAPL",
+      "month": "02/01/2023",
+      "month_close": "147.00",
+      "change_vs_prev_month": "3.00"
+    },
+    {
+      "ticker": "AAPL",
+      "month": "03/01/2023",
+      "month_close": "164.00",
+      "change_vs_prev_month": "17.00"
+    },
+    {
+      "ticker": "AMZN",
+      "month": "01/01/2023",
+      "month_close": "102.00",
+      "change_vs_prev_month": "NULL"
+    },
+    {
+      "ticker": "AMZN",
+      "month": "02/01/2023",
+      "month_close": "94.00",
+      "change_vs_prev_month": "-8.00"
+    },
+    {
+      "ticker": "AMZN",
+      "month": "03/01/2023",
+      "month_close": "101.00",
+      "change_vs_prev_month": "7.00"
+    }
+  ],
+  "reference_sql": "WITH monthly AS (\n  SELECT \n    ticker,\n    DATE_FORMAT(date, '%Y-%m') AS ym,\n    close,\n    ROW_NUMBER() OVER (PARTITION BY ticker, DATE_FORMAT(date, '%Y-%m') ORDER BY date DESC) AS rn\n  FROM stock_prices\n),\neom AS (\n  SELECT ticker, ym, close\n  FROM monthly\n  WHERE rn = 1\n)\nSELECT \n  ticker,\n  ym,\n  close,\n  ROUND(close - LAG(close) OVER (PARTITION BY ticker ORDER BY ym), 2) AS change_amt\nFROM eom\nORDER BY ticker, ym;",
+  "tags": [
+    "bloomberg",
+    "cte",
+    "date-manipulation",
+    "finance",
+    "lead-lag",
+    "medium",
+    "ranking",
+    "social-media",
+    "window-function"
+  ],
+  "related_questions": [
+    "sql-bloomberg-stock-min-max-1",
+    "sql-bloomberg-underperforming-stocks"
+  ],
+  "sources": [
+    [
+      "Sibling free question: FAANG Stock Min-Max (Part 1)",
+      "https://datalemur.com/questions/sql-bloomberg-stock-min-max-1"
+    ],
+    [
+      "DataLemur Bloomberg tutorial question (consecutive-month closing price differences)",
+      "https://datalemur.com/questions/sql-bloomberg-stock-performance"
+    ],
+    [
+      "DataLemur page (locked)",
+      "https://datalemur.com/questions/sql-bloomberg-stock-monthly-change"
+    ],
+    [
+      "DataLemur PDF",
+      "Page 77"
+    ]
+  ],
+  "test_cases": [
+    {
+      "test_case_id": "tc_1_baseline",
+      "description": "Baseline sample input data from problem description",
+      "input_data": {
+        "stock_prices": [
+          {
+            "date": "01/03/2023",
+            "ticker": "AAPL",
+            "open": "125.00",
+            "high": "130.00",
+            "low": "124.00",
+            "close": "128.00"
+          },
+          {
+            "date": "01/31/2023",
+            "ticker": "AAPL",
+            "open": "140.00",
+            "high": "145.00",
+            "low": "139.00",
+            "close": "144.00"
+          },
+          {
+            "date": "02/28/2023",
+            "ticker": "AAPL",
+            "open": "146.00",
+            "high": "150.00",
+            "low": "145.00",
+            "close": "147.00"
+          },
+          {
+            "date": "03/31/2023",
+            "ticker": "AAPL",
+            "open": "160.00",
+            "high": "165.00",
+            "low": "158.00",
+            "close": "164.00"
+          },
+          {
+            "date": "01/31/2023",
+            "ticker": "AMZN",
+            "open": "100.00",
+            "high": "103.00",
+            "low": "98.00",
+            "close": "102.00"
+          },
+          {
+            "date": "02/28/2023",
+            "ticker": "AMZN",
+            "open": "95.00",
+            "high": "99.00",
+            "low": "93.00",
+            "close": "94.00"
+          },
+          {
+            "date": "03/31/2023",
+            "ticker": "AMZN",
+            "open": "98.00",
+            "high": "102.00",
+            "low": "97.00",
+            "close": "101.00"
+          }
+        ]
+      },
+      "expected_output": [
+        {
+          "ticker": "AAPL",
+          "ym": "2023-01",
+          "close": 144.0,
+          "change_amt": null
+        },
+        {
+          "ticker": "AAPL",
+          "ym": "2023-02",
+          "close": 147.0,
+          "change_amt": 3.0
+        },
+        {
+          "ticker": "AAPL",
+          "ym": "2023-03",
+          "close": 164.0,
+          "change_amt": 17.0
+        },
+        {
+          "ticker": "AMZN",
+          "ym": "2023-01",
+          "close": 102.0,
+          "change_amt": null
+        },
+        {
+          "ticker": "AMZN",
+          "ym": "2023-02",
+          "close": 94.0,
+          "change_amt": -8.0
+        },
+        {
+          "ticker": "AMZN",
+          "ym": "2023-03",
+          "close": 101.0,
+          "change_amt": 7.0
+        }
+      ],
+      "category": "normal"
+    },
+    {
+      "test_case_id": "tc_2_high_volume",
+      "description": "Multiple entities with scaled volume and multi-group distributions",
+      "input_data": {
+        "stock_prices": [
+          {
+            "date": "01/03/2023",
+            "ticker": "AAPL",
+            "open": "125.00",
+            "high": "130.00",
+            "low": "124.00",
+            "close": "128.00"
+          },
+          {
+            "date": "01/31/2023",
+            "ticker": "AAPL",
+            "open": "140.00",
+            "high": "145.00",
+            "low": "139.00",
+            "close": "144.00"
+          },
+          {
+            "date": "02/28/2023",
+            "ticker": "AAPL",
+            "open": "146.00",
+            "high": "150.00",
+            "low": "145.00",
+            "close": "147.00"
+          },
+          {
+            "date": "03/31/2023",
+            "ticker": "AAPL",
+            "open": "160.00",
+            "high": "165.00",
+            "low": "158.00",
+            "close": "164.00"
+          },
+          {
+            "date": "01/31/2023",
+            "ticker": "AMZN",
+            "open": "100.00",
+            "high": "103.00",
+            "low": "98.00",
+            "close": "102.00"
+          },
+          {
+            "date": "02/28/2023",
+            "ticker": "AMZN",
+            "open": "95.00",
+            "high": "99.00",
+            "low": "93.00",
+            "close": "94.00"
+          },
+          {
+            "date": "03/31/2023",
+            "ticker": "AMZN",
+            "open": "98.00",
+            "high": "102.00",
+            "low": "97.00",
+            "close": "101.00"
+          },
+          {
+            "date": "01/08/2023",
+            "ticker": "AAPL",
+            "open": "125.00",
+            "high": "130.00",
+            "low": "124.00",
+            "close": "128.00"
+          },
+          {
+            "date": "01/28/2023",
+            "ticker": "AAPL",
+            "open": "140.00",
+            "high": "145.00",
+            "low": "139.00",
+            "close": "144.00"
+          },
+          {
+            "date": "02/28/2023",
+            "ticker": "AAPL",
+            "open": "146.00",
+            "high": "150.00",
+            "low": "145.00",
+            "close": "147.00"
+          },
+          {
+            "date": "03/28/2023",
+            "ticker": "AAPL",
+            "open": "160.00",
+            "high": "165.00",
+            "low": "158.00",
+            "close": "164.00"
+          },
+          {
+            "date": "01/28/2023",
+            "ticker": "AMZN",
+            "open": "100.00",
+            "high": "103.00",
+            "low": "98.00",
+            "close": "102.00"
+          },
+          {
+            "date": "02/28/2023",
+            "ticker": "AMZN",
+            "open": "95.00",
+            "high": "99.00",
+            "low": "93.00",
+            "close": "94.00"
+          },
+          {
+            "date": "03/28/2023",
+            "ticker": "AMZN",
+            "open": "98.00",
+            "high": "102.00",
+            "low": "97.00",
+            "close": "101.00"
+          }
+        ]
+      },
+      "expected_output": [
+        {
+          "ticker": "AAPL",
+          "ym": "2023-01",
+          "close": 144.0,
+          "change_amt": null
+        },
+        {
+          "ticker": "AAPL",
+          "ym": "2023-02",
+          "close": 147.0,
+          "change_amt": 3.0
+        },
+        {
+          "ticker": "AAPL",
+          "ym": "2023-03",
+          "close": 164.0,
+          "change_amt": 17.0
+        },
+        {
+          "ticker": "AMZN",
+          "ym": "2023-01",
+          "close": 102.0,
+          "change_amt": null
+        },
+        {
+          "ticker": "AMZN",
+          "ym": "2023-02",
+          "close": 94.0,
+          "change_amt": -8.0
+        },
+        {
+          "ticker": "AMZN",
+          "ym": "2023-03",
+          "close": 101.0,
+          "change_amt": 7.0
+        }
+      ],
+      "category": "volume"
+    },
+    {
+      "test_case_id": "tc_3_disqualifying_rows",
+      "description": "Dataset containing disqualifying rows, edge values, and cancelled/zero records",
+      "input_data": {
+        "stock_prices": [
+          {
+            "date": "01/03/2023",
+            "ticker": "AAPL",
+            "open": "125.00",
+            "high": "130.00",
+            "low": "124.00",
+            "close": "128.00"
+          },
+          {
+            "date": "01/31/2023",
+            "ticker": "AAPL",
+            "open": "140.00",
+            "high": "145.00",
+            "low": "139.00",
+            "close": "144.00"
+          },
+          {
+            "date": "02/28/2023",
+            "ticker": "AAPL",
+            "open": "146.00",
+            "high": "150.00",
+            "low": "145.00",
+            "close": "147.00"
+          },
+          {
+            "date": "03/31/2023",
+            "ticker": "AAPL",
+            "open": "160.00",
+            "high": "165.00",
+            "low": "158.00",
+            "close": "164.00"
+          },
+          {
+            "date": "01/31/2023",
+            "ticker": "AMZN",
+            "open": "100.00",
+            "high": "103.00",
+            "low": "98.00",
+            "close": "102.00"
+          },
+          {
+            "date": "02/28/2023",
+            "ticker": "AMZN",
+            "open": "95.00",
+            "high": "99.00",
+            "low": "93.00",
+            "close": "94.00"
+          },
+          {
+            "date": "03/31/2023",
+            "ticker": "AMZN",
+            "open": "98.00",
+            "high": "102.00",
+            "low": "97.00",
+            "close": "101.00"
+          },
+          {
+            "date": "01/03/2018",
+            "ticker": "AAPL",
+            "open": "125.00",
+            "high": "130.00",
+            "low": "124.00",
+            "close": "128.00"
+          },
+          {
+            "date": "01/28/2018",
+            "ticker": "AAPL",
+            "open": "140.00",
+            "high": "145.00",
+            "low": "139.00",
+            "close": "144.00"
+          },
+          {
+            "date": "02/28/2018",
+            "ticker": "AAPL",
+            "open": "146.00",
+            "high": "150.00",
+            "low": "145.00",
+            "close": "147.00"
+          }
+        ]
+      },
+      "expected_output": [
+        {
+          "ticker": "AAPL",
+          "ym": "2018-01",
+          "close": 144.0,
+          "change_amt": null
+        },
+        {
+          "ticker": "AAPL",
+          "ym": "2018-02",
+          "close": 147.0,
+          "change_amt": 3.0
+        },
+        {
+          "ticker": "AAPL",
+          "ym": "2023-01",
+          "close": 144.0,
+          "change_amt": -3.0
+        },
+        {
+          "ticker": "AAPL",
+          "ym": "2023-02",
+          "close": 147.0,
+          "change_amt": 3.0
+        },
+        {
+          "ticker": "AAPL",
+          "ym": "2023-03",
+          "close": 164.0,
+          "change_amt": 17.0
+        },
+        {
+          "ticker": "AMZN",
+          "ym": "2023-01",
+          "close": 102.0,
+          "change_amt": null
+        },
+        {
+          "ticker": "AMZN",
+          "ym": "2023-02",
+          "close": 94.0,
+          "change_amt": -8.0
+        },
+        {
+          "ticker": "AMZN",
+          "ym": "2023-03",
+          "close": 101.0,
+          "change_amt": 7.0
+        }
+      ],
+      "category": "edge"
+    },
+    {
+      "test_case_id": "tc_4_empty_result",
+      "description": "Input where no rows satisfy problem criteria, verifying empty result handling",
+      "input_data": {
+        "stock_prices": []
+      },
+      "expected_output": [],
+      "category": "edge"
+    },
+    {
+      "test_case_id": "tc_5_ties_and_nulls",
+      "description": "Tied ranking metrics, unmatched join keys, and NULL values in nullable attributes",
+      "input_data": {
+        "stock_prices": [
+          {
+            "date": "01/03/2023",
+            "ticker": "AAPL",
+            "open": "125.00",
+            "high": "130.00",
+            "low": "124.00",
+            "close": "128.00"
+          },
+          {
+            "date": "01/31/2023",
+            "ticker": "AAPL",
+            "open": "140.00",
+            "high": "145.00",
+            "low": "139.00",
+            "close": "144.00"
+          },
+          {
+            "date": "02/28/2023",
+            "ticker": "AAPL",
+            "open": "146.00",
+            "high": "150.00",
+            "low": "145.00",
+            "close": "147.00"
+          },
+          {
+            "date": "03/31/2023",
+            "ticker": "AAPL",
+            "open": "160.00",
+            "high": "165.00",
+            "low": "158.00",
+            "close": "164.00"
+          },
+          {
+            "date": "01/31/2023",
+            "ticker": "AMZN",
+            "open": "100.00",
+            "high": "103.00",
+            "low": "98.00",
+            "close": "102.00"
+          },
+          {
+            "date": "02/28/2023",
+            "ticker": "AMZN",
+            "open": "95.00",
+            "high": "99.00",
+            "low": "93.00",
+            "close": "94.00"
+          },
+          {
+            "date": "03/31/2023",
+            "ticker": "AMZN",
+            "open": "98.00",
+            "high": "102.00",
+            "low": "97.00",
+            "close": "101.00"
+          },
+          {
+            "date": "01/03/2023",
+            "ticker": "AAPL",
+            "open": "125.00",
+            "high": "130.00",
+            "low": "124.00",
+            "close": "128.00"
+          },
+          {
+            "date": "01/31/2023",
+            "ticker": "AAPL",
+            "open": "140.00",
+            "high": "145.00",
+            "low": "139.00",
+            "close": "144.00"
+          }
+        ]
+      },
+      "expected_output": [
+        {
+          "ticker": "AAPL",
+          "ym": "2023-01",
+          "close": 144.0,
+          "change_amt": null
+        },
+        {
+          "ticker": "AAPL",
+          "ym": "2023-02",
+          "close": 147.0,
+          "change_amt": 3.0
+        },
+        {
+          "ticker": "AAPL",
+          "ym": "2023-03",
+          "close": 164.0,
+          "change_amt": 17.0
+        },
+        {
+          "ticker": "AMZN",
+          "ym": "2023-01",
+          "close": 102.0,
+          "change_amt": null
+        },
+        {
+          "ticker": "AMZN",
+          "ym": "2023-02",
+          "close": 94.0,
+          "change_amt": -8.0
+        },
+        {
+          "ticker": "AMZN",
+          "ym": "2023-03",
+          "close": 101.0,
+          "change_amt": 7.0
+        }
+      ],
+      "category": "edge"
+    }
+  ],
+  "order_sensitive": true,
+  "expected_output": [
+    {
+      "ticker": "AAPL",
+      "ym": "2023-01",
+      "close": 144.0,
+      "change_amt": null
+    },
+    {
+      "ticker": "AAPL",
+      "ym": "2023-02",
+      "close": 147.0,
+      "change_amt": 3.0
+    },
+    {
+      "ticker": "AAPL",
+      "ym": "2023-03",
+      "close": 164.0,
+      "change_amt": 17.0
+    },
+    {
+      "ticker": "AMZN",
+      "ym": "2023-01",
+      "close": 102.0,
+      "change_amt": null
+    },
+    {
+      "ticker": "AMZN",
+      "ym": "2023-02",
+      "close": 94.0,
+      "change_amt": -8.0
+    },
+    {
+      "ticker": "AMZN",
+      "ym": "2023-03",
+      "close": 101.0,
+      "change_amt": 7.0
+    }
+  ]
+}

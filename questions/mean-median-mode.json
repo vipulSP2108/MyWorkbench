@@ -1,0 +1,284 @@
+{
+  "question_id": "q_044_mean_median_mode",
+  "slug": "mean-median-mode",
+  "title": "Mean, Median, Mode",
+  "difficulty": "Medium",
+  "company": "Microsoft",
+  "premium": true,
+  "question": "You're given a list of numbers representing the number of emails in the inbox of Microsoft Outlook users. Before the Product Management team can start developing features related to bulk-deleting email or achieving inbox zero, they want the mean, median, and mode of the email counts.\n\nDisplay mean, median and mode (in this order), with the mean rounded to the nearest integer. Assume there are no ties for the mode.",
+  "notes": [],
+  "tables": [
+    {
+      "table_name": "inbox_stats",
+      "columns": [
+        {
+          "column_name": "user_id",
+          "data_type": "INT"
+        },
+        {
+          "column_name": "email_count",
+          "data_type": "INT"
+        }
+      ]
+    }
+  ],
+  "sample_data": {
+    "inbox_stats": [
+      {
+        "user_id": 123,
+        "email_count": 100
+      },
+      {
+        "user_id": 234,
+        "email_count": 200
+      },
+      {
+        "user_id": 345,
+        "email_count": 300
+      },
+      {
+        "user_id": 456,
+        "email_count": 200
+      },
+      {
+        "user_id": 567,
+        "email_count": 200
+      }
+    ]
+  },
+  "sample_output": [
+    {
+      "mean": 200,
+      "median": 200,
+      "mode": 200
+    }
+  ],
+  "reference_sql": "SELECT \n  ROUND(AVG(email_count)) AS mean,\n  (SELECT email_count FROM inbox_stats ORDER BY email_count LIMIT 1 OFFSET (SELECT COUNT(*)/2 FROM inbox_stats)) AS median,\n  (SELECT email_count FROM inbox_stats GROUP BY email_count ORDER BY COUNT(*) DESC LIMIT 1) AS mode\nFROM inbox_stats;",
+  "tags": [
+    "aggregation",
+    "ecommerce",
+    "math",
+    "medium",
+    "microsoft"
+  ],
+  "related_questions": [],
+  "sources": [
+    [
+      "DataLemur blog: 9 Microsoft SQL questions (#2)",
+      "https://datalemur.com/blog/microsoft-sql-interview-questions"
+    ],
+    [
+      "DataLemur page (locked)",
+      "https://datalemur.com/questions/mean-median-mode"
+    ],
+    [
+      "DataLemur PDF",
+      "Page 48"
+    ]
+  ],
+  "test_cases": [
+    {
+      "test_case_id": "tc_1_baseline",
+      "description": "Baseline sample input data from problem description",
+      "input_data": {
+        "inbox_stats": [
+          {
+            "user_id": 123,
+            "email_count": 100
+          },
+          {
+            "user_id": 234,
+            "email_count": 200
+          },
+          {
+            "user_id": 345,
+            "email_count": 300
+          },
+          {
+            "user_id": 456,
+            "email_count": 200
+          },
+          {
+            "user_id": 567,
+            "email_count": 200
+          }
+        ]
+      },
+      "expected_output": [
+        {
+          "mean": 200.0,
+          "median": 200,
+          "mode": 200
+        }
+      ],
+      "category": "normal"
+    },
+    {
+      "test_case_id": "tc_2_high_volume",
+      "description": "Multiple entities with scaled volume and multi-group distributions",
+      "input_data": {
+        "inbox_stats": [
+          {
+            "user_id": 123,
+            "email_count": 100
+          },
+          {
+            "user_id": 234,
+            "email_count": 200
+          },
+          {
+            "user_id": 345,
+            "email_count": 300
+          },
+          {
+            "user_id": 456,
+            "email_count": 200
+          },
+          {
+            "user_id": 567,
+            "email_count": 200
+          },
+          {
+            "user_id": 1123,
+            "email_count": 100
+          },
+          {
+            "user_id": 1234,
+            "email_count": 200
+          },
+          {
+            "user_id": 1345,
+            "email_count": 300
+          },
+          {
+            "user_id": 1456,
+            "email_count": 200
+          },
+          {
+            "user_id": 1567,
+            "email_count": 200
+          }
+        ]
+      },
+      "expected_output": [
+        {
+          "mean": 200.0,
+          "median": 200,
+          "mode": 200
+        }
+      ],
+      "category": "volume"
+    },
+    {
+      "test_case_id": "tc_3_disqualifying_rows",
+      "description": "Dataset containing disqualifying rows, edge values, and cancelled/zero records",
+      "input_data": {
+        "inbox_stats": [
+          {
+            "user_id": 123,
+            "email_count": 100
+          },
+          {
+            "user_id": 234,
+            "email_count": 200
+          },
+          {
+            "user_id": 345,
+            "email_count": 300
+          },
+          {
+            "user_id": 456,
+            "email_count": 200
+          },
+          {
+            "user_id": 567,
+            "email_count": 200
+          },
+          {
+            "user_id": 5123,
+            "email_count": 100
+          },
+          {
+            "user_id": 5234,
+            "email_count": 200
+          }
+        ]
+      },
+      "expected_output": [
+        {
+          "mean": 186.0,
+          "median": 200,
+          "mode": 200
+        }
+      ],
+      "category": "edge"
+    },
+    {
+      "test_case_id": "tc_4_empty_result",
+      "description": "Input where no rows satisfy problem criteria, verifying empty result handling",
+      "input_data": {
+        "inbox_stats": []
+      },
+      "expected_output": [
+        {
+          "mean": null,
+          "median": null,
+          "mode": null
+        }
+      ],
+      "category": "edge"
+    },
+    {
+      "test_case_id": "tc_5_ties_and_nulls",
+      "description": "Tied ranking metrics, unmatched join keys, and NULL values in nullable attributes",
+      "input_data": {
+        "inbox_stats": [
+          {
+            "user_id": 123,
+            "email_count": 100
+          },
+          {
+            "user_id": 234,
+            "email_count": 200
+          },
+          {
+            "user_id": 345,
+            "email_count": 300
+          },
+          {
+            "user_id": 456,
+            "email_count": 200
+          },
+          {
+            "user_id": 567,
+            "email_count": 200
+          },
+          {
+            "user_id": 9123,
+            "email_count": 100
+          },
+          {
+            "user_id": 9734,
+            "email_count": 200
+          }
+        ]
+      },
+      "expected_output": [
+        {
+          "mean": 186.0,
+          "median": 200,
+          "mode": 200
+        }
+      ],
+      "category": "edge"
+    }
+  ],
+  "order_sensitive": true,
+  "expected_output": [
+    {
+      "mean": 200.0,
+      "median": 200,
+      "mode": 200
+    }
+  ]
+}

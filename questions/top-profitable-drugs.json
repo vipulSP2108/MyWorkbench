@@ -1,0 +1,361 @@
+{
+  "question_id": "q_019_top_profitable_drugs",
+  "slug": "top-profitable-drugs",
+  "title": "Pharmacy Analytics (Part 1)",
+  "difficulty": "Easy",
+  "company": "CVS Health",
+  "premium": false,
+  "question": "CVS Health is trying to better understand its pharmacy sales, and how well different products are selling. Each drug can only be produced by one manufacturer.\n\nWrite a query to find the top 3 most profitable drugs sold, and how much profit they made. Assume that there are no ties in the profits. Display the result from the highest to the lowest total profit.\n\nDefinition:\n\nIf you like this question, try out Pharmacy Analytics (Part 2)!",
+  "notes": [
+    "cogs stands for Cost of Goods Sold which is the direct cost associated with producing the drug.",
+    "Total Profit = Total Sales - Cost of Goods Sold",
+    "Zyprexa made the most profit (of \\$84,576.53) followed by Varicose Relief (of \\$80,926.64) and Surmontil (of \\$79,815.3).",
+    "The dataset you are querying against may have different input & output - this is just an example!"
+  ],
+  "tables": [
+    {
+      "table_name": "pharmacy_sales",
+      "columns": [
+        {
+          "column_name": "product_id",
+          "data_type": "INT"
+        },
+        {
+          "column_name": "units_sold",
+          "data_type": "INT"
+        },
+        {
+          "column_name": "total_sales",
+          "data_type": "DECIMAL(10,2)"
+        },
+        {
+          "column_name": "cogs",
+          "data_type": "DECIMAL(10,2)"
+        },
+        {
+          "column_name": "manufacturer",
+          "data_type": "VARCHAR(255)"
+        },
+        {
+          "column_name": "drug",
+          "data_type": "VARCHAR(255)"
+        }
+      ]
+    }
+  ],
+  "sample_data": {
+    "pharmacy_sales": [
+      {
+        "product_id": "9",
+        "units_sold": "37410",
+        "total_sales": "293452.54",
+        "cogs": "208876.01",
+        "manufacturer": "Eli Lilly",
+        "drug": "Zyprexa"
+      },
+      {
+        "product_id": "34",
+        "units_sold": "94698",
+        "total_sales": "600997.19",
+        "cogs": "521182.16",
+        "manufacturer": "AstraZeneca",
+        "drug": "Surmontil"
+      },
+      {
+        "product_id": "61",
+        "units_sold": "77023",
+        "total_sales": "500101.61",
+        "cogs": "419174.97",
+        "manufacturer": "Biogen",
+        "drug": "Varicose Relief"
+      },
+      {
+        "product_id": "136",
+        "units_sold": "144814",
+        "total_sales": "1084258",
+        "cogs": "1006447.73",
+        "manufacturer": "Biogen",
+        "drug": "Burkhart"
+      }
+    ]
+  },
+  "sample_output": [
+    {
+      "drug": "Zyprexa",
+      "total_profit": "84576.53"
+    },
+    {
+      "drug": "Varicose Relief",
+      "total_profit": "80926.64"
+    },
+    {
+      "drug": "Surmontil",
+      "total_profit": "79815.03"
+    }
+  ],
+  "reference_sql": "SELECT \n  drug,\n  total_sales - cogs AS total_profit\nFROM pharmacy_sales\nORDER BY total_profit DESC, drug ASC\nLIMIT 3;",
+  "tags": [
+    "aggregation",
+    "cvs health",
+    "easy",
+    "ecommerce",
+    "healthcare",
+    "ranking",
+    "social-media",
+    "window-function"
+  ],
+  "related_questions": [
+    "non-profitable-drugs",
+    "total-drugs-sales",
+    "top-drugs-sold"
+  ],
+  "sources": [
+    [
+      "DataLemur page (free)",
+      "https://datalemur.com/questions/top-profitable-drugs"
+    ],
+    [
+      "DataLemur PDF",
+      "Page 23"
+    ]
+  ],
+  "test_cases": [
+    {
+      "test_case_id": "tc_1_baseline",
+      "description": "Baseline sample input data from problem description",
+      "input_data": {
+        "pharmacy_sales": [
+          {
+            "product_id": "9",
+            "units_sold": "37410",
+            "total_sales": "293452.54",
+            "cogs": "208876.01",
+            "manufacturer": "Eli Lilly",
+            "drug": "Zyprexa"
+          },
+          {
+            "product_id": "34",
+            "units_sold": "94698",
+            "total_sales": "600997.19",
+            "cogs": "521182.16",
+            "manufacturer": "AstraZeneca",
+            "drug": "Surmontil"
+          },
+          {
+            "product_id": "61",
+            "units_sold": "77023",
+            "total_sales": "500101.61",
+            "cogs": "419174.97",
+            "manufacturer": "Biogen",
+            "drug": "Varicose Relief"
+          },
+          {
+            "product_id": "136",
+            "units_sold": "144814",
+            "total_sales": "1084258",
+            "cogs": "1006447.73",
+            "manufacturer": "Biogen",
+            "drug": "Burkhart"
+          }
+        ]
+      },
+      "expected_output": [
+        {
+          "drug": "Zyprexa",
+          "total_profit": 84576.53
+        },
+        {
+          "drug": "Varicose Relief",
+          "total_profit": 80926.64
+        },
+        {
+          "drug": "Surmontil",
+          "total_profit": 79815.03
+        }
+      ],
+      "category": "normal"
+    },
+    {
+      "test_case_id": "tc_2_high_volume",
+      "description": "Multiple entities with scaled volume and multi-group distributions",
+      "input_data": {
+        "pharmacy_sales": [
+          {
+            "product_id": "9",
+            "units_sold": "37410",
+            "total_sales": "293452.54",
+            "cogs": "208876.01",
+            "manufacturer": "Eli Lilly",
+            "drug": "Zyprexa"
+          },
+          {
+            "product_id": "34",
+            "units_sold": "94698",
+            "total_sales": "600997.19",
+            "cogs": "521182.16",
+            "manufacturer": "AstraZeneca",
+            "drug": "Surmontil"
+          },
+          {
+            "product_id": "61",
+            "units_sold": "77023",
+            "total_sales": "500101.61",
+            "cogs": "419174.97",
+            "manufacturer": "Biogen",
+            "drug": "Varicose Relief"
+          },
+          {
+            "product_id": "136",
+            "units_sold": "144814",
+            "total_sales": "1084258",
+            "cogs": "1006447.73",
+            "manufacturer": "Biogen",
+            "drug": "Burkhart"
+          },
+          {
+            "product_id": 1009,
+            "units_sold": "37410",
+            "total_sales": 440178.81,
+            "cogs": "208876.01",
+            "manufacturer": "Eli Lilly",
+            "drug": "Zyprexa"
+          },
+          {
+            "product_id": 1034,
+            "units_sold": "94698",
+            "total_sales": 901495.78,
+            "cogs": "521182.16",
+            "manufacturer": "AstraZeneca",
+            "drug": "Surmontil"
+          },
+          {
+            "product_id": 1061,
+            "units_sold": "77023",
+            "total_sales": 750152.42,
+            "cogs": "419174.97",
+            "manufacturer": "Biogen",
+            "drug": "Varicose Relief"
+          },
+          {
+            "product_id": 1136,
+            "units_sold": "144814",
+            "total_sales": 1626387.0,
+            "cogs": "1006447.73",
+            "manufacturer": "Biogen",
+            "drug": "Burkhart"
+          }
+        ]
+      },
+      "expected_output": [
+        {
+          "drug": "Burkhart",
+          "total_profit": 619939.27
+        },
+        {
+          "drug": "Surmontil",
+          "total_profit": 380313.62
+        },
+        {
+          "drug": "Varicose Relief",
+          "total_profit": 330977.45
+        }
+      ],
+      "category": "volume"
+    },
+    {
+      "test_case_id": "tc_3_disqualifying_rows",
+      "description": "Dataset containing disqualifying rows, edge values, and cancelled/zero records",
+      "input_data": {
+        "pharmacy_sales": [
+          {
+            "product_id": "9",
+            "units_sold": "37410",
+            "total_sales": "293452.54",
+            "cogs": "208876.01",
+            "manufacturer": "Eli Lilly",
+            "drug": "Zyprexa"
+          },
+          {
+            "product_id": "34",
+            "units_sold": "94698",
+            "total_sales": "600997.19",
+            "cogs": "521182.16",
+            "manufacturer": "AstraZeneca",
+            "drug": "Surmontil"
+          },
+          {
+            "product_id": "61",
+            "units_sold": "77023",
+            "total_sales": "500101.61",
+            "cogs": "419174.97",
+            "manufacturer": "Biogen",
+            "drug": "Varicose Relief"
+          },
+          {
+            "product_id": "136",
+            "units_sold": "144814",
+            "total_sales": "1084258",
+            "cogs": "1006447.73",
+            "manufacturer": "Biogen",
+            "drug": "Burkhart"
+          },
+          {
+            "product_id": 5009,
+            "units_sold": "37410",
+            "total_sales": "293452.54",
+            "cogs": "208876.01",
+            "manufacturer": "Eli Lilly",
+            "drug": "Zyprexa"
+          },
+          {
+            "product_id": 5034,
+            "units_sold": "94698",
+            "total_sales": "600997.19",
+            "cogs": "521182.16",
+            "manufacturer": "AstraZeneca",
+            "drug": "Surmontil"
+          }
+        ]
+      },
+      "expected_output": [
+        {
+          "drug": "Zyprexa",
+          "total_profit": 84576.53
+        },
+        {
+          "drug": "Zyprexa",
+          "total_profit": 84576.53
+        },
+        {
+          "drug": "Varicose Relief",
+          "total_profit": 80926.64
+        }
+      ],
+      "category": "edge"
+    },
+    {
+      "test_case_id": "tc_4_empty_result",
+      "description": "Input where no rows satisfy problem criteria, verifying empty result handling",
+      "input_data": {
+        "pharmacy_sales": []
+      },
+      "expected_output": [],
+      "category": "edge"
+    }
+  ],
+  "order_sensitive": true,
+  "expected_output": [
+    {
+      "drug": "Zyprexa",
+      "total_profit": 84576.53
+    },
+    {
+      "drug": "Varicose Relief",
+      "total_profit": 80926.64
+    },
+    {
+      "drug": "Surmontil",
+      "total_profit": 79815.03
+    }
+  ]
+}

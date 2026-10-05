@@ -1,0 +1,302 @@
+{
+  "question_id": "q_097_alibaba_compressed_median",
+  "slug": "alibaba-compressed-median",
+  "title": "Compressed Median",
+  "difficulty": "Hard",
+  "company": "Alibaba",
+  "premium": true,
+  "question": "Series context (from the free sibling questions): you're given a table with the item count for each Alibaba order, together with the frequency of orders that have the same item count. Example from the series: 800 orders with 3 items each is stored as item_count = 3, order_occurrences = 800.\n\nLikely ask (unverified): write a query to find the median number of items per order, treating the table as compressed data (each item_count repeated order_occurrences times).\n\nNot available: the exact wording, rounding rules, example rows and expected output for this problem.",
+  "notes": [],
+  "tables": [
+    {
+      "table_name": "items_per_order",
+      "columns": [
+        {
+          "column_name": "item_count",
+          "data_type": "INT"
+        },
+        {
+          "column_name": "order_occurrences",
+          "data_type": "INT"
+        }
+      ]
+    }
+  ],
+  "sample_data": {
+    "items_per_order": [
+      {
+        "item_count": "1",
+        "order_occurrences": "500"
+      },
+      {
+        "item_count": "2",
+        "order_occurrences": "1000"
+      },
+      {
+        "item_count": "3",
+        "order_occurrences": "800"
+      },
+      {
+        "item_count": "4",
+        "order_occurrences": "1000"
+      }
+    ]
+  },
+  "sample_output": [
+    {
+      "median": "3.00"
+    }
+  ],
+  "reference_sql": "WITH running AS (\n  SELECT \n    item_count,\n    order_occurrences,\n    SUM(order_occurrences) OVER (ORDER BY item_count) AS cum_orders,\n    SUM(order_occurrences) OVER () AS total_orders\n  FROM items_per_order\n)\nSELECT ROUND(AVG(item_count), 1) AS median\nFROM running\nWHERE cum_orders >= total_orders / 2.0\nLIMIT 1;",
+  "tags": [
+    "aggregation",
+    "alibaba",
+    "cte",
+    "ecommerce",
+    "hard",
+    "math",
+    "social-media",
+    "window-function"
+  ],
+  "related_questions": [
+    "alibaba-compressed-mean",
+    "alibaba-compressed-mode"
+  ],
+  "sources": [
+    [
+      "Sibling free question: Compressed Mean",
+      "https://datalemur.com/questions/alibaba-compressed-mean"
+    ],
+    [
+      "Sibling free question: Compressed Mode",
+      "https://datalemur.com/questions/alibaba-compressed-mode"
+    ],
+    [
+      "DataLemur page (locked)",
+      "https://datalemur.com/questions/alibaba-compressed-median"
+    ],
+    [
+      "DataLemur PDF",
+      "Page 101"
+    ]
+  ],
+  "test_cases": [
+    {
+      "test_case_id": "tc_1_baseline",
+      "description": "Baseline sample input data from problem description",
+      "input_data": {
+        "items_per_order": [
+          {
+            "item_count": "1",
+            "order_occurrences": "500"
+          },
+          {
+            "item_count": "2",
+            "order_occurrences": "1000"
+          },
+          {
+            "item_count": "3",
+            "order_occurrences": "800"
+          },
+          {
+            "item_count": "4",
+            "order_occurrences": "1000"
+          }
+        ]
+      },
+      "expected_output": [
+        {
+          "median": 3.5
+        }
+      ],
+      "category": "normal"
+    },
+    {
+      "test_case_id": "tc_2_high_volume",
+      "description": "Multiple entities with scaled volume and multi-group distributions",
+      "input_data": {
+        "items_per_order": [
+          {
+            "item_count": "1",
+            "order_occurrences": "500"
+          },
+          {
+            "item_count": "2",
+            "order_occurrences": "1000"
+          },
+          {
+            "item_count": "3",
+            "order_occurrences": "800"
+          },
+          {
+            "item_count": "4",
+            "order_occurrences": "1000"
+          },
+          {
+            "item_count": "1",
+            "order_occurrences": "500"
+          },
+          {
+            "item_count": "2",
+            "order_occurrences": "1000"
+          },
+          {
+            "item_count": "3",
+            "order_occurrences": "800"
+          },
+          {
+            "item_count": "4",
+            "order_occurrences": "1000"
+          }
+        ]
+      },
+      "expected_output": [
+        {
+          "median": 3.5
+        }
+      ],
+      "category": "volume"
+    },
+    {
+      "test_case_id": "tc_3_disqualifying_rows",
+      "description": "Dataset containing disqualifying rows, edge values, and cancelled/zero records",
+      "input_data": {
+        "items_per_order": [
+          {
+            "item_count": "1",
+            "order_occurrences": "500"
+          },
+          {
+            "item_count": "2",
+            "order_occurrences": "1000"
+          },
+          {
+            "item_count": "3",
+            "order_occurrences": "800"
+          },
+          {
+            "item_count": "4",
+            "order_occurrences": "1000"
+          },
+          {
+            "item_count": "1",
+            "order_occurrences": "500"
+          },
+          {
+            "item_count": "2",
+            "order_occurrences": "1000"
+          }
+        ]
+      },
+      "expected_output": [
+        {
+          "median": 2.8
+        }
+      ],
+      "category": "edge"
+    },
+    {
+      "test_case_id": "tc_4_empty_result",
+      "description": "Input where no rows satisfy problem criteria, verifying empty result handling",
+      "input_data": {
+        "items_per_order": []
+      },
+      "expected_output": [
+        {
+          "median": null
+        }
+      ],
+      "category": "edge"
+    },
+    {
+      "test_case_id": "tc_5_ties_and_nulls",
+      "description": "Tied ranking metrics, unmatched join keys, and NULL values in nullable attributes",
+      "input_data": {
+        "items_per_order": [
+          {
+            "item_count": "1",
+            "order_occurrences": "500"
+          },
+          {
+            "item_count": "2",
+            "order_occurrences": "1000"
+          },
+          {
+            "item_count": "3",
+            "order_occurrences": "800"
+          },
+          {
+            "item_count": "4",
+            "order_occurrences": "1000"
+          },
+          {
+            "item_count": "1",
+            "order_occurrences": "500"
+          },
+          {
+            "item_count": "2",
+            "order_occurrences": "1000"
+          }
+        ]
+      },
+      "expected_output": [
+        {
+          "median": 2.8
+        }
+      ],
+      "category": "edge"
+    },
+    {
+      "test_case_id": "tc_6_extreme_boundary",
+      "description": "Consecutive day sequences, month-end date rollovers, and high-frequency transactions",
+      "input_data": {
+        "items_per_order": [
+          {
+            "item_count": "1",
+            "order_occurrences": "500"
+          },
+          {
+            "item_count": "2",
+            "order_occurrences": "1000"
+          },
+          {
+            "item_count": "3",
+            "order_occurrences": "800"
+          },
+          {
+            "item_count": "4",
+            "order_occurrences": "1000"
+          },
+          {
+            "item_count": "1",
+            "order_occurrences": "500"
+          },
+          {
+            "item_count": "2",
+            "order_occurrences": "1000"
+          },
+          {
+            "item_count": "3",
+            "order_occurrences": "800"
+          },
+          {
+            "item_count": "4",
+            "order_occurrences": "1000"
+          }
+        ]
+      },
+      "expected_output": [
+        {
+          "median": 3.5
+        }
+      ],
+      "category": "boundary"
+    }
+  ],
+  "order_sensitive": false,
+  "expected_output": [
+    {
+      "median": 3.5
+    }
+  ]
+}

@@ -1,0 +1,422 @@
+{
+  "question_id": "q_095_first_month_retention",
+  "slug": "first-month-retention",
+  "title": "Weekly Churn Rates",
+  "difficulty": "Hard",
+  "company": "Facebook",
+  "premium": true,
+  "question": "Facebook wants to analyze user retention. A user is considered churned in their first month if they have no activity within 28 days following their signup date.\n\nWrite a query to calculate the first-month churn rate for users grouped by their signup week. Output the signup week start date and the churn rate percentage rounded to 2 decimal places.",
+  "notes": [],
+  "tables": [
+    {
+      "table_name": "users",
+      "columns": [
+        {
+          "column_name": "user_id",
+          "data_type": "INT"
+        },
+        {
+          "column_name": "signup_date",
+          "data_type": "DATETIME"
+        }
+      ]
+    },
+    {
+      "table_name": "user_actions",
+      "columns": [
+        {
+          "column_name": "user_id",
+          "data_type": "INT"
+        },
+        {
+          "column_name": "event_date",
+          "data_type": "DATETIME"
+        },
+        {
+          "column_name": "action_type",
+          "data_type": "VARCHAR(255)"
+        }
+      ]
+    }
+  ],
+  "sample_data": {
+    "users": [
+      {
+        "user_id": 1,
+        "signup_date": "06/01/2022 00:00:00"
+      },
+      {
+        "user_id": 2,
+        "signup_date": "06/02/2022 00:00:00"
+      },
+      {
+        "user_id": 3,
+        "signup_date": "06/08/2022 00:00:00"
+      }
+    ],
+    "user_actions": [
+      {
+        "user_id": 1,
+        "event_date": "06/10/2022 00:00:00",
+        "action_type": "login"
+      },
+      {
+        "user_id": 2,
+        "event_date": "07/15/2022 00:00:00",
+        "action_type": "post"
+      },
+      {
+        "user_id": 3,
+        "event_date": "06/12/2022 00:00:00",
+        "action_type": "login"
+      }
+    ]
+  },
+  "sample_output": [
+    {
+      "signup_week": "05/30/2022",
+      "churn_rate": "50.00"
+    },
+    {
+      "signup_week": "06/06/2022",
+      "churn_rate": "0.00"
+    }
+  ],
+  "reference_sql": "SELECT \n  ROUND(100.0 * COUNT(DISTINCT a.user_id) / COUNT(DISTINCT u.user_id), 2) AS retention_rate\nFROM users u\nLEFT JOIN user_actions a \n  ON u.user_id = a.user_id \n AND DATEDIFF(a.event_date, u.signup_date) BETWEEN 1 AND 30;",
+  "tags": [
+    "date-manipulation",
+    "facebook",
+    "hard",
+    "math",
+    "social-media"
+  ],
+  "related_questions": [],
+  "sources": [
+    [
+      "Text supplied by you (not checkable against the locked page)",
+      "https://datalemur.com/questions/first-month-retention"
+    ],
+    [
+      "DataLemur PDF",
+      "Page 99"
+    ]
+  ],
+  "test_cases": [
+    {
+      "test_case_id": "tc_1_baseline",
+      "description": "Baseline sample input data from problem description",
+      "input_data": {
+        "users": [
+          {
+            "user_id": 1,
+            "signup_date": "06/01/2022 00:00:00"
+          },
+          {
+            "user_id": 2,
+            "signup_date": "06/02/2022 00:00:00"
+          },
+          {
+            "user_id": 3,
+            "signup_date": "06/08/2022 00:00:00"
+          }
+        ],
+        "user_actions": [
+          {
+            "user_id": 1,
+            "event_date": "06/10/2022 00:00:00",
+            "action_type": "login"
+          },
+          {
+            "user_id": 2,
+            "event_date": "07/15/2022 00:00:00",
+            "action_type": "post"
+          },
+          {
+            "user_id": 3,
+            "event_date": "06/12/2022 00:00:00",
+            "action_type": "login"
+          }
+        ]
+      },
+      "expected_output": [
+        {
+          "retention_rate": 66.67
+        }
+      ],
+      "category": "normal"
+    },
+    {
+      "test_case_id": "tc_2_high_volume",
+      "description": "Multiple entities with scaled volume and multi-group distributions",
+      "input_data": {
+        "users": [
+          {
+            "user_id": 1,
+            "signup_date": "06/01/2022 00:00:00"
+          },
+          {
+            "user_id": 2,
+            "signup_date": "06/02/2022 00:00:00"
+          },
+          {
+            "user_id": 3,
+            "signup_date": "06/08/2022 00:00:00"
+          },
+          {
+            "user_id": 1001,
+            "signup_date": "06/06/2022 00:00:00"
+          },
+          {
+            "user_id": 1002,
+            "signup_date": "06/07/2022 00:00:00"
+          },
+          {
+            "user_id": 1003,
+            "signup_date": "06/13/2022 00:00:00"
+          }
+        ],
+        "user_actions": [
+          {
+            "user_id": 1,
+            "event_date": "06/10/2022 00:00:00",
+            "action_type": "login"
+          },
+          {
+            "user_id": 2,
+            "event_date": "07/15/2022 00:00:00",
+            "action_type": "post"
+          },
+          {
+            "user_id": 3,
+            "event_date": "06/12/2022 00:00:00",
+            "action_type": "login"
+          },
+          {
+            "user_id": 1001,
+            "event_date": "06/15/2022 00:00:00",
+            "action_type": "login"
+          },
+          {
+            "user_id": 1002,
+            "event_date": "07/20/2022 00:00:00",
+            "action_type": "post"
+          },
+          {
+            "user_id": 1003,
+            "event_date": "06/17/2022 00:00:00",
+            "action_type": "login"
+          }
+        ]
+      },
+      "expected_output": [
+        {
+          "retention_rate": 66.67
+        }
+      ],
+      "category": "volume"
+    },
+    {
+      "test_case_id": "tc_3_disqualifying_rows",
+      "description": "Dataset containing disqualifying rows, edge values, and cancelled/zero records",
+      "input_data": {
+        "users": [
+          {
+            "user_id": 1,
+            "signup_date": "06/01/2022 00:00:00"
+          },
+          {
+            "user_id": 2,
+            "signup_date": "06/02/2022 00:00:00"
+          },
+          {
+            "user_id": 3,
+            "signup_date": "06/08/2022 00:00:00"
+          },
+          {
+            "user_id": 5001,
+            "signup_date": "06/01/2017 00:00:00"
+          }
+        ],
+        "user_actions": [
+          {
+            "user_id": 1,
+            "event_date": "06/10/2022 00:00:00",
+            "action_type": "login"
+          },
+          {
+            "user_id": 2,
+            "event_date": "07/15/2022 00:00:00",
+            "action_type": "post"
+          },
+          {
+            "user_id": 3,
+            "event_date": "06/12/2022 00:00:00",
+            "action_type": "login"
+          },
+          {
+            "user_id": 5001,
+            "event_date": "06/10/2017 00:00:00",
+            "action_type": "login"
+          }
+        ]
+      },
+      "expected_output": [
+        {
+          "retention_rate": 75.0
+        }
+      ],
+      "category": "edge"
+    },
+    {
+      "test_case_id": "tc_4_empty_result",
+      "description": "Input where no rows satisfy problem criteria, verifying empty result handling",
+      "input_data": {
+        "users": [],
+        "user_actions": []
+      },
+      "expected_output": [
+        {
+          "retention_rate": null
+        }
+      ],
+      "category": "edge"
+    },
+    {
+      "test_case_id": "tc_5_ties_and_nulls",
+      "description": "Tied ranking metrics, unmatched join keys, and NULL values in nullable attributes",
+      "input_data": {
+        "users": [
+          {
+            "user_id": 1,
+            "signup_date": "06/01/2022 00:00:00"
+          },
+          {
+            "user_id": 2,
+            "signup_date": "06/02/2022 00:00:00"
+          },
+          {
+            "user_id": 3,
+            "signup_date": "06/08/2022 00:00:00"
+          },
+          {
+            "user_id": 9001,
+            "signup_date": "06/01/2022 00:00:00"
+          },
+          {
+            "user_id": 9502,
+            "signup_date": "06/02/2022 00:00:00"
+          }
+        ],
+        "user_actions": [
+          {
+            "user_id": 1,
+            "event_date": "06/10/2022 00:00:00",
+            "action_type": "login"
+          },
+          {
+            "user_id": 2,
+            "event_date": "07/15/2022 00:00:00",
+            "action_type": "post"
+          },
+          {
+            "user_id": 3,
+            "event_date": "06/12/2022 00:00:00",
+            "action_type": "login"
+          },
+          {
+            "user_id": 9001,
+            "event_date": "06/10/2022 00:00:00",
+            "action_type": "login"
+          },
+          {
+            "user_id": 9502,
+            "event_date": "07/15/2022 00:00:00",
+            "action_type": null
+          }
+        ]
+      },
+      "expected_output": [
+        {
+          "retention_rate": 60.0
+        }
+      ],
+      "category": "edge"
+    },
+    {
+      "test_case_id": "tc_6_extreme_boundary",
+      "description": "Consecutive day sequences, month-end date rollovers, and high-frequency transactions",
+      "input_data": {
+        "users": [
+          {
+            "user_id": 1,
+            "signup_date": "06/01/2022 00:00:00"
+          },
+          {
+            "user_id": 2,
+            "signup_date": "06/02/2022 00:00:00"
+          },
+          {
+            "user_id": 3,
+            "signup_date": "06/08/2022 00:00:00"
+          },
+          {
+            "user_id": 8001,
+            "signup_date": "06/02/2022 00:00:00"
+          },
+          {
+            "user_id": 8002,
+            "signup_date": "06/03/2022 00:00:00"
+          },
+          {
+            "user_id": 8003,
+            "signup_date": "06/09/2022 00:00:00"
+          }
+        ],
+        "user_actions": [
+          {
+            "user_id": 1,
+            "event_date": "06/10/2022 00:00:00",
+            "action_type": "login"
+          },
+          {
+            "user_id": 2,
+            "event_date": "07/15/2022 00:00:00",
+            "action_type": "post"
+          },
+          {
+            "user_id": 3,
+            "event_date": "06/12/2022 00:00:00",
+            "action_type": "login"
+          },
+          {
+            "user_id": 8001,
+            "event_date": "06/11/2022 00:00:00",
+            "action_type": "login"
+          },
+          {
+            "user_id": 8002,
+            "event_date": "07/16/2022 00:00:00",
+            "action_type": "post"
+          },
+          {
+            "user_id": 8003,
+            "event_date": "06/13/2022 00:00:00",
+            "action_type": "login"
+          }
+        ]
+      },
+      "expected_output": [
+        {
+          "retention_rate": 66.67
+        }
+      ],
+      "category": "boundary"
+    }
+  ],
+  "order_sensitive": false,
+  "expected_output": [
+    {
+      "retention_rate": 66.67
+    }
+  ]
+}

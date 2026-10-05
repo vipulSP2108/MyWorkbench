@@ -1,0 +1,444 @@
+{
+  "question_id": "q_011_sql_well_paid_employees",
+  "slug": "sql-well-paid-employees",
+  "title": "Well Paid Employees",
+  "difficulty": "Easy",
+  "company": "FAANG",
+  "premium": false,
+  "question": "Companies often perform salary analyses to ensure fair compensation practices. One useful analysis is to check if there are any employees earning more than their direct managers.\n\nAs a HR Analyst, you're asked to identify all employees who earn more than their direct managers. The result should include the employee's ID and name.",
+  "notes": [
+    "The output shows that Olivia Smith earns \\$7,000, surpassing her manager, William David who earns \\$6,800.",
+    "The dataset you are querying against may have different input & output - this is just an example!"
+  ],
+  "tables": [
+    {
+      "table_name": "employee",
+      "columns": [
+        {
+          "column_name": "employee_id",
+          "data_type": "INT"
+        },
+        {
+          "column_name": "name",
+          "data_type": "VARCHAR(255)"
+        },
+        {
+          "column_name": "salary",
+          "data_type": "INT"
+        },
+        {
+          "column_name": "department_id",
+          "data_type": "INT"
+        },
+        {
+          "column_name": "manager_id",
+          "data_type": "INT"
+        }
+      ]
+    }
+  ],
+  "sample_data": {
+    "employee": [
+      {
+        "employee_id": "1",
+        "name": "Emma Thompson",
+        "salary": "3800",
+        "department_id": "1",
+        "manager_id": "6"
+      },
+      {
+        "employee_id": "2",
+        "name": "Daniel Rodriguez",
+        "salary": "2230",
+        "department_id": "1",
+        "manager_id": "7"
+      },
+      {
+        "employee_id": "3",
+        "name": "Olivia Smith",
+        "salary": "7000",
+        "department_id": "1",
+        "manager_id": "8"
+      },
+      {
+        "employee_id": "4",
+        "name": "Noah Johnson",
+        "salary": "6800",
+        "department_id": "2",
+        "manager_id": "9"
+      },
+      {
+        "employee_id": "5",
+        "name": "Sophia Martinez",
+        "salary": "1750",
+        "department_id": "1",
+        "manager_id": "11"
+      },
+      {
+        "employee_id": "6",
+        "name": "Liam Brown",
+        "salary": "13000",
+        "department_id": "3",
+        "manager_id": "NULL"
+      },
+      {
+        "employee_id": "7",
+        "name": "Ava Garcia",
+        "salary": "12500",
+        "department_id": "3",
+        "manager_id": "NULL"
+      },
+      {
+        "employee_id": "8",
+        "name": "William Davis",
+        "salary": "6800",
+        "department_id": "2",
+        "manager_id": "NULL"
+      }
+    ]
+  },
+  "sample_output": [
+    {
+      "employee_id": "3",
+      "employee_name": "Olivia Smith"
+    }
+  ],
+  "reference_sql": "SELECT e.employee_id, e.name AS employee_name\nFROM employee e\nJOIN employee m ON e.manager_id = m.employee_id\nWHERE e.salary > m.salary\nORDER BY e.employee_id;",
+  "tags": [
+    "easy",
+    "faang",
+    "finance",
+    "hr",
+    "self-join"
+  ],
+  "related_questions": [],
+  "sources": [
+    [
+      "DataLemur page (free)",
+      "https://datalemur.com/questions/sql-well-paid-employees"
+    ],
+    [
+      "DataLemur PDF",
+      "Page 15"
+    ]
+  ],
+  "test_cases": [
+    {
+      "test_case_id": "tc_1_baseline",
+      "description": "Baseline sample input data from problem description",
+      "input_data": {
+        "employee": [
+          {
+            "employee_id": "1",
+            "name": "Emma Thompson",
+            "salary": "3800",
+            "department_id": "1",
+            "manager_id": "6"
+          },
+          {
+            "employee_id": "2",
+            "name": "Daniel Rodriguez",
+            "salary": "2230",
+            "department_id": "1",
+            "manager_id": "7"
+          },
+          {
+            "employee_id": "3",
+            "name": "Olivia Smith",
+            "salary": "7000",
+            "department_id": "1",
+            "manager_id": "8"
+          },
+          {
+            "employee_id": "4",
+            "name": "Noah Johnson",
+            "salary": "6800",
+            "department_id": "2",
+            "manager_id": "9"
+          },
+          {
+            "employee_id": "5",
+            "name": "Sophia Martinez",
+            "salary": "1750",
+            "department_id": "1",
+            "manager_id": "11"
+          },
+          {
+            "employee_id": "6",
+            "name": "Liam Brown",
+            "salary": "13000",
+            "department_id": "3",
+            "manager_id": "NULL"
+          },
+          {
+            "employee_id": "7",
+            "name": "Ava Garcia",
+            "salary": "12500",
+            "department_id": "3",
+            "manager_id": "NULL"
+          },
+          {
+            "employee_id": "8",
+            "name": "William Davis",
+            "salary": "6800",
+            "department_id": "2",
+            "manager_id": "NULL"
+          }
+        ]
+      },
+      "expected_output": [
+        {
+          "employee_id": 3,
+          "employee_name": "Olivia Smith"
+        }
+      ],
+      "category": "normal"
+    },
+    {
+      "test_case_id": "tc_2_high_volume",
+      "description": "Multiple entities with scaled volume and multi-group distributions",
+      "input_data": {
+        "employee": [
+          {
+            "employee_id": "1",
+            "name": "Emma Thompson",
+            "salary": "3800",
+            "department_id": "1",
+            "manager_id": "6"
+          },
+          {
+            "employee_id": "2",
+            "name": "Daniel Rodriguez",
+            "salary": "2230",
+            "department_id": "1",
+            "manager_id": "7"
+          },
+          {
+            "employee_id": "3",
+            "name": "Olivia Smith",
+            "salary": "7000",
+            "department_id": "1",
+            "manager_id": "8"
+          },
+          {
+            "employee_id": "4",
+            "name": "Noah Johnson",
+            "salary": "6800",
+            "department_id": "2",
+            "manager_id": "9"
+          },
+          {
+            "employee_id": "5",
+            "name": "Sophia Martinez",
+            "salary": "1750",
+            "department_id": "1",
+            "manager_id": "11"
+          },
+          {
+            "employee_id": "6",
+            "name": "Liam Brown",
+            "salary": "13000",
+            "department_id": "3",
+            "manager_id": "NULL"
+          },
+          {
+            "employee_id": "7",
+            "name": "Ava Garcia",
+            "salary": "12500",
+            "department_id": "3",
+            "manager_id": "NULL"
+          },
+          {
+            "employee_id": "8",
+            "name": "William Davis",
+            "salary": "6800",
+            "department_id": "2",
+            "manager_id": "NULL"
+          },
+          {
+            "employee_id": 1001,
+            "name": "Emma Thompson",
+            "salary": 5700.0,
+            "department_id": 1001,
+            "manager_id": 1006
+          },
+          {
+            "employee_id": 1002,
+            "name": "Daniel Rodriguez",
+            "salary": 3345.0,
+            "department_id": 1001,
+            "manager_id": 1007
+          },
+          {
+            "employee_id": 1003,
+            "name": "Olivia Smith",
+            "salary": 10500.0,
+            "department_id": 1001,
+            "manager_id": 1008
+          },
+          {
+            "employee_id": 1004,
+            "name": "Noah Johnson",
+            "salary": 10200.0,
+            "department_id": 1002,
+            "manager_id": 1009
+          },
+          {
+            "employee_id": 1005,
+            "name": "Sophia Martinez",
+            "salary": 2625.0,
+            "department_id": 1001,
+            "manager_id": 1011
+          },
+          {
+            "employee_id": 1006,
+            "name": "Liam Brown",
+            "salary": 19500.0,
+            "department_id": 1003,
+            "manager_id": "NULL"
+          },
+          {
+            "employee_id": 1007,
+            "name": "Ava Garcia",
+            "salary": 18750.0,
+            "department_id": 1003,
+            "manager_id": "NULL"
+          },
+          {
+            "employee_id": 1008,
+            "name": "William Davis",
+            "salary": 10200.0,
+            "department_id": 1002,
+            "manager_id": "NULL"
+          }
+        ]
+      },
+      "expected_output": [
+        {
+          "employee_id": 3,
+          "employee_name": "Olivia Smith"
+        },
+        {
+          "employee_id": 1003,
+          "employee_name": "Olivia Smith"
+        }
+      ],
+      "category": "volume"
+    },
+    {
+      "test_case_id": "tc_3_disqualifying_rows",
+      "description": "Dataset containing disqualifying rows, edge values, and cancelled/zero records",
+      "input_data": {
+        "employee": [
+          {
+            "employee_id": "1",
+            "name": "Emma Thompson",
+            "salary": "3800",
+            "department_id": "1",
+            "manager_id": "6"
+          },
+          {
+            "employee_id": "2",
+            "name": "Daniel Rodriguez",
+            "salary": "2230",
+            "department_id": "1",
+            "manager_id": "7"
+          },
+          {
+            "employee_id": "3",
+            "name": "Olivia Smith",
+            "salary": "7000",
+            "department_id": "1",
+            "manager_id": "8"
+          },
+          {
+            "employee_id": "4",
+            "name": "Noah Johnson",
+            "salary": "6800",
+            "department_id": "2",
+            "manager_id": "9"
+          },
+          {
+            "employee_id": "5",
+            "name": "Sophia Martinez",
+            "salary": "1750",
+            "department_id": "1",
+            "manager_id": "11"
+          },
+          {
+            "employee_id": "6",
+            "name": "Liam Brown",
+            "salary": "13000",
+            "department_id": "3",
+            "manager_id": "NULL"
+          },
+          {
+            "employee_id": "7",
+            "name": "Ava Garcia",
+            "salary": "12500",
+            "department_id": "3",
+            "manager_id": "NULL"
+          },
+          {
+            "employee_id": "8",
+            "name": "William Davis",
+            "salary": "6800",
+            "department_id": "2",
+            "manager_id": "NULL"
+          },
+          {
+            "employee_id": 5001,
+            "name": "Emma Thompson",
+            "salary": 0,
+            "department_id": 5001,
+            "manager_id": 5006
+          },
+          {
+            "employee_id": 5002,
+            "name": "Daniel Rodriguez",
+            "salary": 0,
+            "department_id": 5001,
+            "manager_id": 5007
+          },
+          {
+            "employee_id": 5003,
+            "name": "Olivia Smith",
+            "salary": 0,
+            "department_id": 5001,
+            "manager_id": 5008
+          },
+          {
+            "employee_id": 5004,
+            "name": "Noah Johnson",
+            "salary": 0,
+            "department_id": 5002,
+            "manager_id": 5009
+          }
+        ]
+      },
+      "expected_output": [
+        {
+          "employee_id": 3,
+          "employee_name": "Olivia Smith"
+        }
+      ],
+      "category": "edge"
+    },
+    {
+      "test_case_id": "tc_4_empty_result",
+      "description": "Input where no rows satisfy problem criteria, verifying empty result handling",
+      "input_data": {
+        "employee": []
+      },
+      "expected_output": [],
+      "category": "edge"
+    }
+  ],
+  "order_sensitive": false,
+  "expected_output": [
+    {
+      "employee_id": 3,
+      "employee_name": "Olivia Smith"
+    }
+  ]
+}

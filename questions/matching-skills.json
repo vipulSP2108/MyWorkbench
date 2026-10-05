@@ -1,0 +1,345 @@
+{
+  "question_id": "q_002_matching_skills",
+  "slug": "matching-skills",
+  "title": "Data Science Skills",
+  "difficulty": "Easy",
+  "company": "LinkedIn",
+  "premium": false,
+  "question": "Given a table of candidates and their skills, you're tasked with finding the candidates best suited for an open Data Science job. You want to find candidates who are proficient in Python, Tableau, and PostgreSQL.\n\nWrite a query to list the candidates who possess all of the required skills for the job. Sort the output by candidate ID in ascending order.\n\nAssumption:",
+  "notes": [
+    "There are no duplicates in the candidates table.",
+    "Candidate 123 is displayed because they have Python, Tableau, and PostgreSQL skills. 345 isn't included in the output because they're missing one of the required skills: PostgreSQL.",
+    "The dataset you are querying against may have different input & output - this is just an example!",
+    "p.s. give the hints below a try if you're stuck and don't know where to start!",
+    "p.p.s if you find this problem too tricky, even after the hints, check out my 30-day SQL learning roadmap, which features my favorite free resources to learn SQL! After you strengthen your SQL foundations, I'm sure you'll be more than ready to tackle this question!"
+  ],
+  "tables": [
+    {
+      "table_name": "candidates",
+      "columns": [
+        {
+          "column_name": "candidate_id",
+          "data_type": "INT"
+        },
+        {
+          "column_name": "skill",
+          "data_type": "VARCHAR(255)"
+        }
+      ]
+    }
+  ],
+  "sample_data": {
+    "candidates": [
+      {
+        "candidate_id": "123",
+        "skill": "Python"
+      },
+      {
+        "candidate_id": "123",
+        "skill": "Tableau"
+      },
+      {
+        "candidate_id": "123",
+        "skill": "PostgreSQL"
+      },
+      {
+        "candidate_id": "234",
+        "skill": "R"
+      },
+      {
+        "candidate_id": "234",
+        "skill": "PowerBI"
+      },
+      {
+        "candidate_id": "234",
+        "skill": "SQL Server"
+      },
+      {
+        "candidate_id": "345",
+        "skill": "Python"
+      },
+      {
+        "candidate_id": "345",
+        "skill": "Tableau"
+      }
+    ]
+  },
+  "sample_output": [
+    {
+      "candidate_id": 123
+    }
+  ],
+  "reference_sql": "SELECT candidate_id\nFROM candidates\nWHERE skill IN ('Python', 'Tableau', 'PostgreSQL')\nGROUP BY candidate_id\nHAVING COUNT(DISTINCT skill) = 3\nORDER BY candidate_id;",
+  "tags": [
+    "date-manipulation",
+    "easy",
+    "ecommerce",
+    "hr",
+    "linkedin",
+    "social-media"
+  ],
+  "related_questions": [],
+  "sources": [
+    [
+      "DataLemur page (free)",
+      "https://datalemur.com/questions/matching-skills"
+    ],
+    [
+      "DataLemur PDF",
+      "Page 6"
+    ]
+  ],
+  "test_cases": [
+    {
+      "test_case_id": "tc_1_baseline",
+      "description": "Baseline: Candidate 123 qualifies, candidates 234 and 345 do not qualify",
+      "input_data": {
+        "candidates": [
+          {
+            "candidate_id": "123",
+            "skill": "Python"
+          },
+          {
+            "candidate_id": "123",
+            "skill": "Tableau"
+          },
+          {
+            "candidate_id": "123",
+            "skill": "PostgreSQL"
+          },
+          {
+            "candidate_id": "234",
+            "skill": "R"
+          },
+          {
+            "candidate_id": "234",
+            "skill": "PowerBI"
+          },
+          {
+            "candidate_id": "234",
+            "skill": "SQL Server"
+          },
+          {
+            "candidate_id": "345",
+            "skill": "Python"
+          },
+          {
+            "candidate_id": "345",
+            "skill": "Tableau"
+          }
+        ]
+      },
+      "expected_output": [
+        {
+          "candidate_id": 123
+        }
+      ],
+      "category": "normal"
+    },
+    {
+      "test_case_id": "tc_2_strict_order_by_check",
+      "description": "Multiple candidates in hash-distributed order. Strictly fails if ORDER BY candidate_id ASC is omitted",
+      "input_data": {
+        "candidates": [
+          {
+            "candidate_id": 999,
+            "skill": "Python"
+          },
+          {
+            "candidate_id": 999,
+            "skill": "Tableau"
+          },
+          {
+            "candidate_id": 999,
+            "skill": "PostgreSQL"
+          },
+          {
+            "candidate_id": 10,
+            "skill": "Python"
+          },
+          {
+            "candidate_id": 10,
+            "skill": "Tableau"
+          },
+          {
+            "candidate_id": 10,
+            "skill": "PostgreSQL"
+          },
+          {
+            "candidate_id": 850,
+            "skill": "Python"
+          },
+          {
+            "candidate_id": 850,
+            "skill": "Tableau"
+          },
+          {
+            "candidate_id": 850,
+            "skill": "PostgreSQL"
+          },
+          {
+            "candidate_id": 42,
+            "skill": "Python"
+          },
+          {
+            "candidate_id": 42,
+            "skill": "Tableau"
+          },
+          {
+            "candidate_id": 42,
+            "skill": "PostgreSQL"
+          },
+          {
+            "candidate_id": 600,
+            "skill": "Python"
+          },
+          {
+            "candidate_id": 600,
+            "skill": "Tableau"
+          },
+          {
+            "candidate_id": 600,
+            "skill": "PostgreSQL"
+          },
+          {
+            "candidate_id": 105,
+            "skill": "Python"
+          },
+          {
+            "candidate_id": 105,
+            "skill": "Tableau"
+          },
+          {
+            "candidate_id": 105,
+            "skill": "PostgreSQL"
+          },
+          {
+            "candidate_id": 3,
+            "skill": "Python"
+          },
+          {
+            "candidate_id": 3,
+            "skill": "Tableau"
+          },
+          {
+            "candidate_id": 3,
+            "skill": "PostgreSQL"
+          },
+          {
+            "candidate_id": 777,
+            "skill": "Python"
+          },
+          {
+            "candidate_id": 777,
+            "skill": "Tableau"
+          },
+          {
+            "candidate_id": 777,
+            "skill": "PostgreSQL"
+          },
+          {
+            "candidate_id": 9999,
+            "skill": "Python"
+          },
+          {
+            "candidate_id": 9999,
+            "skill": "Tableau"
+          },
+          {
+            "candidate_id": 8888,
+            "skill": "R"
+          }
+        ]
+      },
+      "expected_output": [
+        {
+          "candidate_id": 3
+        },
+        {
+          "candidate_id": 10
+        },
+        {
+          "candidate_id": 42
+        },
+        {
+          "candidate_id": 105
+        },
+        {
+          "candidate_id": 600
+        },
+        {
+          "candidate_id": 777
+        },
+        {
+          "candidate_id": 850
+        },
+        {
+          "candidate_id": 999
+        }
+      ],
+      "category": "boundary"
+    },
+    {
+      "test_case_id": "tc_3_duplicate_skills_distinct_check",
+      "description": "Tests duplicate skill entries: candidate 111 has 3 rows but only 2 distinct required skills",
+      "input_data": {
+        "candidates": [
+          {
+            "candidate_id": 111,
+            "skill": "Python"
+          },
+          {
+            "candidate_id": 111,
+            "skill": "Python"
+          },
+          {
+            "candidate_id": 111,
+            "skill": "Tableau"
+          },
+          {
+            "candidate_id": 222,
+            "skill": "Python"
+          },
+          {
+            "candidate_id": 222,
+            "skill": "Tableau"
+          },
+          {
+            "candidate_id": 222,
+            "skill": "PostgreSQL"
+          }
+        ]
+      },
+      "expected_output": [
+        {
+          "candidate_id": 222
+        }
+      ],
+      "category": "boundary"
+    },
+    {
+      "test_case_id": "tc_4_no_qualifying_candidates",
+      "description": "Edge case: No candidates possess all 3 skills, returns empty result",
+      "input_data": {
+        "candidates": [
+          {
+            "candidate_id": 777,
+            "skill": "R"
+          },
+          {
+            "candidate_id": 777,
+            "skill": "Julia"
+          }
+        ]
+      },
+      "expected_output": [],
+      "category": "boundary"
+    }
+  ],
+  "order_sensitive": true,
+  "expected_output": [
+    {
+      "candidate_id": 123
+    }
+  ]
+}

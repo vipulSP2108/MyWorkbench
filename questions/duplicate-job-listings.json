@@ -1,0 +1,290 @@
+{
+  "question_id": "q_008_duplicate_job_listings",
+  "slug": "duplicate-job-listings",
+  "title": "Duplicate Job Listings",
+  "difficulty": "Easy",
+  "company": "LinkedIn",
+  "premium": false,
+  "question": "Assume you're given a table containing job postings from various companies on the LinkedIn platform. Write a query to retrieve the count of companies that have posted duplicate job listings.\n\nDefinition:",
+  "notes": [
+    "Duplicate job listings are defined as two job listings within the same company that share identical titles and descriptions.",
+    "There is one company ID 345 that posted duplicate job listings. The duplicate listings, IDs 945 and 164 have identical titles and descriptions.",
+    "The dataset you are querying against may have different input & output - this is just an example!"
+  ],
+  "tables": [
+    {
+      "table_name": "job_listings",
+      "columns": [
+        {
+          "column_name": "job_id",
+          "data_type": "INT"
+        },
+        {
+          "column_name": "company_id",
+          "data_type": "INT"
+        },
+        {
+          "column_name": "title",
+          "data_type": "VARCHAR(255)"
+        },
+        {
+          "column_name": "description",
+          "data_type": "VARCHAR(255)"
+        }
+      ]
+    }
+  ],
+  "sample_data": {
+    "job_listings": [
+      {
+        "job_id": "248",
+        "company_id": "827",
+        "title": "Business Analyst",
+        "description": "Business analyst evaluates past and current business data with the primary goal of improving decision-making processes within organizations."
+      },
+      {
+        "job_id": "149",
+        "company_id": "845",
+        "title": "Business Analyst",
+        "description": "Business analyst evaluates past and current business data with the primary goal of improving decision-making processes within organizations."
+      },
+      {
+        "job_id": "945",
+        "company_id": "345",
+        "title": "Data Analyst",
+        "description": "Data analyst reviews data to identify key insights into a business's customers and ways the data can be used to solve problems."
+      },
+      {
+        "job_id": "164",
+        "company_id": "345",
+        "title": "Data Analyst",
+        "description": "Data analyst reviews data to identify key insights into a business's customers and ways the data can be used to solve problems."
+      },
+      {
+        "job_id": "172",
+        "company_id": "244",
+        "title": "Data Engineer",
+        "description": "Data engineer works in a variety of settings to build systems that collect, manage, and convert raw data into usable information for data scientists and business analysts to interpret."
+      }
+    ]
+  },
+  "sample_output": [
+    {
+      "duplicate_companies": "1"
+    }
+  ],
+  "reference_sql": "WITH job_counts AS (\n  SELECT company_id, title, description, COUNT(job_id) AS post_count\n  FROM job_listings\n  GROUP BY company_id, title, description\n  HAVING COUNT(job_id) > 1\n)\nSELECT COUNT(DISTINCT company_id) AS duplicate_companies\nFROM job_counts;",
+  "tags": [
+    "aggregation",
+    "easy",
+    "hr",
+    "linkedin",
+    "social-media"
+  ],
+  "related_questions": [],
+  "sources": [
+    [
+      "DataLemur page (free)",
+      "https://datalemur.com/questions/duplicate-job-listings"
+    ],
+    [
+      "DataLemur PDF",
+      "Page 12"
+    ]
+  ],
+  "test_cases": [
+    {
+      "test_case_id": "tc_1_baseline",
+      "description": "Baseline sample input data from problem description",
+      "input_data": {
+        "job_listings": [
+          {
+            "job_id": "248",
+            "company_id": "827",
+            "title": "Business Analyst",
+            "description": "Business analyst evaluates past and current business data with the primary goal of improving decision-making processes within organizations."
+          },
+          {
+            "job_id": "149",
+            "company_id": "845",
+            "title": "Business Analyst",
+            "description": "Business analyst evaluates past and current business data with the primary goal of improving decision-making processes within organizations."
+          },
+          {
+            "job_id": "945",
+            "company_id": "345",
+            "title": "Data Analyst",
+            "description": "Data analyst reviews data to identify key insights into a business's customers and ways the data can be used to solve problems."
+          },
+          {
+            "job_id": "164",
+            "company_id": "345",
+            "title": "Data Analyst",
+            "description": "Data analyst reviews data to identify key insights into a business's customers and ways the data can be used to solve problems."
+          },
+          {
+            "job_id": "172",
+            "company_id": "244",
+            "title": "Data Engineer",
+            "description": "Data engineer works in a variety of settings to build systems that collect, manage, and convert raw data into usable information for data scientists and business analysts to interpret."
+          }
+        ]
+      },
+      "expected_output": [
+        {
+          "duplicate_companies": 1
+        }
+      ],
+      "category": "normal"
+    },
+    {
+      "test_case_id": "tc_2_high_volume",
+      "description": "Multiple entities with scaled volume and multi-group distributions",
+      "input_data": {
+        "job_listings": [
+          {
+            "job_id": "248",
+            "company_id": "827",
+            "title": "Business Analyst",
+            "description": "Business analyst evaluates past and current business data with the primary goal of improving decision-making processes within organizations."
+          },
+          {
+            "job_id": "149",
+            "company_id": "845",
+            "title": "Business Analyst",
+            "description": "Business analyst evaluates past and current business data with the primary goal of improving decision-making processes within organizations."
+          },
+          {
+            "job_id": "945",
+            "company_id": "345",
+            "title": "Data Analyst",
+            "description": "Data analyst reviews data to identify key insights into a business's customers and ways the data can be used to solve problems."
+          },
+          {
+            "job_id": "164",
+            "company_id": "345",
+            "title": "Data Analyst",
+            "description": "Data analyst reviews data to identify key insights into a business's customers and ways the data can be used to solve problems."
+          },
+          {
+            "job_id": "172",
+            "company_id": "244",
+            "title": "Data Engineer",
+            "description": "Data engineer works in a variety of settings to build systems that collect, manage, and convert raw data into usable information for data scientists and business analysts to interpret."
+          },
+          {
+            "job_id": 1248,
+            "company_id": 1827,
+            "title": "Business Analyst",
+            "description": "Business analyst evaluates past and current business data with the primary goal of improving decision-making processes within organizations."
+          },
+          {
+            "job_id": 1149,
+            "company_id": 1845,
+            "title": "Business Analyst",
+            "description": "Business analyst evaluates past and current business data with the primary goal of improving decision-making processes within organizations."
+          },
+          {
+            "job_id": 1945,
+            "company_id": 1345,
+            "title": "Data Analyst",
+            "description": "Data analyst reviews data to identify key insights into a business's customers and ways the data can be used to solve problems."
+          },
+          {
+            "job_id": 1164,
+            "company_id": 1345,
+            "title": "Data Analyst",
+            "description": "Data analyst reviews data to identify key insights into a business's customers and ways the data can be used to solve problems."
+          },
+          {
+            "job_id": 1172,
+            "company_id": 1244,
+            "title": "Data Engineer",
+            "description": "Data engineer works in a variety of settings to build systems that collect, manage, and convert raw data into usable information for data scientists and business analysts to interpret."
+          }
+        ]
+      },
+      "expected_output": [
+        {
+          "duplicate_companies": 2
+        }
+      ],
+      "category": "volume"
+    },
+    {
+      "test_case_id": "tc_3_disqualifying_rows",
+      "description": "Dataset containing disqualifying rows, edge values, and cancelled/zero records",
+      "input_data": {
+        "job_listings": [
+          {
+            "job_id": "248",
+            "company_id": "827",
+            "title": "Business Analyst",
+            "description": "Business analyst evaluates past and current business data with the primary goal of improving decision-making processes within organizations."
+          },
+          {
+            "job_id": "149",
+            "company_id": "845",
+            "title": "Business Analyst",
+            "description": "Business analyst evaluates past and current business data with the primary goal of improving decision-making processes within organizations."
+          },
+          {
+            "job_id": "945",
+            "company_id": "345",
+            "title": "Data Analyst",
+            "description": "Data analyst reviews data to identify key insights into a business's customers and ways the data can be used to solve problems."
+          },
+          {
+            "job_id": "164",
+            "company_id": "345",
+            "title": "Data Analyst",
+            "description": "Data analyst reviews data to identify key insights into a business's customers and ways the data can be used to solve problems."
+          },
+          {
+            "job_id": "172",
+            "company_id": "244",
+            "title": "Data Engineer",
+            "description": "Data engineer works in a variety of settings to build systems that collect, manage, and convert raw data into usable information for data scientists and business analysts to interpret."
+          },
+          {
+            "job_id": 5248,
+            "company_id": 5827,
+            "title": "Business Analyst",
+            "description": "Business analyst evaluates past and current business data with the primary goal of improving decision-making processes within organizations."
+          },
+          {
+            "job_id": 5149,
+            "company_id": 5845,
+            "title": "Business Analyst",
+            "description": "Business analyst evaluates past and current business data with the primary goal of improving decision-making processes within organizations."
+          }
+        ]
+      },
+      "expected_output": [
+        {
+          "duplicate_companies": 1
+        }
+      ],
+      "category": "edge"
+    },
+    {
+      "test_case_id": "tc_4_empty_result",
+      "description": "Input where no rows satisfy problem criteria, verifying empty result handling",
+      "input_data": {
+        "job_listings": []
+      },
+      "expected_output": [
+        {
+          "duplicate_companies": 0
+        }
+      ],
+      "category": "edge"
+    }
+  ],
+  "order_sensitive": false,
+  "expected_output": [
+    {
+      "duplicate_companies": 1
+    }
+  ]
+}

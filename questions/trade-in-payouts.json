@@ -1,0 +1,340 @@
+{
+  "question_id": "q_032_trade_in_payouts",
+  "slug": "trade-in-payouts",
+  "title": "Trade In Payouts",
+  "difficulty": "Easy",
+  "company": "Apple",
+  "premium": true,
+  "question": "Apple has a trade-in program where customers can return an old iPhone to Apple and receive the trade-in value of the device (the payout) in cash.\n\nFor each store, write a query for the total revenue (payout) from the trade-ins. Order the result in descending order.",
+  "notes": [],
+  "tables": [
+    {
+      "table_name": "trade_in_transactions",
+      "columns": [
+        {
+          "column_name": "transaction_id",
+          "data_type": "INT"
+        },
+        {
+          "column_name": "model_id",
+          "data_type": "INT"
+        },
+        {
+          "column_name": "store_id",
+          "data_type": "INT"
+        },
+        {
+          "column_name": "transaction_date",
+          "data_type": "DATE"
+        }
+      ]
+    },
+    {
+      "table_name": "trade_in_payouts",
+      "columns": [
+        {
+          "column_name": "model_id",
+          "data_type": "INT"
+        },
+        {
+          "column_name": "model_name",
+          "data_type": "VARCHAR(255)"
+        },
+        {
+          "column_name": "payout_amount",
+          "data_type": "INT"
+        }
+      ]
+    }
+  ],
+  "sample_data": {
+    "trade_in_transactions": [
+      {
+        "transaction_id": 1,
+        "model_id": 112,
+        "store_id": 512,
+        "transaction_date": "01/01/2022"
+      },
+      {
+        "transaction_id": 2,
+        "model_id": 113,
+        "store_id": 512,
+        "transaction_date": "01/01/2022"
+      }
+    ],
+    "trade_in_payouts": [
+      {
+        "model_id": 111,
+        "model_name": "iPhone 11",
+        "payout_amount": 200
+      },
+      {
+        "model_id": 112,
+        "model_name": "iPhone 12",
+        "payout_amount": 350
+      },
+      {
+        "model_id": 113,
+        "model_name": "iPhone 13",
+        "payout_amount": 450
+      },
+      {
+        "model_id": 114,
+        "model_name": "iPhone 13 Pro Max",
+        "payout_amount": 650
+      }
+    ]
+  },
+  "sample_output": [
+    {
+      "store_id": 512,
+      "payout_total": 800
+    }
+  ],
+  "reference_sql": "SELECT t.store_id,\n       SUM(p.payout_amount) AS payout_total\nFROM trade_in_transactions t\nJOIN trade_in_payouts p ON t.model_id = p.model_id\nGROUP BY t.store_id\nORDER BY payout_total DESC, t.store_id ASC;",
+  "tags": [
+    "aggregation",
+    "apple",
+    "easy",
+    "ecommerce",
+    "finance",
+    "join"
+  ],
+  "related_questions": [],
+  "sources": [
+    [
+      "DataLemur blog: 10 Apple SQL questions (#1)",
+      "https://datalemur.com/blog/apple-sql-interview-questions"
+    ],
+    [
+      "DataLemur page (locked)",
+      "https://datalemur.com/questions/trade-in-payouts"
+    ],
+    [
+      "DataLemur PDF",
+      "Page 36"
+    ]
+  ],
+  "test_cases": [
+    {
+      "test_case_id": "tc_1_baseline",
+      "description": "Baseline sample input data from problem description",
+      "input_data": {
+        "trade_in_transactions": [
+          {
+            "transaction_id": 1,
+            "model_id": 112,
+            "store_id": 512,
+            "transaction_date": "01/01/2022"
+          },
+          {
+            "transaction_id": 2,
+            "model_id": 113,
+            "store_id": 512,
+            "transaction_date": "01/01/2022"
+          }
+        ],
+        "trade_in_payouts": [
+          {
+            "model_id": 111,
+            "model_name": "iPhone 11",
+            "payout_amount": 200
+          },
+          {
+            "model_id": 112,
+            "model_name": "iPhone 12",
+            "payout_amount": 350
+          },
+          {
+            "model_id": 113,
+            "model_name": "iPhone 13",
+            "payout_amount": 450
+          },
+          {
+            "model_id": 114,
+            "model_name": "iPhone 13 Pro Max",
+            "payout_amount": 650
+          }
+        ]
+      },
+      "expected_output": [
+        {
+          "store_id": 512,
+          "payout_total": 800
+        }
+      ],
+      "category": "normal"
+    },
+    {
+      "test_case_id": "tc_2_high_volume",
+      "description": "Multiple entities with scaled volume and multi-group distributions",
+      "input_data": {
+        "trade_in_transactions": [
+          {
+            "transaction_id": 1,
+            "model_id": 112,
+            "store_id": 512,
+            "transaction_date": "01/01/2022"
+          },
+          {
+            "transaction_id": 2,
+            "model_id": 113,
+            "store_id": 512,
+            "transaction_date": "01/01/2022"
+          },
+          {
+            "transaction_id": 1001,
+            "model_id": 1112,
+            "store_id": 1512,
+            "transaction_date": "01/06/2022"
+          },
+          {
+            "transaction_id": 1002,
+            "model_id": 1113,
+            "store_id": 1512,
+            "transaction_date": "01/06/2022"
+          }
+        ],
+        "trade_in_payouts": [
+          {
+            "model_id": 111,
+            "model_name": "iPhone 11",
+            "payout_amount": 200
+          },
+          {
+            "model_id": 112,
+            "model_name": "iPhone 12",
+            "payout_amount": 350
+          },
+          {
+            "model_id": 113,
+            "model_name": "iPhone 13",
+            "payout_amount": 450
+          },
+          {
+            "model_id": 114,
+            "model_name": "iPhone 13 Pro Max",
+            "payout_amount": 650
+          },
+          {
+            "model_id": 1111,
+            "model_name": "iPhone 11",
+            "payout_amount": 300.0
+          },
+          {
+            "model_id": 1112,
+            "model_name": "iPhone 12",
+            "payout_amount": 525.0
+          },
+          {
+            "model_id": 1113,
+            "model_name": "iPhone 13",
+            "payout_amount": 675.0
+          },
+          {
+            "model_id": 1114,
+            "model_name": "iPhone 13 Pro Max",
+            "payout_amount": 975.0
+          }
+        ]
+      },
+      "expected_output": [
+        {
+          "store_id": 1512,
+          "payout_total": 1200
+        },
+        {
+          "store_id": 512,
+          "payout_total": 800
+        }
+      ],
+      "category": "volume"
+    },
+    {
+      "test_case_id": "tc_3_disqualifying_rows",
+      "description": "Dataset containing disqualifying rows, edge values, and cancelled/zero records",
+      "input_data": {
+        "trade_in_transactions": [
+          {
+            "transaction_id": 1,
+            "model_id": 112,
+            "store_id": 512,
+            "transaction_date": "01/01/2022"
+          },
+          {
+            "transaction_id": 2,
+            "model_id": 113,
+            "store_id": 512,
+            "transaction_date": "01/01/2022"
+          },
+          {
+            "transaction_id": 5001,
+            "model_id": 5112,
+            "store_id": 5512,
+            "transaction_date": "01/01/2017"
+          }
+        ],
+        "trade_in_payouts": [
+          {
+            "model_id": 111,
+            "model_name": "iPhone 11",
+            "payout_amount": 200
+          },
+          {
+            "model_id": 112,
+            "model_name": "iPhone 12",
+            "payout_amount": 350
+          },
+          {
+            "model_id": 113,
+            "model_name": "iPhone 13",
+            "payout_amount": 450
+          },
+          {
+            "model_id": 114,
+            "model_name": "iPhone 13 Pro Max",
+            "payout_amount": 650
+          },
+          {
+            "model_id": 5111,
+            "model_name": "iPhone 11",
+            "payout_amount": 0
+          },
+          {
+            "model_id": 5112,
+            "model_name": "iPhone 12",
+            "payout_amount": 0
+          }
+        ]
+      },
+      "expected_output": [
+        {
+          "store_id": 512,
+          "payout_total": 800
+        },
+        {
+          "store_id": 5512,
+          "payout_total": 0
+        }
+      ],
+      "category": "edge"
+    },
+    {
+      "test_case_id": "tc_4_empty_result",
+      "description": "Input where no rows satisfy problem criteria, verifying empty result handling",
+      "input_data": {
+        "trade_in_transactions": [],
+        "trade_in_payouts": []
+      },
+      "expected_output": [],
+      "category": "edge"
+    }
+  ],
+  "order_sensitive": true,
+  "expected_output": [
+    {
+      "store_id": 512,
+      "payout_total": 800
+    }
+  ]
+}

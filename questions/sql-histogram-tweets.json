@@ -1,0 +1,309 @@
+{
+  "question_id": "q_001_sql_histogram_tweets",
+  "slug": "sql-histogram-tweets",
+  "title": "Histogram of Tweets",
+  "difficulty": "Easy",
+  "company": "Twitter",
+  "premium": false,
+  "question": "Assume you're given a table Twitter tweet data, write a query to obtain a histogram of tweets posted per user in 2022. Output the tweet count per user as the bucket and the number of Twitter users who fall into that bucket.\n\nIn other words, group the users by the number of tweets they posted in 2022 and count the number of users in each group.",
+  "notes": [
+    "Based on the example output, there are two users who posted only one tweet in 2022, and one user who posted two tweets in 2022. The query groups the users by the number of tweets they posted and displays the number of users in each group.",
+    "The dataset you are querying against may have different input & output - this is just an example!"
+  ],
+  "tables": [
+    {
+      "table_name": "tweets",
+      "columns": [
+        {
+          "column_name": "tweet_id",
+          "data_type": "INT"
+        },
+        {
+          "column_name": "user_id",
+          "data_type": "INT"
+        },
+        {
+          "column_name": "msg",
+          "data_type": "VARCHAR(255)"
+        },
+        {
+          "column_name": "tweet_date",
+          "data_type": "DATETIME"
+        }
+      ]
+    }
+  ],
+  "sample_data": {
+    "tweets": [
+      {
+        "tweet_id": "214252",
+        "user_id": "111",
+        "msg": "Am considering taking Tesla private at $420. Funding secured.",
+        "tweet_date": "12/30/2021 00:00:00"
+      },
+      {
+        "tweet_id": "739252",
+        "user_id": "111",
+        "msg": "Despite the constant negative press covfefe",
+        "tweet_date": "01/01/2022 00:00:00"
+      },
+      {
+        "tweet_id": "846402",
+        "user_id": "111",
+        "msg": "Following @NickSinghTech on Twitter changed my life!",
+        "tweet_date": "02/14/2022 00:00:00"
+      },
+      {
+        "tweet_id": "241425",
+        "user_id": "254",
+        "msg": "If the salary is so competitive why won’t you tell me what it is?",
+        "tweet_date": "03/01/2022 00:00:00"
+      },
+      {
+        "tweet_id": "231574",
+        "user_id": "148",
+        "msg": "I no longer have a manager. I can't be managed",
+        "tweet_date": "03/23/2022 00:00:00"
+      }
+    ]
+  },
+  "sample_output": [
+    {
+      "tweet_bucket": "1",
+      "users_num": "2"
+    },
+    {
+      "tweet_bucket": "2",
+      "users_num": "1"
+    }
+  ],
+  "reference_sql": "WITH user_tweets AS (\n  SELECT user_id, COUNT(tweet_id) AS tweet_count\n  FROM tweets\n  WHERE YEAR(tweet_date) = 2022\n  GROUP BY user_id\n)\nSELECT tweet_count AS tweet_bucket, COUNT(user_id) AS users_num\nFROM user_tweets\nGROUP BY tweet_count\nORDER BY tweet_bucket;",
+  "tags": [
+    "aggregation",
+    "easy",
+    "social-media",
+    "twitter"
+  ],
+  "related_questions": [],
+  "sources": [
+    [
+      "DataLemur page (free)",
+      "https://datalemur.com/questions/sql-histogram-tweets"
+    ],
+    [
+      "DataLemur PDF",
+      "Page 5"
+    ]
+  ],
+  "test_cases": [
+    {
+      "test_case_id": "tc_1_baseline",
+      "description": "Baseline sample input data from problem description",
+      "input_data": {
+        "tweets": [
+          {
+            "tweet_id": "214252",
+            "user_id": "111",
+            "msg": "Am considering taking Tesla private at $420. Funding secured.",
+            "tweet_date": "12/30/2021 00:00:00"
+          },
+          {
+            "tweet_id": "739252",
+            "user_id": "111",
+            "msg": "Despite the constant negative press covfefe",
+            "tweet_date": "01/01/2022 00:00:00"
+          },
+          {
+            "tweet_id": "846402",
+            "user_id": "111",
+            "msg": "Following @NickSinghTech on Twitter changed my life!",
+            "tweet_date": "02/14/2022 00:00:00"
+          },
+          {
+            "tweet_id": "241425",
+            "user_id": "254",
+            "msg": "If the salary is so competitive why won’t you tell me what it is?",
+            "tweet_date": "03/01/2022 00:00:00"
+          },
+          {
+            "tweet_id": "231574",
+            "user_id": "148",
+            "msg": "I no longer have a manager. I can't be managed",
+            "tweet_date": "03/23/2022 00:00:00"
+          }
+        ]
+      },
+      "expected_output": [
+        {
+          "tweet_bucket": 1,
+          "users_num": 2
+        },
+        {
+          "tweet_bucket": 2,
+          "users_num": 1
+        }
+      ],
+      "category": "normal"
+    },
+    {
+      "test_case_id": "tc_2_high_volume",
+      "description": "Multiple entities with scaled volume and multi-group distributions",
+      "input_data": {
+        "tweets": [
+          {
+            "tweet_id": "214252",
+            "user_id": "111",
+            "msg": "Am considering taking Tesla private at $420. Funding secured.",
+            "tweet_date": "12/30/2021 00:00:00"
+          },
+          {
+            "tweet_id": "739252",
+            "user_id": "111",
+            "msg": "Despite the constant negative press covfefe",
+            "tweet_date": "01/01/2022 00:00:00"
+          },
+          {
+            "tweet_id": "846402",
+            "user_id": "111",
+            "msg": "Following @NickSinghTech on Twitter changed my life!",
+            "tweet_date": "02/14/2022 00:00:00"
+          },
+          {
+            "tweet_id": "241425",
+            "user_id": "254",
+            "msg": "If the salary is so competitive why won’t you tell me what it is?",
+            "tweet_date": "03/01/2022 00:00:00"
+          },
+          {
+            "tweet_id": "231574",
+            "user_id": "148",
+            "msg": "I no longer have a manager. I can't be managed",
+            "tweet_date": "03/23/2022 00:00:00"
+          },
+          {
+            "tweet_id": 215252,
+            "user_id": 1111,
+            "msg": "Am considering taking Tesla private at $420. Funding secured.",
+            "tweet_date": "12/28/2021 00:00:00"
+          },
+          {
+            "tweet_id": 740252,
+            "user_id": 1111,
+            "msg": "Despite the constant negative press covfefe",
+            "tweet_date": "01/06/2022 00:00:00"
+          },
+          {
+            "tweet_id": 847402,
+            "user_id": 1111,
+            "msg": "Following @NickSinghTech on Twitter changed my life!",
+            "tweet_date": "02/19/2022 00:00:00"
+          },
+          {
+            "tweet_id": 242425,
+            "user_id": 1254,
+            "msg": "If the salary is so competitive why won’t you tell me what it is?",
+            "tweet_date": "03/06/2022 00:00:00"
+          },
+          {
+            "tweet_id": 232574,
+            "user_id": 1148,
+            "msg": "I no longer have a manager. I can't be managed",
+            "tweet_date": "03/28/2022 00:00:00"
+          }
+        ]
+      },
+      "expected_output": [
+        {
+          "tweet_bucket": 1,
+          "users_num": 4
+        },
+        {
+          "tweet_bucket": 2,
+          "users_num": 2
+        }
+      ],
+      "category": "volume"
+    },
+    {
+      "test_case_id": "tc_3_disqualifying_rows",
+      "description": "Dataset containing disqualifying rows, edge values, and cancelled/zero records",
+      "input_data": {
+        "tweets": [
+          {
+            "tweet_id": "214252",
+            "user_id": "111",
+            "msg": "Am considering taking Tesla private at $420. Funding secured.",
+            "tweet_date": "12/30/2021 00:00:00"
+          },
+          {
+            "tweet_id": "739252",
+            "user_id": "111",
+            "msg": "Despite the constant negative press covfefe",
+            "tweet_date": "01/01/2022 00:00:00"
+          },
+          {
+            "tweet_id": "846402",
+            "user_id": "111",
+            "msg": "Following @NickSinghTech on Twitter changed my life!",
+            "tweet_date": "02/14/2022 00:00:00"
+          },
+          {
+            "tweet_id": "241425",
+            "user_id": "254",
+            "msg": "If the salary is so competitive why won’t you tell me what it is?",
+            "tweet_date": "03/01/2022 00:00:00"
+          },
+          {
+            "tweet_id": "231574",
+            "user_id": "148",
+            "msg": "I no longer have a manager. I can't be managed",
+            "tweet_date": "03/23/2022 00:00:00"
+          },
+          {
+            "tweet_id": 219252,
+            "user_id": 5111,
+            "msg": "Am considering taking Tesla private at $420. Funding secured.",
+            "tweet_date": "12/28/2016 00:00:00"
+          },
+          {
+            "tweet_id": 744252,
+            "user_id": 5111,
+            "msg": "Despite the constant negative press covfefe",
+            "tweet_date": "01/01/2017 00:00:00"
+          }
+        ]
+      },
+      "expected_output": [
+        {
+          "tweet_bucket": 1,
+          "users_num": 2
+        },
+        {
+          "tweet_bucket": 2,
+          "users_num": 1
+        }
+      ],
+      "category": "edge"
+    },
+    {
+      "test_case_id": "tc_4_empty_result",
+      "description": "Input where no rows satisfy problem criteria, verifying empty result handling",
+      "input_data": {
+        "tweets": []
+      },
+      "expected_output": [],
+      "category": "edge"
+    }
+  ],
+  "order_sensitive": false,
+  "expected_output": [
+    {
+      "tweet_bucket": 1,
+      "users_num": 2
+    },
+    {
+      "tweet_bucket": 2,
+      "users_num": 1
+    }
+  ]
+}

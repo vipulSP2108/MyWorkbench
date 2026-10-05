@@ -1,0 +1,330 @@
+{
+  "question_id": "q_087_total_utilization_time",
+  "slug": "total-utilization-time",
+  "title": "Server Utilization Time",
+  "difficulty": "Hard",
+  "company": "Amazon",
+  "premium": false,
+  "question": "AWS is powered by fleets of servers, and senior management wants data-driven ways to optimise server usage.\n\nWrite a query that calculates the total time the fleet of servers was running, in units of full days.\n\nAssumptions: each server may start and stop several times; total fleet time is the sum of each server's uptime.",
+  "notes": [],
+  "tables": [
+    {
+      "table_name": "server_utilization",
+      "columns": [
+        {
+          "column_name": "server_id",
+          "data_type": "INT"
+        },
+        {
+          "column_name": "status_time",
+          "data_type": "DATETIME"
+        },
+        {
+          "column_name": "session_status",
+          "data_type": "VARCHAR(255)"
+        }
+      ]
+    }
+  ],
+  "sample_data": {
+    "server_utilization": [
+      {
+        "server_id": 1,
+        "status_time": "08/02/2022 10:00:00",
+        "session_status": "start"
+      },
+      {
+        "server_id": 1,
+        "status_time": "08/04/2022 10:00:00",
+        "session_status": "stop"
+      },
+      {
+        "server_id": 2,
+        "status_time": "08/17/2022 10:00:00",
+        "session_status": "start"
+      },
+      {
+        "server_id": 2,
+        "status_time": "08/24/2022 10:00:00",
+        "session_status": "stop"
+      }
+    ]
+  },
+  "sample_output": [
+    {
+      "total_uptime_days": 21
+    }
+  ],
+  "reference_sql": "WITH session_pairs AS (\n  SELECT \n    server_id,\n    status_time AS start_time,\n    LEAD(status_time) OVER (PARTITION BY server_id ORDER BY status_time) AS stop_time,\n    session_status\n  FROM server_utilization\n)\nSELECT \n  FLOOR(SUM(TIMESTAMPDIFF(SECOND, start_time, stop_time)) / 86400) AS total_uptime_days\nFROM session_pairs\nWHERE session_status = 'start' AND stop_time IS NOT NULL;",
+  "tags": [
+    "aggregation",
+    "amazon",
+    "cte",
+    "date-manipulation",
+    "hard",
+    "lead-lag",
+    "window-function"
+  ],
+  "related_questions": [],
+  "sources": [
+    [
+      "DataLemur page (free)",
+      "https://datalemur.com/questions/total-utilization-time"
+    ],
+    [
+      "DataLemur PDF",
+      "Page 91"
+    ]
+  ],
+  "test_cases": [
+    {
+      "test_case_id": "tc_1_baseline",
+      "description": "Baseline sample input data from problem description",
+      "input_data": {
+        "server_utilization": [
+          {
+            "server_id": 1,
+            "status_time": "08/02/2022 10:00:00",
+            "session_status": "start"
+          },
+          {
+            "server_id": 1,
+            "status_time": "08/04/2022 10:00:00",
+            "session_status": "stop"
+          },
+          {
+            "server_id": 2,
+            "status_time": "08/17/2022 10:00:00",
+            "session_status": "start"
+          },
+          {
+            "server_id": 2,
+            "status_time": "08/24/2022 10:00:00",
+            "session_status": "stop"
+          }
+        ]
+      },
+      "expected_output": [
+        {
+          "total_uptime_days": 9.0
+        }
+      ],
+      "category": "normal"
+    },
+    {
+      "test_case_id": "tc_2_high_volume",
+      "description": "Multiple entities with scaled volume and multi-group distributions",
+      "input_data": {
+        "server_utilization": [
+          {
+            "server_id": 1,
+            "status_time": "08/02/2022 10:00:00",
+            "session_status": "start"
+          },
+          {
+            "server_id": 1,
+            "status_time": "08/04/2022 10:00:00",
+            "session_status": "stop"
+          },
+          {
+            "server_id": 2,
+            "status_time": "08/17/2022 10:00:00",
+            "session_status": "start"
+          },
+          {
+            "server_id": 2,
+            "status_time": "08/24/2022 10:00:00",
+            "session_status": "stop"
+          },
+          {
+            "server_id": 1001,
+            "status_time": "08/07/2022 10:00:00",
+            "session_status": "start"
+          },
+          {
+            "server_id": 1001,
+            "status_time": "08/09/2022 10:00:00",
+            "session_status": "stop"
+          },
+          {
+            "server_id": 1002,
+            "status_time": "08/22/2022 10:00:00",
+            "session_status": "start"
+          },
+          {
+            "server_id": 1002,
+            "status_time": "08/28/2022 10:00:00",
+            "session_status": "stop"
+          }
+        ]
+      },
+      "expected_output": [
+        {
+          "total_uptime_days": 17.0
+        }
+      ],
+      "category": "volume"
+    },
+    {
+      "test_case_id": "tc_3_disqualifying_rows",
+      "description": "Dataset containing disqualifying rows, edge values, and cancelled/zero records",
+      "input_data": {
+        "server_utilization": [
+          {
+            "server_id": 1,
+            "status_time": "08/02/2022 10:00:00",
+            "session_status": "start"
+          },
+          {
+            "server_id": 1,
+            "status_time": "08/04/2022 10:00:00",
+            "session_status": "stop"
+          },
+          {
+            "server_id": 2,
+            "status_time": "08/17/2022 10:00:00",
+            "session_status": "start"
+          },
+          {
+            "server_id": 2,
+            "status_time": "08/24/2022 10:00:00",
+            "session_status": "stop"
+          },
+          {
+            "server_id": 5001,
+            "status_time": "08/02/2017 10:00:00",
+            "session_status": "Cancelled"
+          },
+          {
+            "server_id": 5001,
+            "status_time": "08/04/2017 10:00:00",
+            "session_status": "Cancelled"
+          }
+        ]
+      },
+      "expected_output": [
+        {
+          "total_uptime_days": 9.0
+        }
+      ],
+      "category": "edge"
+    },
+    {
+      "test_case_id": "tc_4_empty_result",
+      "description": "Input where no rows satisfy problem criteria, verifying empty result handling",
+      "input_data": {
+        "server_utilization": []
+      },
+      "expected_output": [
+        {
+          "total_uptime_days": null
+        }
+      ],
+      "category": "edge"
+    },
+    {
+      "test_case_id": "tc_5_ties_and_nulls",
+      "description": "Tied ranking metrics, unmatched join keys, and NULL values in nullable attributes",
+      "input_data": {
+        "server_utilization": [
+          {
+            "server_id": 1,
+            "status_time": "08/02/2022 10:00:00",
+            "session_status": "start"
+          },
+          {
+            "server_id": 1,
+            "status_time": "08/04/2022 10:00:00",
+            "session_status": "stop"
+          },
+          {
+            "server_id": 2,
+            "status_time": "08/17/2022 10:00:00",
+            "session_status": "start"
+          },
+          {
+            "server_id": 2,
+            "status_time": "08/24/2022 10:00:00",
+            "session_status": "stop"
+          },
+          {
+            "server_id": 9001,
+            "status_time": "08/02/2022 10:00:00",
+            "session_status": "start"
+          },
+          {
+            "server_id": 9501,
+            "status_time": "08/04/2022 10:00:00",
+            "session_status": "stop"
+          }
+        ]
+      },
+      "expected_output": [
+        {
+          "total_uptime_days": 9.0
+        }
+      ],
+      "category": "edge"
+    },
+    {
+      "test_case_id": "tc_6_extreme_boundary",
+      "description": "Consecutive day sequences, month-end date rollovers, and high-frequency transactions",
+      "input_data": {
+        "server_utilization": [
+          {
+            "server_id": 1,
+            "status_time": "08/02/2022 10:00:00",
+            "session_status": "start"
+          },
+          {
+            "server_id": 1,
+            "status_time": "08/04/2022 10:00:00",
+            "session_status": "stop"
+          },
+          {
+            "server_id": 2,
+            "status_time": "08/17/2022 10:00:00",
+            "session_status": "start"
+          },
+          {
+            "server_id": 2,
+            "status_time": "08/24/2022 10:00:00",
+            "session_status": "stop"
+          },
+          {
+            "server_id": 8001,
+            "status_time": "08/03/2022 10:00:00",
+            "session_status": "start"
+          },
+          {
+            "server_id": 8001,
+            "status_time": "08/05/2022 10:00:00",
+            "session_status": "stop"
+          },
+          {
+            "server_id": 8002,
+            "status_time": "08/18/2022 10:00:00",
+            "session_status": "start"
+          },
+          {
+            "server_id": 8002,
+            "status_time": "08/25/2022 10:00:00",
+            "session_status": "stop"
+          }
+        ]
+      },
+      "expected_output": [
+        {
+          "total_uptime_days": 18.0
+        }
+      ],
+      "category": "boundary"
+    }
+  ],
+  "order_sensitive": false,
+  "expected_output": [
+    {
+      "total_uptime_days": 9.0
+    }
+  ]
+}

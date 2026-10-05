@@ -1,0 +1,671 @@
+{
+  "question_id": "q_009_completed_trades",
+  "slug": "completed-trades",
+  "title": "Cities With Completed Trades",
+  "difficulty": "Easy",
+  "company": "Robinhood",
+  "premium": false,
+  "question": "Assume you're given the tables containing completed trade orders and user details in a Robinhood trading system.\n\nWrite a query to retrieve the top three cities that have the highest number of completed trade orders listed in descending order. Output the city name and the corresponding number of completed trade orders.",
+  "notes": [
+    "In the given dataset, San Francisco has the highest number of completed trade orders with 3 orders. Boston holds the second position with 2 orders, and Denver ranks third with 1 order.",
+    "The dataset you are querying against may have different input & output - this is just an example!"
+  ],
+  "tables": [
+    {
+      "table_name": "trades",
+      "columns": [
+        {
+          "column_name": "order_id",
+          "data_type": "INT"
+        },
+        {
+          "column_name": "user_id",
+          "data_type": "INT"
+        },
+        {
+          "column_name": "quantity",
+          "data_type": "INT"
+        },
+        {
+          "column_name": "status",
+          "data_type": "VARCHAR(50)"
+        },
+        {
+          "column_name": "date",
+          "data_type": "DATETIME"
+        },
+        {
+          "column_name": "price",
+          "data_type": "DECIMAL(5,2)"
+        }
+      ]
+    },
+    {
+      "table_name": "users",
+      "columns": [
+        {
+          "column_name": "user_id",
+          "data_type": "INT"
+        },
+        {
+          "column_name": "city",
+          "data_type": "VARCHAR(255)"
+        },
+        {
+          "column_name": "email",
+          "data_type": "VARCHAR(255)"
+        },
+        {
+          "column_name": "signup_date",
+          "data_type": "DATETIME"
+        }
+      ]
+    }
+  ],
+  "sample_data": {
+    "trades": [
+      {
+        "order_id": "100101",
+        "user_id": "111",
+        "quantity": "10",
+        "status": "Cancelled",
+        "date": "08/17/2022 12:00:00",
+        "price": "9.80"
+      },
+      {
+        "order_id": "100102",
+        "user_id": "111",
+        "quantity": "10",
+        "status": "Completed",
+        "date": "08/17/2022 12:00:00",
+        "price": "10.00"
+      },
+      {
+        "order_id": "100259",
+        "user_id": "148",
+        "quantity": "35",
+        "status": "Completed",
+        "date": "08/25/2022 12:00:00",
+        "price": "5.10"
+      },
+      {
+        "order_id": "100264",
+        "user_id": "148",
+        "quantity": "40",
+        "status": "Completed",
+        "date": "08/26/2022 12:00:00",
+        "price": "4.80"
+      },
+      {
+        "order_id": "100305",
+        "user_id": "300",
+        "quantity": "15",
+        "status": "Completed",
+        "date": "09/05/2022 12:00:00",
+        "price": "10.00"
+      },
+      {
+        "order_id": "100400",
+        "user_id": "178",
+        "quantity": "32",
+        "status": "Completed",
+        "date": "09/17/2022 12:00:00",
+        "price": "12.00"
+      },
+      {
+        "order_id": "100565",
+        "user_id": "265",
+        "quantity": "2",
+        "status": "Completed",
+        "date": "09/27/2022 12:00:00",
+        "price": "8.70"
+      }
+    ],
+    "users": [
+      {
+        "user_id": "111",
+        "city": "San Francisco",
+        "email": "rrok10@gmail.com",
+        "signup_date": "08/03/2021 12:00:00"
+      },
+      {
+        "user_id": "148",
+        "city": "Boston",
+        "email": "sailor9820@gmail.com",
+        "signup_date": "08/20/2021 12:00:00"
+      },
+      {
+        "user_id": "178",
+        "city": "San Francisco",
+        "email": "harrypotterfan182@gmail.com",
+        "signup_date": "01/05/2022 12:00:00"
+      },
+      {
+        "user_id": "265",
+        "city": "Denver",
+        "email": "shadower_@hotmail.com",
+        "signup_date": "02/26/2022 12:00:00"
+      },
+      {
+        "user_id": "300",
+        "city": "San Francisco",
+        "email": "houstoncowboy1122@hotmail.com",
+        "signup_date": "06/30/2022 12:00:00"
+      }
+    ]
+  },
+  "sample_output": [
+    {
+      "city": "San Francisco",
+      "total_orders": "3"
+    },
+    {
+      "city": "Boston",
+      "total_orders": "2"
+    },
+    {
+      "city": "Denver",
+      "total_orders": "1"
+    }
+  ],
+  "reference_sql": "SELECT u.city, COUNT(t.order_id) AS total_orders\nFROM trades t\nJOIN users u ON t.user_id = u.user_id\nWHERE t.status = 'Completed'\nGROUP BY u.city\nORDER BY total_orders DESC, u.city ASC\nLIMIT 3;",
+  "tags": [
+    "easy",
+    "ecommerce",
+    "finance",
+    "robinhood"
+  ],
+  "related_questions": [],
+  "sources": [
+    [
+      "DataLemur page (free)",
+      "https://datalemur.com/questions/completed-trades"
+    ],
+    [
+      "DataLemur PDF",
+      "Page 13"
+    ]
+  ],
+  "test_cases": [
+    {
+      "test_case_id": "tc_1_baseline",
+      "description": "Baseline sample input data from problem description",
+      "input_data": {
+        "trades": [
+          {
+            "order_id": "100101",
+            "user_id": "111",
+            "quantity": "10",
+            "status": "Cancelled",
+            "date": "08/17/2022 12:00:00",
+            "price": "9.80"
+          },
+          {
+            "order_id": "100102",
+            "user_id": "111",
+            "quantity": "10",
+            "status": "Completed",
+            "date": "08/17/2022 12:00:00",
+            "price": "10.00"
+          },
+          {
+            "order_id": "100259",
+            "user_id": "148",
+            "quantity": "35",
+            "status": "Completed",
+            "date": "08/25/2022 12:00:00",
+            "price": "5.10"
+          },
+          {
+            "order_id": "100264",
+            "user_id": "148",
+            "quantity": "40",
+            "status": "Completed",
+            "date": "08/26/2022 12:00:00",
+            "price": "4.80"
+          },
+          {
+            "order_id": "100305",
+            "user_id": "300",
+            "quantity": "15",
+            "status": "Completed",
+            "date": "09/05/2022 12:00:00",
+            "price": "10.00"
+          },
+          {
+            "order_id": "100400",
+            "user_id": "178",
+            "quantity": "32",
+            "status": "Completed",
+            "date": "09/17/2022 12:00:00",
+            "price": "12.00"
+          },
+          {
+            "order_id": "100565",
+            "user_id": "265",
+            "quantity": "2",
+            "status": "Completed",
+            "date": "09/27/2022 12:00:00",
+            "price": "8.70"
+          }
+        ],
+        "users": [
+          {
+            "user_id": "111",
+            "city": "San Francisco",
+            "email": "rrok10@gmail.com",
+            "signup_date": "08/03/2021 12:00:00"
+          },
+          {
+            "user_id": "148",
+            "city": "Boston",
+            "email": "sailor9820@gmail.com",
+            "signup_date": "08/20/2021 12:00:00"
+          },
+          {
+            "user_id": "178",
+            "city": "San Francisco",
+            "email": "harrypotterfan182@gmail.com",
+            "signup_date": "01/05/2022 12:00:00"
+          },
+          {
+            "user_id": "265",
+            "city": "Denver",
+            "email": "shadower_@hotmail.com",
+            "signup_date": "02/26/2022 12:00:00"
+          },
+          {
+            "user_id": "300",
+            "city": "San Francisco",
+            "email": "houstoncowboy1122@hotmail.com",
+            "signup_date": "06/30/2022 12:00:00"
+          }
+        ]
+      },
+      "expected_output": [
+        {
+          "city": "San Francisco",
+          "total_orders": 3
+        },
+        {
+          "city": "Boston",
+          "total_orders": 2
+        },
+        {
+          "city": "Denver",
+          "total_orders": 1
+        }
+      ],
+      "category": "normal"
+    },
+    {
+      "test_case_id": "tc_2_high_volume",
+      "description": "Multiple entities with scaled volume and multi-group distributions",
+      "input_data": {
+        "trades": [
+          {
+            "order_id": "100101",
+            "user_id": "111",
+            "quantity": "10",
+            "status": "Cancelled",
+            "date": "08/17/2022 12:00:00",
+            "price": "9.80"
+          },
+          {
+            "order_id": "100102",
+            "user_id": "111",
+            "quantity": "10",
+            "status": "Completed",
+            "date": "08/17/2022 12:00:00",
+            "price": "10.00"
+          },
+          {
+            "order_id": "100259",
+            "user_id": "148",
+            "quantity": "35",
+            "status": "Completed",
+            "date": "08/25/2022 12:00:00",
+            "price": "5.10"
+          },
+          {
+            "order_id": "100264",
+            "user_id": "148",
+            "quantity": "40",
+            "status": "Completed",
+            "date": "08/26/2022 12:00:00",
+            "price": "4.80"
+          },
+          {
+            "order_id": "100305",
+            "user_id": "300",
+            "quantity": "15",
+            "status": "Completed",
+            "date": "09/05/2022 12:00:00",
+            "price": "10.00"
+          },
+          {
+            "order_id": "100400",
+            "user_id": "178",
+            "quantity": "32",
+            "status": "Completed",
+            "date": "09/17/2022 12:00:00",
+            "price": "12.00"
+          },
+          {
+            "order_id": "100565",
+            "user_id": "265",
+            "quantity": "2",
+            "status": "Completed",
+            "date": "09/27/2022 12:00:00",
+            "price": "8.70"
+          },
+          {
+            "order_id": 101101,
+            "user_id": 1111,
+            "quantity": "10",
+            "status": "Cancelled",
+            "date": "08/22/2022 12:00:00",
+            "price": 14.7
+          },
+          {
+            "order_id": 101102,
+            "user_id": 1111,
+            "quantity": "10",
+            "status": "Completed",
+            "date": "08/22/2022 12:00:00",
+            "price": 15.0
+          },
+          {
+            "order_id": 101259,
+            "user_id": 1148,
+            "quantity": "35",
+            "status": "Completed",
+            "date": "08/28/2022 12:00:00",
+            "price": 7.65
+          },
+          {
+            "order_id": 101264,
+            "user_id": 1148,
+            "quantity": "40",
+            "status": "Completed",
+            "date": "08/28/2022 12:00:00",
+            "price": 7.2
+          },
+          {
+            "order_id": 101305,
+            "user_id": 1300,
+            "quantity": "15",
+            "status": "Completed",
+            "date": "09/10/2022 12:00:00",
+            "price": 15.0
+          },
+          {
+            "order_id": 101400,
+            "user_id": 1178,
+            "quantity": "32",
+            "status": "Completed",
+            "date": "09/22/2022 12:00:00",
+            "price": 18.0
+          },
+          {
+            "order_id": 101565,
+            "user_id": 1265,
+            "quantity": "2",
+            "status": "Completed",
+            "date": "09/28/2022 12:00:00",
+            "price": 13.05
+          }
+        ],
+        "users": [
+          {
+            "user_id": "111",
+            "city": "San Francisco",
+            "email": "rrok10@gmail.com",
+            "signup_date": "08/03/2021 12:00:00"
+          },
+          {
+            "user_id": "148",
+            "city": "Boston",
+            "email": "sailor9820@gmail.com",
+            "signup_date": "08/20/2021 12:00:00"
+          },
+          {
+            "user_id": "178",
+            "city": "San Francisco",
+            "email": "harrypotterfan182@gmail.com",
+            "signup_date": "01/05/2022 12:00:00"
+          },
+          {
+            "user_id": "265",
+            "city": "Denver",
+            "email": "shadower_@hotmail.com",
+            "signup_date": "02/26/2022 12:00:00"
+          },
+          {
+            "user_id": "300",
+            "city": "San Francisco",
+            "email": "houstoncowboy1122@hotmail.com",
+            "signup_date": "06/30/2022 12:00:00"
+          },
+          {
+            "user_id": 1111,
+            "city": "San Francisco",
+            "email": "rrok10@gmail.com",
+            "signup_date": "08/08/2021 12:00:00"
+          },
+          {
+            "user_id": 1148,
+            "city": "Boston",
+            "email": "sailor9820@gmail.com",
+            "signup_date": "08/25/2021 12:00:00"
+          },
+          {
+            "user_id": 1178,
+            "city": "San Francisco",
+            "email": "harrypotterfan182@gmail.com",
+            "signup_date": "01/10/2022 12:00:00"
+          },
+          {
+            "user_id": 1265,
+            "city": "Denver",
+            "email": "shadower_@hotmail.com",
+            "signup_date": "02/28/2022 12:00:00"
+          },
+          {
+            "user_id": 1300,
+            "city": "San Francisco",
+            "email": "houstoncowboy1122@hotmail.com",
+            "signup_date": "06/28/2022 12:00:00"
+          }
+        ]
+      },
+      "expected_output": [
+        {
+          "city": "San Francisco",
+          "total_orders": 6
+        },
+        {
+          "city": "Boston",
+          "total_orders": 4
+        },
+        {
+          "city": "Denver",
+          "total_orders": 2
+        }
+      ],
+      "category": "volume"
+    },
+    {
+      "test_case_id": "tc_3_disqualifying_rows",
+      "description": "Dataset containing disqualifying rows, edge values, and cancelled/zero records",
+      "input_data": {
+        "trades": [
+          {
+            "order_id": "100101",
+            "user_id": "111",
+            "quantity": "10",
+            "status": "Cancelled",
+            "date": "08/17/2022 12:00:00",
+            "price": "9.80"
+          },
+          {
+            "order_id": "100102",
+            "user_id": "111",
+            "quantity": "10",
+            "status": "Completed",
+            "date": "08/17/2022 12:00:00",
+            "price": "10.00"
+          },
+          {
+            "order_id": "100259",
+            "user_id": "148",
+            "quantity": "35",
+            "status": "Completed",
+            "date": "08/25/2022 12:00:00",
+            "price": "5.10"
+          },
+          {
+            "order_id": "100264",
+            "user_id": "148",
+            "quantity": "40",
+            "status": "Completed",
+            "date": "08/26/2022 12:00:00",
+            "price": "4.80"
+          },
+          {
+            "order_id": "100305",
+            "user_id": "300",
+            "quantity": "15",
+            "status": "Completed",
+            "date": "09/05/2022 12:00:00",
+            "price": "10.00"
+          },
+          {
+            "order_id": "100400",
+            "user_id": "178",
+            "quantity": "32",
+            "status": "Completed",
+            "date": "09/17/2022 12:00:00",
+            "price": "12.00"
+          },
+          {
+            "order_id": "100565",
+            "user_id": "265",
+            "quantity": "2",
+            "status": "Completed",
+            "date": "09/27/2022 12:00:00",
+            "price": "8.70"
+          },
+          {
+            "order_id": 105101,
+            "user_id": 5111,
+            "quantity": "10",
+            "status": "Cancelled",
+            "date": "08/17/2017 12:00:00",
+            "price": "9.80"
+          },
+          {
+            "order_id": 105102,
+            "user_id": 5111,
+            "quantity": "10",
+            "status": "Cancelled",
+            "date": "08/17/2017 12:00:00",
+            "price": "10.00"
+          },
+          {
+            "order_id": 105259,
+            "user_id": 5148,
+            "quantity": "35",
+            "status": "Cancelled",
+            "date": "08/25/2017 12:00:00",
+            "price": "5.10"
+          }
+        ],
+        "users": [
+          {
+            "user_id": "111",
+            "city": "San Francisco",
+            "email": "rrok10@gmail.com",
+            "signup_date": "08/03/2021 12:00:00"
+          },
+          {
+            "user_id": "148",
+            "city": "Boston",
+            "email": "sailor9820@gmail.com",
+            "signup_date": "08/20/2021 12:00:00"
+          },
+          {
+            "user_id": "178",
+            "city": "San Francisco",
+            "email": "harrypotterfan182@gmail.com",
+            "signup_date": "01/05/2022 12:00:00"
+          },
+          {
+            "user_id": "265",
+            "city": "Denver",
+            "email": "shadower_@hotmail.com",
+            "signup_date": "02/26/2022 12:00:00"
+          },
+          {
+            "user_id": "300",
+            "city": "San Francisco",
+            "email": "houstoncowboy1122@hotmail.com",
+            "signup_date": "06/30/2022 12:00:00"
+          },
+          {
+            "user_id": 5111,
+            "city": "San Francisco",
+            "email": "rrok10@gmail.com",
+            "signup_date": "08/03/2016 12:00:00"
+          },
+          {
+            "user_id": 5148,
+            "city": "Boston",
+            "email": "sailor9820@gmail.com",
+            "signup_date": "08/20/2016 12:00:00"
+          }
+        ]
+      },
+      "expected_output": [
+        {
+          "city": "San Francisco",
+          "total_orders": 3
+        },
+        {
+          "city": "Boston",
+          "total_orders": 2
+        },
+        {
+          "city": "Denver",
+          "total_orders": 1
+        }
+      ],
+      "category": "edge"
+    },
+    {
+      "test_case_id": "tc_4_empty_result",
+      "description": "Input where no rows satisfy problem criteria, verifying empty result handling",
+      "input_data": {
+        "trades": [],
+        "users": []
+      },
+      "expected_output": [],
+      "category": "edge"
+    }
+  ],
+  "order_sensitive": true,
+  "expected_output": [
+    {
+      "city": "San Francisco",
+      "total_orders": 3
+    },
+    {
+      "city": "Boston",
+      "total_orders": 2
+    },
+    {
+      "city": "Denver",
+      "total_orders": 1
+    }
+  ]
+}

@@ -1,0 +1,622 @@
+{
+  "question_id": "q_099_same_week_purchases",
+  "slug": "same-week-purchases",
+  "title": "Same Week Purchases",
+  "difficulty": "Hard",
+  "company": "Etsy",
+  "premium": true,
+  "question": "You are given two tables with Etsy's user signups and purchases. Write a query to obtain the percentage of users who signed up and made a purchase within 7 days of signing up. Round the result to 2 decimal places.",
+  "notes": [],
+  "tables": [
+    {
+      "table_name": "signups",
+      "columns": [
+        {
+          "column_name": "user_id",
+          "data_type": "INT"
+        },
+        {
+          "column_name": "signup_date",
+          "data_type": "DATETIME"
+        }
+      ]
+    },
+    {
+      "table_name": "purchases",
+      "columns": [
+        {
+          "column_name": "user_id",
+          "data_type": "INT"
+        },
+        {
+          "column_name": "product_id",
+          "data_type": "INT"
+        },
+        {
+          "column_name": "purchase_amount",
+          "data_type": "DECIMAL(10,2)"
+        },
+        {
+          "column_name": "purchase_date",
+          "data_type": "DATETIME"
+        }
+      ]
+    }
+  ],
+  "sample_data": {
+    "signups": [
+      {
+        "user_id": 445,
+        "signup_date": "06/21/2022 12:00:00"
+      },
+      {
+        "user_id": 742,
+        "signup_date": "06/19/2022 12:00:00"
+      },
+      {
+        "user_id": 648,
+        "signup_date": "06/24/2022 12:00:00"
+      },
+      {
+        "user_id": 789,
+        "signup_date": "06/27/2022 12:00:00"
+      },
+      {
+        "user_id": 123,
+        "signup_date": "06/27/2022 12:00:00"
+      }
+    ],
+    "purchases": [
+      {
+        "user_id": 244,
+        "product_id": 7575,
+        "purchase_amount": "45.00",
+        "purchase_date": "06/22/2022 12:00:00"
+      },
+      {
+        "user_id": 742,
+        "product_id": 1241,
+        "purchase_amount": "50.00",
+        "purchase_date": "06/28/2022 12:00:00"
+      },
+      {
+        "user_id": 648,
+        "product_id": 3632,
+        "purchase_amount": "55.50",
+        "purchase_date": "06/25/2022 12:00:00"
+      },
+      {
+        "user_id": 123,
+        "product_id": 8475,
+        "purchase_amount": "67.30",
+        "purchase_date": "06/29/2022 12:00:00"
+      },
+      {
+        "user_id": 244,
+        "product_id": 2341,
+        "purchase_amount": "74.10",
+        "purchase_date": "06/30/2022 12:00:00"
+      }
+    ]
+  },
+  "sample_output": [
+    {
+      "single_purchase_pct": "40.00"
+    }
+  ],
+  "reference_sql": "SELECT \n  ROUND(100.0 * COUNT(DISTINCT p.user_id) / COUNT(DISTINCT s.user_id), 2) AS same_week_pct\nFROM signups s\nLEFT JOIN purchases p \n  ON s.user_id = p.user_id \n AND DATEDIFF(p.purchase_date, s.signup_date) BETWEEN 0 AND 7;",
+  "tags": [
+    "date-manipulation",
+    "ecommerce",
+    "etsy",
+    "hard",
+    "math"
+  ],
+  "related_questions": [],
+  "sources": [
+    [
+      "DataLemur blog: 8 Etsy SQL questions",
+      "https://datalemur.com/blog/etsy-sql-interview-questions"
+    ],
+    [
+      "DataLemur page (locked)",
+      "https://datalemur.com/questions/same-week-purchases"
+    ],
+    [
+      "DataLemur PDF",
+      "Page 103"
+    ]
+  ],
+  "test_cases": [
+    {
+      "test_case_id": "tc_1_baseline",
+      "description": "Baseline sample input data from problem description",
+      "input_data": {
+        "signups": [
+          {
+            "user_id": 445,
+            "signup_date": "06/21/2022 12:00:00"
+          },
+          {
+            "user_id": 742,
+            "signup_date": "06/19/2022 12:00:00"
+          },
+          {
+            "user_id": 648,
+            "signup_date": "06/24/2022 12:00:00"
+          },
+          {
+            "user_id": 789,
+            "signup_date": "06/27/2022 12:00:00"
+          },
+          {
+            "user_id": 123,
+            "signup_date": "06/27/2022 12:00:00"
+          }
+        ],
+        "purchases": [
+          {
+            "user_id": 244,
+            "product_id": 7575,
+            "purchase_amount": "45.00",
+            "purchase_date": "06/22/2022 12:00:00"
+          },
+          {
+            "user_id": 742,
+            "product_id": 1241,
+            "purchase_amount": "50.00",
+            "purchase_date": "06/28/2022 12:00:00"
+          },
+          {
+            "user_id": 648,
+            "product_id": 3632,
+            "purchase_amount": "55.50",
+            "purchase_date": "06/25/2022 12:00:00"
+          },
+          {
+            "user_id": 123,
+            "product_id": 8475,
+            "purchase_amount": "67.30",
+            "purchase_date": "06/29/2022 12:00:00"
+          },
+          {
+            "user_id": 244,
+            "product_id": 2341,
+            "purchase_amount": "74.10",
+            "purchase_date": "06/30/2022 12:00:00"
+          }
+        ]
+      },
+      "expected_output": [
+        {
+          "same_week_pct": 40.0
+        }
+      ],
+      "category": "normal"
+    },
+    {
+      "test_case_id": "tc_2_high_volume",
+      "description": "Multiple entities with scaled volume and multi-group distributions",
+      "input_data": {
+        "signups": [
+          {
+            "user_id": 445,
+            "signup_date": "06/21/2022 12:00:00"
+          },
+          {
+            "user_id": 742,
+            "signup_date": "06/19/2022 12:00:00"
+          },
+          {
+            "user_id": 648,
+            "signup_date": "06/24/2022 12:00:00"
+          },
+          {
+            "user_id": 789,
+            "signup_date": "06/27/2022 12:00:00"
+          },
+          {
+            "user_id": 123,
+            "signup_date": "06/27/2022 12:00:00"
+          },
+          {
+            "user_id": 1445,
+            "signup_date": "06/26/2022 12:00:00"
+          },
+          {
+            "user_id": 1742,
+            "signup_date": "06/24/2022 12:00:00"
+          },
+          {
+            "user_id": 1648,
+            "signup_date": "06/28/2022 12:00:00"
+          },
+          {
+            "user_id": 1789,
+            "signup_date": "06/28/2022 12:00:00"
+          },
+          {
+            "user_id": 1123,
+            "signup_date": "06/28/2022 12:00:00"
+          }
+        ],
+        "purchases": [
+          {
+            "user_id": 244,
+            "product_id": 7575,
+            "purchase_amount": "45.00",
+            "purchase_date": "06/22/2022 12:00:00"
+          },
+          {
+            "user_id": 742,
+            "product_id": 1241,
+            "purchase_amount": "50.00",
+            "purchase_date": "06/28/2022 12:00:00"
+          },
+          {
+            "user_id": 648,
+            "product_id": 3632,
+            "purchase_amount": "55.50",
+            "purchase_date": "06/25/2022 12:00:00"
+          },
+          {
+            "user_id": 123,
+            "product_id": 8475,
+            "purchase_amount": "67.30",
+            "purchase_date": "06/29/2022 12:00:00"
+          },
+          {
+            "user_id": 244,
+            "product_id": 2341,
+            "purchase_amount": "74.10",
+            "purchase_date": "06/30/2022 12:00:00"
+          },
+          {
+            "user_id": 1244,
+            "product_id": 8575,
+            "purchase_amount": 67.5,
+            "purchase_date": "06/27/2022 12:00:00"
+          },
+          {
+            "user_id": 1742,
+            "product_id": 2241,
+            "purchase_amount": 75.0,
+            "purchase_date": "06/28/2022 12:00:00"
+          },
+          {
+            "user_id": 1648,
+            "product_id": 4632,
+            "purchase_amount": 83.25,
+            "purchase_date": "06/28/2022 12:00:00"
+          },
+          {
+            "user_id": 1123,
+            "product_id": 9475,
+            "purchase_amount": 100.95,
+            "purchase_date": "06/28/2022 12:00:00"
+          },
+          {
+            "user_id": 1244,
+            "product_id": 3341,
+            "purchase_amount": 111.15,
+            "purchase_date": "06/28/2022 12:00:00"
+          }
+        ]
+      },
+      "expected_output": [
+        {
+          "same_week_pct": 50.0
+        }
+      ],
+      "category": "volume"
+    },
+    {
+      "test_case_id": "tc_3_disqualifying_rows",
+      "description": "Dataset containing disqualifying rows, edge values, and cancelled/zero records",
+      "input_data": {
+        "signups": [
+          {
+            "user_id": 445,
+            "signup_date": "06/21/2022 12:00:00"
+          },
+          {
+            "user_id": 742,
+            "signup_date": "06/19/2022 12:00:00"
+          },
+          {
+            "user_id": 648,
+            "signup_date": "06/24/2022 12:00:00"
+          },
+          {
+            "user_id": 789,
+            "signup_date": "06/27/2022 12:00:00"
+          },
+          {
+            "user_id": 123,
+            "signup_date": "06/27/2022 12:00:00"
+          },
+          {
+            "user_id": 5445,
+            "signup_date": "06/21/2017 12:00:00"
+          },
+          {
+            "user_id": 5742,
+            "signup_date": "06/19/2017 12:00:00"
+          }
+        ],
+        "purchases": [
+          {
+            "user_id": 244,
+            "product_id": 7575,
+            "purchase_amount": "45.00",
+            "purchase_date": "06/22/2022 12:00:00"
+          },
+          {
+            "user_id": 742,
+            "product_id": 1241,
+            "purchase_amount": "50.00",
+            "purchase_date": "06/28/2022 12:00:00"
+          },
+          {
+            "user_id": 648,
+            "product_id": 3632,
+            "purchase_amount": "55.50",
+            "purchase_date": "06/25/2022 12:00:00"
+          },
+          {
+            "user_id": 123,
+            "product_id": 8475,
+            "purchase_amount": "67.30",
+            "purchase_date": "06/29/2022 12:00:00"
+          },
+          {
+            "user_id": 244,
+            "product_id": 2341,
+            "purchase_amount": "74.10",
+            "purchase_date": "06/30/2022 12:00:00"
+          },
+          {
+            "user_id": 5244,
+            "product_id": 12575,
+            "purchase_amount": 0,
+            "purchase_date": "06/22/2017 12:00:00"
+          },
+          {
+            "user_id": 5742,
+            "product_id": 6241,
+            "purchase_amount": 0,
+            "purchase_date": "06/28/2017 12:00:00"
+          }
+        ]
+      },
+      "expected_output": [
+        {
+          "same_week_pct": 28.57
+        }
+      ],
+      "category": "edge"
+    },
+    {
+      "test_case_id": "tc_4_empty_result",
+      "description": "Input where no rows satisfy problem criteria, verifying empty result handling",
+      "input_data": {
+        "signups": [],
+        "purchases": []
+      },
+      "expected_output": [
+        {
+          "same_week_pct": null
+        }
+      ],
+      "category": "edge"
+    },
+    {
+      "test_case_id": "tc_5_ties_and_nulls",
+      "description": "Tied ranking metrics, unmatched join keys, and NULL values in nullable attributes",
+      "input_data": {
+        "signups": [
+          {
+            "user_id": 445,
+            "signup_date": "06/21/2022 12:00:00"
+          },
+          {
+            "user_id": 742,
+            "signup_date": "06/19/2022 12:00:00"
+          },
+          {
+            "user_id": 648,
+            "signup_date": "06/24/2022 12:00:00"
+          },
+          {
+            "user_id": 789,
+            "signup_date": "06/27/2022 12:00:00"
+          },
+          {
+            "user_id": 123,
+            "signup_date": "06/27/2022 12:00:00"
+          },
+          {
+            "user_id": 9445,
+            "signup_date": "06/21/2022 12:00:00"
+          },
+          {
+            "user_id": 10242,
+            "signup_date": "06/19/2022 12:00:00"
+          }
+        ],
+        "purchases": [
+          {
+            "user_id": 244,
+            "product_id": 7575,
+            "purchase_amount": "45.00",
+            "purchase_date": "06/22/2022 12:00:00"
+          },
+          {
+            "user_id": 742,
+            "product_id": 1241,
+            "purchase_amount": "50.00",
+            "purchase_date": "06/28/2022 12:00:00"
+          },
+          {
+            "user_id": 648,
+            "product_id": 3632,
+            "purchase_amount": "55.50",
+            "purchase_date": "06/25/2022 12:00:00"
+          },
+          {
+            "user_id": 123,
+            "product_id": 8475,
+            "purchase_amount": "67.30",
+            "purchase_date": "06/29/2022 12:00:00"
+          },
+          {
+            "user_id": 244,
+            "product_id": 2341,
+            "purchase_amount": "74.10",
+            "purchase_date": "06/30/2022 12:00:00"
+          },
+          {
+            "user_id": 9244,
+            "product_id": 16575,
+            "purchase_amount": "45.00",
+            "purchase_date": "06/22/2022 12:00:00"
+          },
+          {
+            "user_id": 10242,
+            "product_id": 10741,
+            "purchase_amount": "50.00",
+            "purchase_date": "06/28/2022 12:00:00"
+          }
+        ]
+      },
+      "expected_output": [
+        {
+          "same_week_pct": 28.57
+        }
+      ],
+      "category": "edge"
+    },
+    {
+      "test_case_id": "tc_6_extreme_boundary",
+      "description": "Consecutive day sequences, month-end date rollovers, and high-frequency transactions",
+      "input_data": {
+        "signups": [
+          {
+            "user_id": 445,
+            "signup_date": "06/21/2022 12:00:00"
+          },
+          {
+            "user_id": 742,
+            "signup_date": "06/19/2022 12:00:00"
+          },
+          {
+            "user_id": 648,
+            "signup_date": "06/24/2022 12:00:00"
+          },
+          {
+            "user_id": 789,
+            "signup_date": "06/27/2022 12:00:00"
+          },
+          {
+            "user_id": 123,
+            "signup_date": "06/27/2022 12:00:00"
+          },
+          {
+            "user_id": 8445,
+            "signup_date": "06/22/2022 12:00:00"
+          },
+          {
+            "user_id": 8742,
+            "signup_date": "06/20/2022 12:00:00"
+          },
+          {
+            "user_id": 8648,
+            "signup_date": "06/25/2022 12:00:00"
+          },
+          {
+            "user_id": 8789,
+            "signup_date": "06/28/2022 12:00:00"
+          },
+          {
+            "user_id": 8123,
+            "signup_date": "06/28/2022 12:00:00"
+          }
+        ],
+        "purchases": [
+          {
+            "user_id": 244,
+            "product_id": 7575,
+            "purchase_amount": "45.00",
+            "purchase_date": "06/22/2022 12:00:00"
+          },
+          {
+            "user_id": 742,
+            "product_id": 1241,
+            "purchase_amount": "50.00",
+            "purchase_date": "06/28/2022 12:00:00"
+          },
+          {
+            "user_id": 648,
+            "product_id": 3632,
+            "purchase_amount": "55.50",
+            "purchase_date": "06/25/2022 12:00:00"
+          },
+          {
+            "user_id": 123,
+            "product_id": 8475,
+            "purchase_amount": "67.30",
+            "purchase_date": "06/29/2022 12:00:00"
+          },
+          {
+            "user_id": 244,
+            "product_id": 2341,
+            "purchase_amount": "74.10",
+            "purchase_date": "06/30/2022 12:00:00"
+          },
+          {
+            "user_id": 8244,
+            "product_id": 15575,
+            "purchase_amount": 90.0,
+            "purchase_date": "06/23/2022 12:00:00"
+          },
+          {
+            "user_id": 8742,
+            "product_id": 9241,
+            "purchase_amount": 100.0,
+            "purchase_date": "06/28/2022 12:00:00"
+          },
+          {
+            "user_id": 8648,
+            "product_id": 11632,
+            "purchase_amount": 111.0,
+            "purchase_date": "06/26/2022 12:00:00"
+          },
+          {
+            "user_id": 8123,
+            "product_id": 16475,
+            "purchase_amount": 134.6,
+            "purchase_date": "06/28/2022 12:00:00"
+          },
+          {
+            "user_id": 8244,
+            "product_id": 10341,
+            "purchase_amount": 148.2,
+            "purchase_date": "06/28/2022 12:00:00"
+          }
+        ]
+      },
+      "expected_output": [
+        {
+          "same_week_pct": 40.0
+        }
+      ],
+      "category": "boundary"
+    }
+  ],
+  "order_sensitive": false,
+  "expected_output": [
+    {
+      "same_week_pct": 40.0
+    }
+  ]
+}

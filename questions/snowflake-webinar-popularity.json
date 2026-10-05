@@ -1,0 +1,328 @@
+{
+  "question_id": "q_033_snowflake_webinar_popularity",
+  "slug": "snowflake-webinar-popularity",
+  "title": "Webinar Popularity",
+  "difficulty": "Easy",
+  "company": "Snowflake",
+  "premium": true,
+  "question": "As a Data Analyst on Snowflake's Marketing Analytics team, you are analyzing the CRM to determine what percent of marketing touches were of type 'webinar' in April 2022. Round your percentage to the nearest integer.\n\nNote from the source: marketing touches, also known as touch points, are the brand's (Snowflake's) points of contact with customers, from start to finish.",
+  "notes": [],
+  "tables": [
+    {
+      "table_name": "webinar_attendance",
+      "columns": [
+        {
+          "column_name": "event_id",
+          "data_type": "INT"
+        },
+        {
+          "column_name": "contact_id",
+          "data_type": "INT"
+        },
+        {
+          "column_name": "event_type",
+          "data_type": "VARCHAR(255)"
+        },
+        {
+          "column_name": "event_date",
+          "data_type": "DATE"
+        }
+      ]
+    }
+  ],
+  "sample_data": {
+    "webinar_attendance": [
+      {
+        "event_id": 1,
+        "contact_id": 1,
+        "event_type": "webinar",
+        "event_date": "4/17/2022"
+      },
+      {
+        "event_id": 2,
+        "contact_id": 1,
+        "event_type": "trial_request",
+        "event_date": "4/23/2022"
+      },
+      {
+        "event_id": 3,
+        "contact_id": 1,
+        "event_type": "whitepaper_download",
+        "event_date": "4/30/2022"
+      },
+      {
+        "event_id": 4,
+        "contact_id": 2,
+        "event_type": "handson_lab",
+        "event_date": "4/19/2022"
+      },
+      {
+        "event_id": 5,
+        "contact_id": 2,
+        "event_type": "trial_request",
+        "event_date": "4/23/2022"
+      },
+      {
+        "event_id": 6,
+        "contact_id": 2,
+        "event_type": "conference_registration",
+        "event_date": "4/24/2022"
+      },
+      {
+        "event_id": 7,
+        "contact_id": 3,
+        "event_type": "whitepaper_download",
+        "event_date": "4/30/2022"
+      },
+      {
+        "event_id": 8,
+        "contact_id": 4,
+        "event_type": "trial_request",
+        "event_date": "4/30/2022"
+      },
+      {
+        "event_id": 9,
+        "contact_id": 4,
+        "event_type": "webinar",
+        "event_date": "5/14/2022"
+      }
+    ]
+  },
+  "sample_output": [
+    {
+      "webinar_pct": 13.0
+    }
+  ],
+  "reference_sql": "SELECT \n  ROUND(100.0 * SUM(CASE WHEN event_type = 'webinar' THEN 1 ELSE 0 END) / COUNT(*), 0) AS webinar_pct\nFROM webinar_attendance\nWHERE event_date >= '2022-04-01' AND event_date <= '2022-04-30';",
+  "tags": [
+    "easy",
+    "ecommerce",
+    "math",
+    "snowflake"
+  ],
+  "related_questions": [],
+  "sources": [
+    [
+      "DataLemur blog: 10 Snowflake SQL questions (#3)",
+      "https://datalemur.com/blog/snowflake-sql-interview-questions"
+    ],
+    [
+      "DataLemur page (locked)",
+      "https://datalemur.com/questions/snowflake-webinar-popularity"
+    ],
+    [
+      "DataLemur PDF",
+      "Page 37"
+    ]
+  ],
+  "test_cases": [
+    {
+      "test_case_id": "tc_1_baseline",
+      "description": "Baseline: 1 webinar out of 8 April touches (12.5% -> 13%)",
+      "input_data": {
+        "webinar_attendance": [
+          {
+            "event_id": 1,
+            "contact_id": 1,
+            "event_type": "webinar",
+            "event_date": "4/17/2022"
+          },
+          {
+            "event_id": 2,
+            "contact_id": 1,
+            "event_type": "trial_request",
+            "event_date": "4/23/2022"
+          },
+          {
+            "event_id": 3,
+            "contact_id": 1,
+            "event_type": "whitepaper_download",
+            "event_date": "4/30/2022"
+          },
+          {
+            "event_id": 4,
+            "contact_id": 2,
+            "event_type": "handson_lab",
+            "event_date": "4/19/2022"
+          },
+          {
+            "event_id": 5,
+            "contact_id": 2,
+            "event_type": "trial_request",
+            "event_date": "4/23/2022"
+          },
+          {
+            "event_id": 6,
+            "contact_id": 2,
+            "event_type": "conference_registration",
+            "event_date": "4/24/2022"
+          },
+          {
+            "event_id": 7,
+            "contact_id": 3,
+            "event_type": "whitepaper_download",
+            "event_date": "4/30/2022"
+          },
+          {
+            "event_id": 8,
+            "contact_id": 4,
+            "event_type": "trial_request",
+            "event_date": "4/30/2022"
+          },
+          {
+            "event_id": 9,
+            "contact_id": 4,
+            "event_type": "webinar",
+            "event_date": "5/14/2022"
+          }
+        ]
+      },
+      "expected_output": [
+        {
+          "webinar_pct": 13.0
+        }
+      ],
+      "category": "normal"
+    },
+    {
+      "test_case_id": "tc_2_fifty_percent",
+      "description": "Tests 2 webinars out of 4 April touches (50%)",
+      "input_data": {
+        "webinar_attendance": [
+          {
+            "event_id": 1,
+            "contact_id": 1,
+            "event_type": "webinar",
+            "event_date": "2022-04-05"
+          },
+          {
+            "event_id": 2,
+            "contact_id": 2,
+            "event_type": "webinar",
+            "event_date": "2022-04-10"
+          },
+          {
+            "event_id": 3,
+            "contact_id": 3,
+            "event_type": "whitepaper",
+            "event_date": "2022-04-15"
+          },
+          {
+            "event_id": 4,
+            "contact_id": 4,
+            "event_type": "trial",
+            "event_date": "2022-04-20"
+          },
+          {
+            "event_id": 5,
+            "contact_id": 5,
+            "event_type": "webinar",
+            "event_date": "2022-05-01"
+          }
+        ]
+      },
+      "expected_output": [
+        {
+          "webinar_pct": 50.0
+        }
+      ],
+      "category": "edge"
+    },
+    {
+      "test_case_id": "tc_3_zero_webinars",
+      "description": "Edge case: Multiple touches in April 2022, but none are webinars (0%)",
+      "category": "edge",
+      "input_data": {
+        "webinar_attendance": [
+          {
+            "event_id": 1,
+            "contact_id": 1,
+            "event_type": "trial_request",
+            "event_date": "2022-04-10"
+          },
+          {
+            "event_id": 2,
+            "contact_id": 2,
+            "event_type": "whitepaper_download",
+            "event_date": "2022-04-15"
+          }
+        ]
+      },
+      "expected_output": [
+        {
+          "webinar_pct": 0.0
+        }
+      ]
+    },
+    {
+      "test_case_id": "tc_4_all_webinars",
+      "description": "Edge case: All April marketing touches are webinars (100%)",
+      "category": "edge",
+      "input_data": {
+        "webinar_attendance": [
+          {
+            "event_id": 1,
+            "contact_id": 1,
+            "event_type": "webinar",
+            "event_date": "2022-04-05"
+          },
+          {
+            "event_id": 2,
+            "contact_id": 2,
+            "event_type": "webinar",
+            "event_date": "2022-04-20"
+          }
+        ]
+      },
+      "expected_output": [
+        {
+          "webinar_pct": 100.0
+        }
+      ]
+    },
+    {
+      "test_case_id": "tc_5_date_boundaries",
+      "description": "Boundary case: Strict April date boundaries excluding March 31 and May 1",
+      "category": "boundary",
+      "input_data": {
+        "webinar_attendance": [
+          {
+            "event_id": 1,
+            "contact_id": 1,
+            "event_type": "webinar",
+            "event_date": "2022-03-31"
+          },
+          {
+            "event_id": 2,
+            "contact_id": 2,
+            "event_type": "webinar",
+            "event_date": "2022-04-01"
+          },
+          {
+            "event_id": 3,
+            "contact_id": 3,
+            "event_type": "trial_request",
+            "event_date": "2022-04-30"
+          },
+          {
+            "event_id": 4,
+            "contact_id": 4,
+            "event_type": "webinar",
+            "event_date": "2022-05-01"
+          }
+        ]
+      },
+      "expected_output": [
+        {
+          "webinar_pct": 50.0
+        }
+      ]
+    }
+  ],
+  "order_sensitive": false,
+  "expected_output": [
+    {
+      "webinar_pct": 13.0
+    }
+  ]
+}

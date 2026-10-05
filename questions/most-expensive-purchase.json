@@ -1,0 +1,253 @@
+{
+  "question_id": "q_023_most_expensive_purchase",
+  "slug": "most-expensive-purchase",
+  "title": "Most Expensive Purchase",
+  "difficulty": "Easy",
+  "company": "Amazon",
+  "premium": true,
+  "question": "Amazon wants to analyze high-value transactions. Write a query to find the most expensive single purchase amount made by each customer.\n\nOutput the customer ID and their maximum purchase amount, sorted by maximum purchase amount in descending order.",
+  "notes": [],
+  "tables": [
+    {
+      "table_name": "transactions",
+      "columns": [
+        {
+          "column_name": "transaction_id",
+          "data_type": "INT"
+        },
+        {
+          "column_name": "customer_id",
+          "data_type": "INT"
+        },
+        {
+          "column_name": "purchase_amount",
+          "data_type": "DECIMAL(10,2)"
+        },
+        {
+          "column_name": "purchase_date",
+          "data_type": "DATETIME"
+        }
+      ]
+    }
+  ],
+  "sample_data": {
+    "transactions": [
+      {
+        "transaction_id": 1,
+        "customer_id": 101,
+        "purchase_amount": "150.00",
+        "purchase_date": "01/01/2023"
+      },
+      {
+        "transaction_id": 2,
+        "customer_id": 101,
+        "purchase_amount": "450.50",
+        "purchase_date": "01/05/2023"
+      },
+      {
+        "transaction_id": 3,
+        "customer_id": 102,
+        "purchase_amount": "89.99",
+        "purchase_date": "01/02/2023"
+      }
+    ]
+  },
+  "sample_output": [
+    {
+      "customer_id": 101,
+      "max_purchase": "450.50"
+    },
+    {
+      "customer_id": 102,
+      "max_purchase": "89.99"
+    }
+  ],
+  "reference_sql": "SELECT \n  customer_id,\n  ROUND(MAX(purchase_amount), 2) AS max_purchase\nFROM transactions\nGROUP BY customer_id\nORDER BY max_purchase DESC, customer_id ASC;",
+  "tags": [
+    "aggregation",
+    "amazon",
+    "easy",
+    "ecommerce",
+    "finance"
+  ],
+  "related_questions": [],
+  "sources": [
+    [
+      "Text supplied by you (not checkable against the locked page)",
+      "https://datalemur.com/questions/most-expensive-purchase"
+    ],
+    [
+      "DataLemur PDF",
+      "Page 27"
+    ]
+  ],
+  "test_cases": [
+    {
+      "test_case_id": "tc_1_baseline",
+      "description": "Baseline sample input data from problem description",
+      "input_data": {
+        "transactions": [
+          {
+            "transaction_id": 1,
+            "customer_id": 101,
+            "purchase_amount": "150.00",
+            "purchase_date": "01/01/2023"
+          },
+          {
+            "transaction_id": 2,
+            "customer_id": 101,
+            "purchase_amount": "450.50",
+            "purchase_date": "01/05/2023"
+          },
+          {
+            "transaction_id": 3,
+            "customer_id": 102,
+            "purchase_amount": "89.99",
+            "purchase_date": "01/02/2023"
+          }
+        ]
+      },
+      "expected_output": [
+        {
+          "customer_id": 101,
+          "max_purchase": 450.5
+        },
+        {
+          "customer_id": 102,
+          "max_purchase": 89.99
+        }
+      ],
+      "category": "normal"
+    },
+    {
+      "test_case_id": "tc_2_high_volume",
+      "description": "Multiple entities with scaled volume and multi-group distributions",
+      "input_data": {
+        "transactions": [
+          {
+            "transaction_id": 1,
+            "customer_id": 101,
+            "purchase_amount": "150.00",
+            "purchase_date": "01/01/2023"
+          },
+          {
+            "transaction_id": 2,
+            "customer_id": 101,
+            "purchase_amount": "450.50",
+            "purchase_date": "01/05/2023"
+          },
+          {
+            "transaction_id": 3,
+            "customer_id": 102,
+            "purchase_amount": "89.99",
+            "purchase_date": "01/02/2023"
+          },
+          {
+            "transaction_id": 1001,
+            "customer_id": 1101,
+            "purchase_amount": 225.0,
+            "purchase_date": "01/06/2023"
+          },
+          {
+            "transaction_id": 1002,
+            "customer_id": 1101,
+            "purchase_amount": 675.75,
+            "purchase_date": "01/10/2023"
+          },
+          {
+            "transaction_id": 1003,
+            "customer_id": 1102,
+            "purchase_amount": 134.98,
+            "purchase_date": "01/07/2023"
+          }
+        ]
+      },
+      "expected_output": [
+        {
+          "customer_id": 1101,
+          "max_purchase": 675.75
+        },
+        {
+          "customer_id": 101,
+          "max_purchase": 450.5
+        },
+        {
+          "customer_id": 1102,
+          "max_purchase": 134.98
+        },
+        {
+          "customer_id": 102,
+          "max_purchase": 89.99
+        }
+      ],
+      "category": "volume"
+    },
+    {
+      "test_case_id": "tc_3_disqualifying_rows",
+      "description": "Dataset containing disqualifying rows, edge values, and cancelled/zero records",
+      "input_data": {
+        "transactions": [
+          {
+            "transaction_id": 1,
+            "customer_id": 101,
+            "purchase_amount": "150.00",
+            "purchase_date": "01/01/2023"
+          },
+          {
+            "transaction_id": 2,
+            "customer_id": 101,
+            "purchase_amount": "450.50",
+            "purchase_date": "01/05/2023"
+          },
+          {
+            "transaction_id": 3,
+            "customer_id": 102,
+            "purchase_amount": "89.99",
+            "purchase_date": "01/02/2023"
+          },
+          {
+            "transaction_id": 5001,
+            "customer_id": 5101,
+            "purchase_amount": 0,
+            "purchase_date": "01/01/2018"
+          }
+        ]
+      },
+      "expected_output": [
+        {
+          "customer_id": 101,
+          "max_purchase": 450.5
+        },
+        {
+          "customer_id": 102,
+          "max_purchase": 89.99
+        },
+        {
+          "customer_id": 5101,
+          "max_purchase": 0.0
+        }
+      ],
+      "category": "edge"
+    },
+    {
+      "test_case_id": "tc_4_empty_result",
+      "description": "Input where no rows satisfy problem criteria, verifying empty result handling",
+      "input_data": {
+        "transactions": []
+      },
+      "expected_output": [],
+      "category": "edge"
+    }
+  ],
+  "order_sensitive": true,
+  "expected_output": [
+    {
+      "customer_id": 101,
+      "max_purchase": 450.5
+    },
+    {
+      "customer_id": 102,
+      "max_purchase": 89.99
+    }
+  ]
+}

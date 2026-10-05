@@ -1,0 +1,388 @@
+{
+  "question_id": "q_085_reactivated_users",
+  "slug": "reactivated-users",
+  "title": "Reactivated Users",
+  "difficulty": "Hard",
+  "company": "Facebook",
+  "premium": false,
+  "question": "Imagine you're provided with a table containing information about user logins on Facebook in 2022. Write a query that determines the number of reactivated users for a given month. Reactivated users are those who were inactive the previous month but logged in during the current month.\n\nOutput the month in numerical format along with the count of reactivated users.\n\nHere's some important assumptions to consider:\n\n*As of Aug 4th, 2023, we have carefully reviewed the feedback received and made necessary updates to the solution.*",
+  "notes": [
+    "The user_logins table only contains data for the year 2022 and there are no missing dates within that period.",
+    "For instance, if a user whose first login date is on 3 March 2022, we assume that they had previously logged in during the year 2021. Although the data for their previous logins is not present in the user_logins table, we consider these users as reactivated users.",
+    "In February 2022, we have 1 reactivated user, user 123. They had previously logged in during 2021 and recently reactivated their account in February 2022.",
+    "In March 2022, we have 2 reactivated users. Users 112 and 245 were inactive in the previous months but logged in during March 2022, indicating that they reactivated their accounts.",
+    "Moving on to May 2022, we still have 2 reactivated users. User 123, who had previously reactivated in February 2022, reactivated their account again in May 2022. Additionally, user 725, who was inactive in the previous months, logged in during May 2022, indicating that they reactivated their account once again.",
+    "The dataset you are querying against may have different input & output - this is just an example!"
+  ],
+  "tables": [
+    {
+      "table_name": "user_logins",
+      "columns": [
+        {
+          "column_name": "user_id",
+          "data_type": "INT"
+        },
+        {
+          "column_name": "login_date",
+          "data_type": "DATETIME"
+        }
+      ]
+    }
+  ],
+  "sample_data": {
+    "user_logins": [
+      {
+        "user_id": "123",
+        "login_date": "02/22/2022 12:00:00"
+      },
+      {
+        "user_id": "112",
+        "login_date": "03/15/2022 12:00:00"
+      },
+      {
+        "user_id": "245",
+        "login_date": "03/28/2022 12:00:00"
+      },
+      {
+        "user_id": "123",
+        "login_date": "05/01/2022 12:00:00"
+      },
+      {
+        "user_id": "725",
+        "login_date": "05/25/2022 12:00:00"
+      }
+    ]
+  },
+  "sample_output": [
+    {
+      "mth": "2",
+      "reactivated_users": "1"
+    },
+    {
+      "mth": "3",
+      "reactivated_users": "2"
+    },
+    {
+      "mth": "5",
+      "reactivated_users": "2"
+    }
+  ],
+  "reference_sql": "WITH user_months AS (\n  SELECT DISTINCT user_id, MONTH(login_date) AS mth\n  FROM user_logins\n)\nSELECT \n  curr.mth,\n  COUNT(DISTINCT curr.user_id) AS reactivated_users\nFROM user_months curr\nLEFT JOIN user_months prev ON curr.user_id = prev.user_id AND curr.mth = prev.mth + 1\nWHERE prev.user_id IS NULL AND curr.mth > 1\nGROUP BY curr.mth\nORDER BY curr.mth;",
+  "tags": [
+    "aggregation",
+    "date-manipulation",
+    "facebook",
+    "hard",
+    "lead-lag",
+    "social-media",
+    "window-function"
+  ],
+  "related_questions": [],
+  "sources": [
+    [
+      "DataLemur page (free)",
+      "https://datalemur.com/questions/reactivated-users"
+    ],
+    [
+      "DataLemur PDF",
+      "Page 89"
+    ]
+  ],
+  "test_cases": [
+    {
+      "test_case_id": "tc_1_baseline",
+      "description": "Baseline sample input data from problem description",
+      "input_data": {
+        "user_logins": [
+          {
+            "user_id": "123",
+            "login_date": "02/22/2022 12:00:00"
+          },
+          {
+            "user_id": "112",
+            "login_date": "03/15/2022 12:00:00"
+          },
+          {
+            "user_id": "245",
+            "login_date": "03/28/2022 12:00:00"
+          },
+          {
+            "user_id": "123",
+            "login_date": "05/01/2022 12:00:00"
+          },
+          {
+            "user_id": "725",
+            "login_date": "05/25/2022 12:00:00"
+          }
+        ]
+      },
+      "expected_output": [
+        {
+          "mth": 2,
+          "reactivated_users": 1
+        },
+        {
+          "mth": 3,
+          "reactivated_users": 2
+        },
+        {
+          "mth": 5,
+          "reactivated_users": 2
+        }
+      ],
+      "category": "normal"
+    },
+    {
+      "test_case_id": "tc_2_high_volume",
+      "description": "Multiple entities with scaled volume and multi-group distributions",
+      "input_data": {
+        "user_logins": [
+          {
+            "user_id": "123",
+            "login_date": "02/22/2022 12:00:00"
+          },
+          {
+            "user_id": "112",
+            "login_date": "03/15/2022 12:00:00"
+          },
+          {
+            "user_id": "245",
+            "login_date": "03/28/2022 12:00:00"
+          },
+          {
+            "user_id": "123",
+            "login_date": "05/01/2022 12:00:00"
+          },
+          {
+            "user_id": "725",
+            "login_date": "05/25/2022 12:00:00"
+          },
+          {
+            "user_id": 1123,
+            "login_date": "02/27/2022 12:00:00"
+          },
+          {
+            "user_id": 1112,
+            "login_date": "03/20/2022 12:00:00"
+          },
+          {
+            "user_id": 1245,
+            "login_date": "03/28/2022 12:00:00"
+          },
+          {
+            "user_id": 1123,
+            "login_date": "05/06/2022 12:00:00"
+          },
+          {
+            "user_id": 1725,
+            "login_date": "05/28/2022 12:00:00"
+          }
+        ]
+      },
+      "expected_output": [
+        {
+          "mth": 2,
+          "reactivated_users": 2
+        },
+        {
+          "mth": 3,
+          "reactivated_users": 4
+        },
+        {
+          "mth": 5,
+          "reactivated_users": 4
+        }
+      ],
+      "category": "volume"
+    },
+    {
+      "test_case_id": "tc_3_disqualifying_rows",
+      "description": "Dataset containing disqualifying rows, edge values, and cancelled/zero records",
+      "input_data": {
+        "user_logins": [
+          {
+            "user_id": "123",
+            "login_date": "02/22/2022 12:00:00"
+          },
+          {
+            "user_id": "112",
+            "login_date": "03/15/2022 12:00:00"
+          },
+          {
+            "user_id": "245",
+            "login_date": "03/28/2022 12:00:00"
+          },
+          {
+            "user_id": "123",
+            "login_date": "05/01/2022 12:00:00"
+          },
+          {
+            "user_id": "725",
+            "login_date": "05/25/2022 12:00:00"
+          },
+          {
+            "user_id": 5123,
+            "login_date": "02/22/2017 12:00:00"
+          },
+          {
+            "user_id": 5112,
+            "login_date": "03/15/2017 12:00:00"
+          }
+        ]
+      },
+      "expected_output": [
+        {
+          "mth": 2,
+          "reactivated_users": 2
+        },
+        {
+          "mth": 3,
+          "reactivated_users": 3
+        },
+        {
+          "mth": 5,
+          "reactivated_users": 2
+        }
+      ],
+      "category": "edge"
+    },
+    {
+      "test_case_id": "tc_4_empty_result",
+      "description": "Input where no rows satisfy problem criteria, verifying empty result handling",
+      "input_data": {
+        "user_logins": []
+      },
+      "expected_output": [],
+      "category": "edge"
+    },
+    {
+      "test_case_id": "tc_5_ties_and_nulls",
+      "description": "Tied ranking metrics, unmatched join keys, and NULL values in nullable attributes",
+      "input_data": {
+        "user_logins": [
+          {
+            "user_id": "123",
+            "login_date": "02/22/2022 12:00:00"
+          },
+          {
+            "user_id": "112",
+            "login_date": "03/15/2022 12:00:00"
+          },
+          {
+            "user_id": "245",
+            "login_date": "03/28/2022 12:00:00"
+          },
+          {
+            "user_id": "123",
+            "login_date": "05/01/2022 12:00:00"
+          },
+          {
+            "user_id": "725",
+            "login_date": "05/25/2022 12:00:00"
+          },
+          {
+            "user_id": 9123,
+            "login_date": "02/22/2022 12:00:00"
+          },
+          {
+            "user_id": 9612,
+            "login_date": "03/15/2022 12:00:00"
+          }
+        ]
+      },
+      "expected_output": [
+        {
+          "mth": 2,
+          "reactivated_users": 2
+        },
+        {
+          "mth": 3,
+          "reactivated_users": 3
+        },
+        {
+          "mth": 5,
+          "reactivated_users": 2
+        }
+      ],
+      "category": "edge"
+    },
+    {
+      "test_case_id": "tc_6_extreme_boundary",
+      "description": "Consecutive day sequences, month-end date rollovers, and high-frequency transactions",
+      "input_data": {
+        "user_logins": [
+          {
+            "user_id": "123",
+            "login_date": "02/22/2022 12:00:00"
+          },
+          {
+            "user_id": "112",
+            "login_date": "03/15/2022 12:00:00"
+          },
+          {
+            "user_id": "245",
+            "login_date": "03/28/2022 12:00:00"
+          },
+          {
+            "user_id": "123",
+            "login_date": "05/01/2022 12:00:00"
+          },
+          {
+            "user_id": "725",
+            "login_date": "05/25/2022 12:00:00"
+          },
+          {
+            "user_id": 8123,
+            "login_date": "02/23/2022 12:00:00"
+          },
+          {
+            "user_id": 8112,
+            "login_date": "03/16/2022 12:00:00"
+          },
+          {
+            "user_id": 8245,
+            "login_date": "03/28/2022 12:00:00"
+          },
+          {
+            "user_id": 8123,
+            "login_date": "05/02/2022 12:00:00"
+          },
+          {
+            "user_id": 8725,
+            "login_date": "05/26/2022 12:00:00"
+          }
+        ]
+      },
+      "expected_output": [
+        {
+          "mth": 2,
+          "reactivated_users": 2
+        },
+        {
+          "mth": 3,
+          "reactivated_users": 4
+        },
+        {
+          "mth": 5,
+          "reactivated_users": 4
+        }
+      ],
+      "category": "boundary"
+    }
+  ],
+  "order_sensitive": false,
+  "expected_output": [
+    {
+      "mth": 2,
+      "reactivated_users": 1
+    },
+    {
+      "mth": 3,
+      "reactivated_users": 2
+    },
+    {
+      "mth": 5,
+      "reactivated_users": 2
+    }
+  ]
+}

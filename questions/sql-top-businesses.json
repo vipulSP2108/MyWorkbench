@@ -1,0 +1,481 @@
+{
+  "question_id": "q_029_sql_top_businesses",
+  "slug": "sql-top-businesses",
+  "title": "Top Rated Businesses",
+  "difficulty": "Easy",
+  "company": "Yelp",
+  "premium": true,
+  "question": "Assume you are given a table of reviews from users. Define a top-rated place as a business whose reviews only consist of 4 or 5\nstars.\nWrite a query to get the number and percentage of businesses that are top-rated places.",
+  "notes": [],
+  "tables": [
+    {
+      "table_name": "reviews",
+      "columns": [
+        {
+          "column_name": "review_id",
+          "data_type": "INT"
+        },
+        {
+          "column_name": "business_id",
+          "data_type": "INT"
+        },
+        {
+          "column_name": "user_id",
+          "data_type": "INT"
+        },
+        {
+          "column_name": "review_stars",
+          "data_type": "INT"
+        },
+        {
+          "column_name": "review_date",
+          "data_type": "DATE"
+        }
+      ]
+    }
+  ],
+  "sample_data": {
+    "reviews": [
+      {
+        "review_id": "1",
+        "business_id": "100",
+        "user_id": "11",
+        "review_stars": "5",
+        "review_date": "01/03/2022"
+      },
+      {
+        "review_id": "2",
+        "business_id": "100",
+        "user_id": "12",
+        "review_stars": "4",
+        "review_date": "01/09/2022"
+      },
+      {
+        "review_id": "3",
+        "business_id": "200",
+        "user_id": "11",
+        "review_stars": "5",
+        "review_date": "02/01/2022"
+      },
+      {
+        "review_id": "4",
+        "business_id": "200",
+        "user_id": "13",
+        "review_stars": "2",
+        "review_date": "02/05/2022"
+      },
+      {
+        "review_id": "5",
+        "business_id": "300",
+        "user_id": "14",
+        "review_stars": "4",
+        "review_date": "03/02/2022"
+      },
+      {
+        "review_id": "6",
+        "business_id": "300",
+        "user_id": "15",
+        "review_stars": "4",
+        "review_date": "03/08/2022"
+      },
+      {
+        "review_id": "7",
+        "business_id": "300",
+        "user_id": "16",
+        "review_stars": "5",
+        "review_date": "03/09/2022"
+      },
+      {
+        "review_id": "8",
+        "business_id": "400",
+        "user_id": "12",
+        "review_stars": "1",
+        "review_date": "04/01/2022"
+      },
+      {
+        "review_id": "9",
+        "business_id": "500",
+        "user_id": "17",
+        "review_stars": "5",
+        "review_date": "04/02/2022"
+      }
+    ]
+  },
+  "sample_output": [
+    {
+      "top_rated_businesses": "3",
+      "top_rated_pct": "60.00"
+    }
+  ],
+  "reference_sql": "WITH biz AS (\n  SELECT business_id, MIN(review_stars) AS worst_review\n  FROM reviews\n  GROUP BY business_id\n)\nSELECT \n  SUM(CASE WHEN worst_review >= 4 THEN 1 ELSE 0 END) AS top_rated_businesses,\n  ROUND(100.0 * SUM(CASE WHEN worst_review >= 4 THEN 1 ELSE 0 END) / COUNT(*), 0) AS top_rated_pct\nFROM biz;",
+  "tags": [
+    "aggregation",
+    "cte",
+    "easy",
+    "math",
+    "yelp"
+  ],
+  "related_questions": [],
+  "sources": [
+    [
+      "Nick Singh (DataLemur founder): 30 SQL & DB design questions",
+      "https://www.nicksingh.com/posts/30-sql-and-database-design-questions-from-real-data-science-interviews"
+    ],
+    [
+      "DataLemur page (locked)",
+      "https://datalemur.com/questions/sql-top-businesses"
+    ],
+    [
+      "DataLemur PDF",
+      "Page 33"
+    ]
+  ],
+  "test_cases": [
+    {
+      "test_case_id": "tc_1_baseline",
+      "description": "Baseline sample input data from problem description",
+      "input_data": {
+        "reviews": [
+          {
+            "review_id": "1",
+            "business_id": "100",
+            "user_id": "11",
+            "review_stars": "5",
+            "review_date": "01/03/2022"
+          },
+          {
+            "review_id": "2",
+            "business_id": "100",
+            "user_id": "12",
+            "review_stars": "4",
+            "review_date": "01/09/2022"
+          },
+          {
+            "review_id": "3",
+            "business_id": "200",
+            "user_id": "11",
+            "review_stars": "5",
+            "review_date": "02/01/2022"
+          },
+          {
+            "review_id": "4",
+            "business_id": "200",
+            "user_id": "13",
+            "review_stars": "2",
+            "review_date": "02/05/2022"
+          },
+          {
+            "review_id": "5",
+            "business_id": "300",
+            "user_id": "14",
+            "review_stars": "4",
+            "review_date": "03/02/2022"
+          },
+          {
+            "review_id": "6",
+            "business_id": "300",
+            "user_id": "15",
+            "review_stars": "4",
+            "review_date": "03/08/2022"
+          },
+          {
+            "review_id": "7",
+            "business_id": "300",
+            "user_id": "16",
+            "review_stars": "5",
+            "review_date": "03/09/2022"
+          },
+          {
+            "review_id": "8",
+            "business_id": "400",
+            "user_id": "12",
+            "review_stars": "1",
+            "review_date": "04/01/2022"
+          },
+          {
+            "review_id": "9",
+            "business_id": "500",
+            "user_id": "17",
+            "review_stars": "5",
+            "review_date": "04/02/2022"
+          }
+        ]
+      },
+      "expected_output": [
+        {
+          "top_rated_businesses": 3,
+          "top_rated_pct": 60.0
+        }
+      ],
+      "category": "normal"
+    },
+    {
+      "test_case_id": "tc_2_high_volume",
+      "description": "Multiple entities with scaled volume and multi-group distributions",
+      "input_data": {
+        "reviews": [
+          {
+            "review_id": "1",
+            "business_id": "100",
+            "user_id": "11",
+            "review_stars": "5",
+            "review_date": "01/03/2022"
+          },
+          {
+            "review_id": "2",
+            "business_id": "100",
+            "user_id": "12",
+            "review_stars": "4",
+            "review_date": "01/09/2022"
+          },
+          {
+            "review_id": "3",
+            "business_id": "200",
+            "user_id": "11",
+            "review_stars": "5",
+            "review_date": "02/01/2022"
+          },
+          {
+            "review_id": "4",
+            "business_id": "200",
+            "user_id": "13",
+            "review_stars": "2",
+            "review_date": "02/05/2022"
+          },
+          {
+            "review_id": "5",
+            "business_id": "300",
+            "user_id": "14",
+            "review_stars": "4",
+            "review_date": "03/02/2022"
+          },
+          {
+            "review_id": "6",
+            "business_id": "300",
+            "user_id": "15",
+            "review_stars": "4",
+            "review_date": "03/08/2022"
+          },
+          {
+            "review_id": "7",
+            "business_id": "300",
+            "user_id": "16",
+            "review_stars": "5",
+            "review_date": "03/09/2022"
+          },
+          {
+            "review_id": "8",
+            "business_id": "400",
+            "user_id": "12",
+            "review_stars": "1",
+            "review_date": "04/01/2022"
+          },
+          {
+            "review_id": "9",
+            "business_id": "500",
+            "user_id": "17",
+            "review_stars": "5",
+            "review_date": "04/02/2022"
+          },
+          {
+            "review_id": 1001,
+            "business_id": 1100,
+            "user_id": 1011,
+            "review_stars": "5",
+            "review_date": "01/08/2022"
+          },
+          {
+            "review_id": 1002,
+            "business_id": 1100,
+            "user_id": 1012,
+            "review_stars": "4",
+            "review_date": "01/14/2022"
+          },
+          {
+            "review_id": 1003,
+            "business_id": 1200,
+            "user_id": 1011,
+            "review_stars": "5",
+            "review_date": "02/06/2022"
+          },
+          {
+            "review_id": 1004,
+            "business_id": 1200,
+            "user_id": 1013,
+            "review_stars": "2",
+            "review_date": "02/10/2022"
+          },
+          {
+            "review_id": 1005,
+            "business_id": 1300,
+            "user_id": 1014,
+            "review_stars": "4",
+            "review_date": "03/07/2022"
+          },
+          {
+            "review_id": 1006,
+            "business_id": 1300,
+            "user_id": 1015,
+            "review_stars": "4",
+            "review_date": "03/13/2022"
+          },
+          {
+            "review_id": 1007,
+            "business_id": 1300,
+            "user_id": 1016,
+            "review_stars": "5",
+            "review_date": "03/14/2022"
+          },
+          {
+            "review_id": 1008,
+            "business_id": 1400,
+            "user_id": 1012,
+            "review_stars": "1",
+            "review_date": "04/06/2022"
+          },
+          {
+            "review_id": 1009,
+            "business_id": 1500,
+            "user_id": 1017,
+            "review_stars": "5",
+            "review_date": "04/07/2022"
+          }
+        ]
+      },
+      "expected_output": [
+        {
+          "top_rated_businesses": 6,
+          "top_rated_pct": 60.0
+        }
+      ],
+      "category": "volume"
+    },
+    {
+      "test_case_id": "tc_3_disqualifying_rows",
+      "description": "Dataset containing disqualifying rows, edge values, and cancelled/zero records",
+      "input_data": {
+        "reviews": [
+          {
+            "review_id": "1",
+            "business_id": "100",
+            "user_id": "11",
+            "review_stars": "5",
+            "review_date": "01/03/2022"
+          },
+          {
+            "review_id": "2",
+            "business_id": "100",
+            "user_id": "12",
+            "review_stars": "4",
+            "review_date": "01/09/2022"
+          },
+          {
+            "review_id": "3",
+            "business_id": "200",
+            "user_id": "11",
+            "review_stars": "5",
+            "review_date": "02/01/2022"
+          },
+          {
+            "review_id": "4",
+            "business_id": "200",
+            "user_id": "13",
+            "review_stars": "2",
+            "review_date": "02/05/2022"
+          },
+          {
+            "review_id": "5",
+            "business_id": "300",
+            "user_id": "14",
+            "review_stars": "4",
+            "review_date": "03/02/2022"
+          },
+          {
+            "review_id": "6",
+            "business_id": "300",
+            "user_id": "15",
+            "review_stars": "4",
+            "review_date": "03/08/2022"
+          },
+          {
+            "review_id": "7",
+            "business_id": "300",
+            "user_id": "16",
+            "review_stars": "5",
+            "review_date": "03/09/2022"
+          },
+          {
+            "review_id": "8",
+            "business_id": "400",
+            "user_id": "12",
+            "review_stars": "1",
+            "review_date": "04/01/2022"
+          },
+          {
+            "review_id": "9",
+            "business_id": "500",
+            "user_id": "17",
+            "review_stars": "5",
+            "review_date": "04/02/2022"
+          },
+          {
+            "review_id": 5001,
+            "business_id": 5100,
+            "user_id": 5011,
+            "review_stars": 1,
+            "review_date": "01/03/2017"
+          },
+          {
+            "review_id": 5002,
+            "business_id": 5100,
+            "user_id": 5012,
+            "review_stars": 1,
+            "review_date": "01/09/2017"
+          },
+          {
+            "review_id": 5003,
+            "business_id": 5200,
+            "user_id": 5011,
+            "review_stars": 1,
+            "review_date": "02/01/2017"
+          },
+          {
+            "review_id": 5004,
+            "business_id": 5200,
+            "user_id": 5013,
+            "review_stars": 1,
+            "review_date": "02/05/2017"
+          }
+        ]
+      },
+      "expected_output": [
+        {
+          "top_rated_businesses": 3,
+          "top_rated_pct": 43.0
+        }
+      ],
+      "category": "edge"
+    },
+    {
+      "test_case_id": "tc_4_empty_result",
+      "description": "Input where no rows satisfy problem criteria, verifying empty result handling",
+      "input_data": {
+        "reviews": []
+      },
+      "expected_output": [
+        {
+          "top_rated_businesses": null,
+          "top_rated_pct": null
+        }
+      ],
+      "category": "edge"
+    }
+  ],
+  "order_sensitive": false,
+  "expected_output": [
+    {
+      "top_rated_businesses": 3,
+      "top_rated_pct": 60.0
+    }
+  ]
+}

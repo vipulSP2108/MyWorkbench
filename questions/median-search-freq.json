@@ -1,0 +1,291 @@
+{
+  "question_id": "q_077_median_search_freq",
+  "slug": "median-search-freq",
+  "title": "Median Google Search Frequency",
+  "difficulty": "Hard",
+  "company": "Google",
+  "premium": false,
+  "question": "Google's marketing team is making a Superbowl commercial and needs a simple statistic to put on their TV ad: the median number of searches a person made last year.\n\nHowever, at Google scale, querying the 2 trillion searches is too costly. Luckily, you have access to the summary table which tells you the number of searches made last year and how many Google users fall into that bucket.\n\nWrite a query to report the median of searches made by a user. Round the median to one decimal point.",
+  "notes": [
+    "By expanding the search_frequency table, we get [1, 1, 2, 2, 3, 3, 3, 4] which has a median of 2.5 searches per user.",
+    "The dataset you are querying against may have different input & output - this is just an example!",
+    "p.s. here's more Google SQL Interview Questions to practice!"
+  ],
+  "tables": [
+    {
+      "table_name": "search_frequency",
+      "columns": [
+        {
+          "column_name": "searches",
+          "data_type": "INT"
+        },
+        {
+          "column_name": "num_users",
+          "data_type": "INT"
+        }
+      ]
+    }
+  ],
+  "sample_data": {
+    "search_frequency": [
+      {
+        "searches": "1",
+        "num_users": "2"
+      },
+      {
+        "searches": "2",
+        "num_users": "2"
+      },
+      {
+        "searches": "3",
+        "num_users": "3"
+      },
+      {
+        "searches": "4",
+        "num_users": "1"
+      }
+    ]
+  },
+  "sample_output": [
+    {
+      "median": "2.5"
+    }
+  ],
+  "reference_sql": "WITH expanded AS (\n  SELECT searches, num_users,\n         SUM(num_users) OVER (ORDER BY searches) AS cum_users,\n         SUM(num_users) OVER () AS total_users\n  FROM search_frequency\n)\nSELECT ROUND(AVG(searches), 1) AS median\nFROM expanded\nWHERE cum_users >= total_users / 2.0\nLIMIT 1;",
+  "tags": [
+    "date-manipulation",
+    "google",
+    "hard",
+    "math"
+  ],
+  "related_questions": [],
+  "sources": [
+    [
+      "DataLemur page (free)",
+      "https://datalemur.com/questions/median-search-freq"
+    ],
+    [
+      "DataLemur PDF",
+      "Page 81"
+    ]
+  ],
+  "test_cases": [
+    {
+      "test_case_id": "tc_1_baseline",
+      "description": "Baseline sample input data from problem description",
+      "input_data": {
+        "search_frequency": [
+          {
+            "searches": "1",
+            "num_users": "2"
+          },
+          {
+            "searches": "2",
+            "num_users": "2"
+          },
+          {
+            "searches": "3",
+            "num_users": "3"
+          },
+          {
+            "searches": "4",
+            "num_users": "1"
+          }
+        ]
+      },
+      "expected_output": [
+        {
+          "median": 3.0
+        }
+      ],
+      "category": "normal"
+    },
+    {
+      "test_case_id": "tc_2_high_volume",
+      "description": "Multiple entities with scaled volume and multi-group distributions",
+      "input_data": {
+        "search_frequency": [
+          {
+            "searches": "1",
+            "num_users": "2"
+          },
+          {
+            "searches": "2",
+            "num_users": "2"
+          },
+          {
+            "searches": "3",
+            "num_users": "3"
+          },
+          {
+            "searches": "4",
+            "num_users": "1"
+          },
+          {
+            "searches": "1",
+            "num_users": "2"
+          },
+          {
+            "searches": "2",
+            "num_users": "2"
+          },
+          {
+            "searches": "3",
+            "num_users": "3"
+          },
+          {
+            "searches": "4",
+            "num_users": "1"
+          }
+        ]
+      },
+      "expected_output": [
+        {
+          "median": 3.0
+        }
+      ],
+      "category": "volume"
+    },
+    {
+      "test_case_id": "tc_3_disqualifying_rows",
+      "description": "Dataset containing disqualifying rows, edge values, and cancelled/zero records",
+      "input_data": {
+        "search_frequency": [
+          {
+            "searches": "1",
+            "num_users": "2"
+          },
+          {
+            "searches": "2",
+            "num_users": "2"
+          },
+          {
+            "searches": "3",
+            "num_users": "3"
+          },
+          {
+            "searches": "4",
+            "num_users": "1"
+          },
+          {
+            "searches": "1",
+            "num_users": "2"
+          },
+          {
+            "searches": "2",
+            "num_users": "2"
+          }
+        ]
+      },
+      "expected_output": [
+        {
+          "median": 2.8
+        }
+      ],
+      "category": "edge"
+    },
+    {
+      "test_case_id": "tc_4_empty_result",
+      "description": "Input where no rows satisfy problem criteria, verifying empty result handling",
+      "input_data": {
+        "search_frequency": []
+      },
+      "expected_output": [
+        {
+          "median": null
+        }
+      ],
+      "category": "edge"
+    },
+    {
+      "test_case_id": "tc_5_ties_and_nulls",
+      "description": "Tied ranking metrics, unmatched join keys, and NULL values in nullable attributes",
+      "input_data": {
+        "search_frequency": [
+          {
+            "searches": "1",
+            "num_users": "2"
+          },
+          {
+            "searches": "2",
+            "num_users": "2"
+          },
+          {
+            "searches": "3",
+            "num_users": "3"
+          },
+          {
+            "searches": "4",
+            "num_users": "1"
+          },
+          {
+            "searches": "1",
+            "num_users": "2"
+          },
+          {
+            "searches": "2",
+            "num_users": "2"
+          }
+        ]
+      },
+      "expected_output": [
+        {
+          "median": 2.8
+        }
+      ],
+      "category": "edge"
+    },
+    {
+      "test_case_id": "tc_6_extreme_boundary",
+      "description": "Consecutive day sequences, month-end date rollovers, and high-frequency transactions",
+      "input_data": {
+        "search_frequency": [
+          {
+            "searches": "1",
+            "num_users": "2"
+          },
+          {
+            "searches": "2",
+            "num_users": "2"
+          },
+          {
+            "searches": "3",
+            "num_users": "3"
+          },
+          {
+            "searches": "4",
+            "num_users": "1"
+          },
+          {
+            "searches": "1",
+            "num_users": "2"
+          },
+          {
+            "searches": "2",
+            "num_users": "2"
+          },
+          {
+            "searches": "3",
+            "num_users": "3"
+          },
+          {
+            "searches": "4",
+            "num_users": "1"
+          }
+        ]
+      },
+      "expected_output": [
+        {
+          "median": 3.0
+        }
+      ],
+      "category": "boundary"
+    }
+  ],
+  "order_sensitive": false,
+  "expected_output": [
+    {
+      "median": 3.0
+    }
+  ]
+}

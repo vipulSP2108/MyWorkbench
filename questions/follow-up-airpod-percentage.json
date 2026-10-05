@@ -1,0 +1,424 @@
+{
+  "question_id": "q_100_follow_up_airpod_percentage",
+  "slug": "follow-up-airpod-percentage",
+  "title": "Follow-Up Airpod Percentage",
+  "difficulty": "Hard",
+  "company": "Apple",
+  "premium": true,
+  "question": "The Apple Customer Retention Data Science team needs your help to investigate buying patterns related to AirPods and iPhones.\n\nWrite a query to determine the percentage of buyers who bought AirPods directly after they bought iPhones. Round the answer to a whole-number percentage (20 for 20%, 50 for 50%).\n\nClarifications: users bought an iPhone and then AirPods with no intermediate purchases in between. Users who buy an iPhone and AirPods at the same time, with the iPhone logged first, can still be counted. Tip: multiply by 100 before rounding.",
+  "notes": [],
+  "tables": [
+    {
+      "table_name": "transactions",
+      "columns": [
+        {
+          "column_name": "transaction_id",
+          "data_type": "INT"
+        },
+        {
+          "column_name": "customer_id",
+          "data_type": "INT"
+        },
+        {
+          "column_name": "product_name",
+          "data_type": "VARCHAR(255)"
+        },
+        {
+          "column_name": "transaction_timestamp",
+          "data_type": "DATETIME"
+        }
+      ]
+    }
+  ],
+  "sample_data": {
+    "transactions": [
+      {
+        "transaction_id": 1,
+        "customer_id": 101,
+        "product_name": "iPhone",
+        "transaction_timestamp": "08/08/2022 00:00:00"
+      },
+      {
+        "transaction_id": 2,
+        "customer_id": 101,
+        "product_name": "AirPods",
+        "transaction_timestamp": "08/08/2022 00:00:00"
+      },
+      {
+        "transaction_id": 5,
+        "customer_id": 301,
+        "product_name": "iPhone",
+        "transaction_timestamp": "09/05/2022 00:00:00"
+      },
+      {
+        "transaction_id": 6,
+        "customer_id": 301,
+        "product_name": "iPad",
+        "transaction_timestamp": "09/06/2022 00:00:00"
+      },
+      {
+        "transaction_id": 7,
+        "customer_id": 301,
+        "product_name": "AirPods",
+        "transaction_timestamp": "09/07/2022 00:00:00"
+      }
+    ]
+  },
+  "sample_output": [
+    {
+      "follow_up_percentage": 50
+    }
+  ],
+  "reference_sql": "WITH ordered_purchases AS (\n  SELECT \n    customer_id,\n    product_name,\n    transaction_timestamp,\n    LEAD(product_name) OVER (PARTITION BY customer_id ORDER BY transaction_timestamp) AS next_product\n  FROM transactions\n)\nSELECT \n  ROUND(100.0 * COUNT(DISTINCT CASE WHEN product_name = 'iPhone' AND next_product = 'AirPods' THEN customer_id END) / \n        NULLIF(COUNT(DISTINCT CASE WHEN product_name = 'iPhone' THEN customer_id END), 0), 0) AS follow_up_percentage\nFROM ordered_purchases;",
+  "tags": [
+    "aggregation",
+    "apple",
+    "cte",
+    "ecommerce",
+    "finance",
+    "hard",
+    "lead-lag",
+    "math",
+    "window-function"
+  ],
+  "related_questions": [],
+  "sources": [
+    [
+      "DataLemur blog: 10 Apple SQL questions (#2, #9)",
+      "https://datalemur.com/blog/apple-sql-interview-questions"
+    ],
+    [
+      "DataLemur page (locked)",
+      "https://datalemur.com/questions/follow-up-airpod-percentage"
+    ],
+    [
+      "DataLemur PDF",
+      "Page 104"
+    ]
+  ],
+  "test_cases": [
+    {
+      "test_case_id": "tc_1_baseline",
+      "description": "Baseline sample input data from problem description",
+      "input_data": {
+        "transactions": [
+          {
+            "transaction_id": 1,
+            "customer_id": 101,
+            "product_name": "iPhone",
+            "transaction_timestamp": "08/08/2022 00:00:00"
+          },
+          {
+            "transaction_id": 2,
+            "customer_id": 101,
+            "product_name": "AirPods",
+            "transaction_timestamp": "08/08/2022 00:00:00"
+          },
+          {
+            "transaction_id": 5,
+            "customer_id": 301,
+            "product_name": "iPhone",
+            "transaction_timestamp": "09/05/2022 00:00:00"
+          },
+          {
+            "transaction_id": 6,
+            "customer_id": 301,
+            "product_name": "iPad",
+            "transaction_timestamp": "09/06/2022 00:00:00"
+          },
+          {
+            "transaction_id": 7,
+            "customer_id": 301,
+            "product_name": "AirPods",
+            "transaction_timestamp": "09/07/2022 00:00:00"
+          }
+        ]
+      },
+      "expected_output": [
+        {
+          "follow_up_percentage": 50.0
+        }
+      ],
+      "category": "normal"
+    },
+    {
+      "test_case_id": "tc_2_high_volume",
+      "description": "Multiple entities with scaled volume and multi-group distributions",
+      "input_data": {
+        "transactions": [
+          {
+            "transaction_id": 1,
+            "customer_id": 101,
+            "product_name": "iPhone",
+            "transaction_timestamp": "08/08/2022 00:00:00"
+          },
+          {
+            "transaction_id": 2,
+            "customer_id": 101,
+            "product_name": "AirPods",
+            "transaction_timestamp": "08/08/2022 00:00:00"
+          },
+          {
+            "transaction_id": 5,
+            "customer_id": 301,
+            "product_name": "iPhone",
+            "transaction_timestamp": "09/05/2022 00:00:00"
+          },
+          {
+            "transaction_id": 6,
+            "customer_id": 301,
+            "product_name": "iPad",
+            "transaction_timestamp": "09/06/2022 00:00:00"
+          },
+          {
+            "transaction_id": 7,
+            "customer_id": 301,
+            "product_name": "AirPods",
+            "transaction_timestamp": "09/07/2022 00:00:00"
+          },
+          {
+            "transaction_id": 1001,
+            "customer_id": 1101,
+            "product_name": "iPhone",
+            "transaction_timestamp": "08/13/2022 00:00:00"
+          },
+          {
+            "transaction_id": 1002,
+            "customer_id": 1101,
+            "product_name": "AirPods",
+            "transaction_timestamp": "08/13/2022 00:00:00"
+          },
+          {
+            "transaction_id": 1005,
+            "customer_id": 1301,
+            "product_name": "iPhone",
+            "transaction_timestamp": "09/10/2022 00:00:00"
+          },
+          {
+            "transaction_id": 1006,
+            "customer_id": 1301,
+            "product_name": "iPad",
+            "transaction_timestamp": "09/11/2022 00:00:00"
+          },
+          {
+            "transaction_id": 1007,
+            "customer_id": 1301,
+            "product_name": "AirPods",
+            "transaction_timestamp": "09/12/2022 00:00:00"
+          }
+        ]
+      },
+      "expected_output": [
+        {
+          "follow_up_percentage": 50.0
+        }
+      ],
+      "category": "volume"
+    },
+    {
+      "test_case_id": "tc_3_disqualifying_rows",
+      "description": "Dataset containing disqualifying rows, edge values, and cancelled/zero records",
+      "input_data": {
+        "transactions": [
+          {
+            "transaction_id": 1,
+            "customer_id": 101,
+            "product_name": "iPhone",
+            "transaction_timestamp": "08/08/2022 00:00:00"
+          },
+          {
+            "transaction_id": 2,
+            "customer_id": 101,
+            "product_name": "AirPods",
+            "transaction_timestamp": "08/08/2022 00:00:00"
+          },
+          {
+            "transaction_id": 5,
+            "customer_id": 301,
+            "product_name": "iPhone",
+            "transaction_timestamp": "09/05/2022 00:00:00"
+          },
+          {
+            "transaction_id": 6,
+            "customer_id": 301,
+            "product_name": "iPad",
+            "transaction_timestamp": "09/06/2022 00:00:00"
+          },
+          {
+            "transaction_id": 7,
+            "customer_id": 301,
+            "product_name": "AirPods",
+            "transaction_timestamp": "09/07/2022 00:00:00"
+          },
+          {
+            "transaction_id": 5001,
+            "customer_id": 5101,
+            "product_name": "iPhone",
+            "transaction_timestamp": "08/08/2017 00:00:00"
+          },
+          {
+            "transaction_id": 5002,
+            "customer_id": 5101,
+            "product_name": "AirPods",
+            "transaction_timestamp": "08/08/2017 00:00:00"
+          }
+        ]
+      },
+      "expected_output": [
+        {
+          "follow_up_percentage": 67.0
+        }
+      ],
+      "category": "edge"
+    },
+    {
+      "test_case_id": "tc_4_empty_result",
+      "description": "Input where no rows satisfy problem criteria, verifying empty result handling",
+      "input_data": {
+        "transactions": []
+      },
+      "expected_output": [
+        {
+          "follow_up_percentage": null
+        }
+      ],
+      "category": "edge"
+    },
+    {
+      "test_case_id": "tc_5_ties_and_nulls",
+      "description": "Tied ranking metrics, unmatched join keys, and NULL values in nullable attributes",
+      "input_data": {
+        "transactions": [
+          {
+            "transaction_id": 1,
+            "customer_id": 101,
+            "product_name": "iPhone",
+            "transaction_timestamp": "08/08/2022 00:00:00"
+          },
+          {
+            "transaction_id": 2,
+            "customer_id": 101,
+            "product_name": "AirPods",
+            "transaction_timestamp": "08/08/2022 00:00:00"
+          },
+          {
+            "transaction_id": 5,
+            "customer_id": 301,
+            "product_name": "iPhone",
+            "transaction_timestamp": "09/05/2022 00:00:00"
+          },
+          {
+            "transaction_id": 6,
+            "customer_id": 301,
+            "product_name": "iPad",
+            "transaction_timestamp": "09/06/2022 00:00:00"
+          },
+          {
+            "transaction_id": 7,
+            "customer_id": 301,
+            "product_name": "AirPods",
+            "transaction_timestamp": "09/07/2022 00:00:00"
+          },
+          {
+            "transaction_id": 9001,
+            "customer_id": 9101,
+            "product_name": "iPhone Duplicate",
+            "transaction_timestamp": "08/08/2022 00:00:00"
+          },
+          {
+            "transaction_id": 9502,
+            "customer_id": 9601,
+            "product_name": "AirPods",
+            "transaction_timestamp": "08/08/2022 00:00:00"
+          }
+        ]
+      },
+      "expected_output": [
+        {
+          "follow_up_percentage": 50.0
+        }
+      ],
+      "category": "edge"
+    },
+    {
+      "test_case_id": "tc_6_extreme_boundary",
+      "description": "Consecutive day sequences, month-end date rollovers, and high-frequency transactions",
+      "input_data": {
+        "transactions": [
+          {
+            "transaction_id": 1,
+            "customer_id": 101,
+            "product_name": "iPhone",
+            "transaction_timestamp": "08/08/2022 00:00:00"
+          },
+          {
+            "transaction_id": 2,
+            "customer_id": 101,
+            "product_name": "AirPods",
+            "transaction_timestamp": "08/08/2022 00:00:00"
+          },
+          {
+            "transaction_id": 5,
+            "customer_id": 301,
+            "product_name": "iPhone",
+            "transaction_timestamp": "09/05/2022 00:00:00"
+          },
+          {
+            "transaction_id": 6,
+            "customer_id": 301,
+            "product_name": "iPad",
+            "transaction_timestamp": "09/06/2022 00:00:00"
+          },
+          {
+            "transaction_id": 7,
+            "customer_id": 301,
+            "product_name": "AirPods",
+            "transaction_timestamp": "09/07/2022 00:00:00"
+          },
+          {
+            "transaction_id": 8001,
+            "customer_id": 8101,
+            "product_name": "iPhone",
+            "transaction_timestamp": "08/09/2022 00:00:00"
+          },
+          {
+            "transaction_id": 8002,
+            "customer_id": 8101,
+            "product_name": "AirPods",
+            "transaction_timestamp": "08/09/2022 00:00:00"
+          },
+          {
+            "transaction_id": 8005,
+            "customer_id": 8301,
+            "product_name": "iPhone",
+            "transaction_timestamp": "09/06/2022 00:00:00"
+          },
+          {
+            "transaction_id": 8006,
+            "customer_id": 8301,
+            "product_name": "iPad",
+            "transaction_timestamp": "09/07/2022 00:00:00"
+          },
+          {
+            "transaction_id": 8007,
+            "customer_id": 8301,
+            "product_name": "AirPods",
+            "transaction_timestamp": "09/08/2022 00:00:00"
+          }
+        ]
+      },
+      "expected_output": [
+        {
+          "follow_up_percentage": 50.0
+        }
+      ],
+      "category": "boundary"
+    }
+  ],
+  "order_sensitive": false,
+  "expected_output": [
+    {
+      "follow_up_percentage": 50.0
+    }
+  ]
+}

@@ -1,0 +1,287 @@
+{
+  "question_id": "q_003_sql_page_with_no_likes",
+  "slug": "sql-page-with-no-likes",
+  "title": "Page With No Likes",
+  "difficulty": "Easy",
+  "company": "Facebook",
+  "premium": false,
+  "question": "Assume you're given two tables containing data about Facebook Pages and their respective likes (as in \"Like a Facebook Page\").\n\nWrite a query to return the IDs of the Facebook pages that have zero likes. The output should be sorted in ascending order based on the page IDs.",
+  "notes": [
+    "The dataset you are querying against may have different input & output - this is just an example!",
+    "p.s. If you have literally no idea how to solve this, maybe give our free SQL tutorial a try first?"
+  ],
+  "tables": [
+    {
+      "table_name": "pages",
+      "columns": [
+        {
+          "column_name": "page_id",
+          "data_type": "INT"
+        },
+        {
+          "column_name": "page_name",
+          "data_type": "VARCHAR(255)"
+        }
+      ]
+    },
+    {
+      "table_name": "page_likes",
+      "columns": [
+        {
+          "column_name": "user_id",
+          "data_type": "INT"
+        },
+        {
+          "column_name": "page_id",
+          "data_type": "INT"
+        },
+        {
+          "column_name": "liked_date",
+          "data_type": "DATETIME"
+        }
+      ]
+    }
+  ],
+  "sample_data": {
+    "pages": [
+      {
+        "page_id": "20001",
+        "page_name": "SQL Solutions"
+      },
+      {
+        "page_id": "20045",
+        "page_name": "Brain Exercises"
+      },
+      {
+        "page_id": "20701",
+        "page_name": "Tips for Data Analysts"
+      }
+    ],
+    "page_likes": [
+      {
+        "user_id": "111",
+        "page_id": "20001",
+        "liked_date": "04/08/2022 00:00:00"
+      },
+      {
+        "user_id": "121",
+        "page_id": "20045",
+        "liked_date": "03/12/2022 00:00:00"
+      },
+      {
+        "user_id": "156",
+        "page_id": "20001",
+        "liked_date": "07/25/2022 00:00:00"
+      }
+    ]
+  },
+  "sample_output": [
+    {
+      "page_id": "20701"
+    }
+  ],
+  "reference_sql": "SELECT p.page_id\nFROM pages p\nLEFT JOIN page_likes l ON p.page_id = l.page_id\nWHERE l.page_id IS NULL\nORDER BY p.page_id;",
+  "tags": [
+    "easy",
+    "ecommerce",
+    "facebook",
+    "social-media"
+  ],
+  "related_questions": [],
+  "sources": [
+    [
+      "DataLemur page (free)",
+      "https://datalemur.com/questions/sql-page-with-no-likes"
+    ],
+    [
+      "DataLemur PDF",
+      "Page 7"
+    ]
+  ],
+  "test_cases": [
+    {
+      "test_case_id": "tc_1_baseline",
+      "description": "Baseline sample input data from problem description",
+      "input_data": {
+        "pages": [
+          {
+            "page_id": "20001",
+            "page_name": "SQL Solutions"
+          },
+          {
+            "page_id": "20045",
+            "page_name": "Brain Exercises"
+          },
+          {
+            "page_id": "20701",
+            "page_name": "Tips for Data Analysts"
+          }
+        ],
+        "page_likes": [
+          {
+            "user_id": "111",
+            "page_id": "20001",
+            "liked_date": "04/08/2022 00:00:00"
+          },
+          {
+            "user_id": "121",
+            "page_id": "20045",
+            "liked_date": "03/12/2022 00:00:00"
+          },
+          {
+            "user_id": "156",
+            "page_id": "20001",
+            "liked_date": "07/25/2022 00:00:00"
+          }
+        ]
+      },
+      "expected_output": [
+        {
+          "page_id": 20701
+        }
+      ],
+      "category": "normal"
+    },
+    {
+      "test_case_id": "tc_2_high_volume",
+      "description": "Multiple entities with scaled volume and multi-group distributions",
+      "input_data": {
+        "pages": [
+          {
+            "page_id": "20001",
+            "page_name": "SQL Solutions"
+          },
+          {
+            "page_id": "20045",
+            "page_name": "Brain Exercises"
+          },
+          {
+            "page_id": "20701",
+            "page_name": "Tips for Data Analysts"
+          },
+          {
+            "page_id": 21001,
+            "page_name": "SQL Solutions"
+          },
+          {
+            "page_id": 21045,
+            "page_name": "Brain Exercises"
+          },
+          {
+            "page_id": 21701,
+            "page_name": "Tips for Data Analysts"
+          }
+        ],
+        "page_likes": [
+          {
+            "user_id": "111",
+            "page_id": "20001",
+            "liked_date": "04/08/2022 00:00:00"
+          },
+          {
+            "user_id": "121",
+            "page_id": "20045",
+            "liked_date": "03/12/2022 00:00:00"
+          },
+          {
+            "user_id": "156",
+            "page_id": "20001",
+            "liked_date": "07/25/2022 00:00:00"
+          },
+          {
+            "user_id": 1111,
+            "page_id": 21001,
+            "liked_date": "04/13/2022 00:00:00"
+          },
+          {
+            "user_id": 1121,
+            "page_id": 21045,
+            "liked_date": "03/17/2022 00:00:00"
+          },
+          {
+            "user_id": 1156,
+            "page_id": 21001,
+            "liked_date": "07/28/2022 00:00:00"
+          }
+        ]
+      },
+      "expected_output": [
+        {
+          "page_id": 20701
+        },
+        {
+          "page_id": 21701
+        }
+      ],
+      "category": "volume"
+    },
+    {
+      "test_case_id": "tc_3_disqualifying_rows",
+      "description": "Dataset containing disqualifying rows, edge values, and cancelled/zero records",
+      "input_data": {
+        "pages": [
+          {
+            "page_id": "20001",
+            "page_name": "SQL Solutions"
+          },
+          {
+            "page_id": "20045",
+            "page_name": "Brain Exercises"
+          },
+          {
+            "page_id": "20701",
+            "page_name": "Tips for Data Analysts"
+          },
+          {
+            "page_id": 25001,
+            "page_name": "SQL Solutions"
+          }
+        ],
+        "page_likes": [
+          {
+            "user_id": "111",
+            "page_id": "20001",
+            "liked_date": "04/08/2022 00:00:00"
+          },
+          {
+            "user_id": "121",
+            "page_id": "20045",
+            "liked_date": "03/12/2022 00:00:00"
+          },
+          {
+            "user_id": "156",
+            "page_id": "20001",
+            "liked_date": "07/25/2022 00:00:00"
+          },
+          {
+            "user_id": 5111,
+            "page_id": 25001,
+            "liked_date": "04/08/2017 00:00:00"
+          }
+        ]
+      },
+      "expected_output": [
+        {
+          "page_id": 20701
+        }
+      ],
+      "category": "edge"
+    },
+    {
+      "test_case_id": "tc_4_empty_result",
+      "description": "Input where no rows satisfy problem criteria, verifying empty result handling",
+      "input_data": {
+        "pages": [],
+        "page_likes": []
+      },
+      "expected_output": [],
+      "category": "edge"
+    }
+  ],
+  "order_sensitive": true,
+  "expected_output": [
+    {
+      "page_id": 20701
+    }
+  ]
+}

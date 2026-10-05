@@ -1,0 +1,789 @@
+{
+  "question_id": "q_080_marketing_touch_streak",
+  "slug": "marketing-touch-streak",
+  "title": "Marketing Touch Streak",
+  "difficulty": "Hard",
+  "company": "Snowflake",
+  "premium": false,
+  "question": "As a Data Analyst on Snowflake's Marketing Analytics team, your objective is to analyze customer relationship management (CRM) data and identify contacts that satisfy two conditions: 1) Contacts who had a marketing touch for three or more consecutive weeks. 2) Contacts who had at least one marketing touch of the type 'trial_request'.\n\nMarketing touches, also known as touch points, represent the interactions or points of contact between a brand and its customers.\n\nYour goal is to generate a list of email addresses for these contacts.",
+  "notes": [
+    "Among the contacts, only Contact ID 1 (andy.markus@att.net) satisfies both conditions specified in the problem. Contact ID 1 had a marketing touch with an event type of 'trial_request' and the marketing touch points occurred consecutively over a period of 3 weeks. This meets both conditions of having a marketing touch for three or more consecutive weeks.",
+    "On the other hand, Contact ID 2 (rajan.bhatt@capitalone.com) is not included in the generated list. Although they had a marketing touch with the event type 'trial_request', their touch points took place within the same week. Consequently, this does not meet the requirement of consecutive marketing touches for 3 weeks.",
+    "The dataset you are querying against may have different input & output - this is just an example!"
+  ],
+  "tables": [
+    {
+      "table_name": "marketing_touches",
+      "columns": [
+        {
+          "column_name": "event_id",
+          "data_type": "INT"
+        },
+        {
+          "column_name": "contact_id",
+          "data_type": "INT"
+        },
+        {
+          "column_name": "event_type",
+          "data_type": "VARCHAR(50)"
+        },
+        {
+          "column_name": "event_date",
+          "data_type": "DATE"
+        }
+      ]
+    },
+    {
+      "table_name": "crm_contacts",
+      "columns": [
+        {
+          "column_name": "contact_id",
+          "data_type": "INT"
+        },
+        {
+          "column_name": "email",
+          "data_type": "VARCHAR(255)"
+        }
+      ]
+    }
+  ],
+  "sample_data": {
+    "marketing_touches": [
+      {
+        "event_id": "1",
+        "contact_id": "1",
+        "event_type": "webinar",
+        "event_date": "4/17/2022"
+      },
+      {
+        "event_id": "2",
+        "contact_id": "1",
+        "event_type": "trial_request",
+        "event_date": "4/23/2022"
+      },
+      {
+        "event_id": "3",
+        "contact_id": "1",
+        "event_type": "whitepaper_download",
+        "event_date": "4/30/2022"
+      },
+      {
+        "event_id": "4",
+        "contact_id": "2",
+        "event_type": "handson_lab",
+        "event_date": "4/19/2022"
+      },
+      {
+        "event_id": "5",
+        "contact_id": "2",
+        "event_type": "trial_request",
+        "event_date": "4/23/2022"
+      },
+      {
+        "event_id": "6",
+        "contact_id": "2",
+        "event_type": "conference_registration",
+        "event_date": "4/24/2022"
+      },
+      {
+        "event_id": "7",
+        "contact_id": "3",
+        "event_type": "whitepaper_download",
+        "event_date": "4/30/2022"
+      },
+      {
+        "event_id": "8",
+        "contact_id": "4",
+        "event_type": "trial_request",
+        "event_date": "4/30/2022"
+      },
+      {
+        "event_id": "9",
+        "contact_id": "4",
+        "event_type": "webinar",
+        "event_date": "5/14/2022"
+      }
+    ],
+    "crm_contacts": [
+      {
+        "contact_id": "1",
+        "email": "andy.markus@att.net"
+      },
+      {
+        "contact_id": "2",
+        "email": "rajan.bhatt@capitalone.com"
+      },
+      {
+        "contact_id": "3",
+        "email": "lissa_rogers@jetblue.com"
+      },
+      {
+        "contact_id": "4",
+        "email": "kevinliu@square.com"
+      }
+    ]
+  },
+  "sample_output": [
+    {
+      "email": "andy.markus@att.net"
+    }
+  ],
+  "reference_sql": "SELECT c.email\nFROM crm_contacts c\nJOIN marketing_touches m ON c.contact_id = m.contact_id\nWHERE m.event_type = 'webinar'\nGROUP BY c.email\nHAVING COUNT(m.event_id) >= 2\nORDER BY c.email;",
+  "tags": [
+    "date-manipulation",
+    "ecommerce",
+    "hard",
+    "lead-lag",
+    "snowflake",
+    "window-function"
+  ],
+  "related_questions": [],
+  "sources": [
+    [
+      "DataLemur page (free)",
+      "https://datalemur.com/questions/marketing-touch-streak"
+    ],
+    [
+      "DataLemur PDF",
+      "Page 84"
+    ]
+  ],
+  "test_cases": [
+    {
+      "test_case_id": "tc_1_baseline",
+      "description": "Baseline sample input data from problem description",
+      "input_data": {
+        "marketing_touches": [
+          {
+            "event_id": "1",
+            "contact_id": "1",
+            "event_type": "webinar",
+            "event_date": "4/17/2022"
+          },
+          {
+            "event_id": "2",
+            "contact_id": "1",
+            "event_type": "trial_request",
+            "event_date": "4/23/2022"
+          },
+          {
+            "event_id": "3",
+            "contact_id": "1",
+            "event_type": "whitepaper_download",
+            "event_date": "4/30/2022"
+          },
+          {
+            "event_id": "4",
+            "contact_id": "2",
+            "event_type": "handson_lab",
+            "event_date": "4/19/2022"
+          },
+          {
+            "event_id": "5",
+            "contact_id": "2",
+            "event_type": "trial_request",
+            "event_date": "4/23/2022"
+          },
+          {
+            "event_id": "6",
+            "contact_id": "2",
+            "event_type": "conference_registration",
+            "event_date": "4/24/2022"
+          },
+          {
+            "event_id": "7",
+            "contact_id": "3",
+            "event_type": "whitepaper_download",
+            "event_date": "4/30/2022"
+          },
+          {
+            "event_id": "8",
+            "contact_id": "4",
+            "event_type": "trial_request",
+            "event_date": "4/30/2022"
+          },
+          {
+            "event_id": "9",
+            "contact_id": "4",
+            "event_type": "webinar",
+            "event_date": "5/14/2022"
+          }
+        ],
+        "crm_contacts": [
+          {
+            "contact_id": "1",
+            "email": "andy.markus@att.net"
+          },
+          {
+            "contact_id": "2",
+            "email": "rajan.bhatt@capitalone.com"
+          },
+          {
+            "contact_id": "3",
+            "email": "lissa_rogers@jetblue.com"
+          },
+          {
+            "contact_id": "4",
+            "email": "kevinliu@square.com"
+          }
+        ]
+      },
+      "expected_output": [],
+      "category": "normal"
+    },
+    {
+      "test_case_id": "tc_2_high_volume",
+      "description": "Multiple entities with scaled volume and multi-group distributions",
+      "input_data": {
+        "marketing_touches": [
+          {
+            "event_id": "1",
+            "contact_id": "1",
+            "event_type": "webinar",
+            "event_date": "4/17/2022"
+          },
+          {
+            "event_id": "2",
+            "contact_id": "1",
+            "event_type": "trial_request",
+            "event_date": "4/23/2022"
+          },
+          {
+            "event_id": "3",
+            "contact_id": "1",
+            "event_type": "whitepaper_download",
+            "event_date": "4/30/2022"
+          },
+          {
+            "event_id": "4",
+            "contact_id": "2",
+            "event_type": "handson_lab",
+            "event_date": "4/19/2022"
+          },
+          {
+            "event_id": "5",
+            "contact_id": "2",
+            "event_type": "trial_request",
+            "event_date": "4/23/2022"
+          },
+          {
+            "event_id": "6",
+            "contact_id": "2",
+            "event_type": "conference_registration",
+            "event_date": "4/24/2022"
+          },
+          {
+            "event_id": "7",
+            "contact_id": "3",
+            "event_type": "whitepaper_download",
+            "event_date": "4/30/2022"
+          },
+          {
+            "event_id": "8",
+            "contact_id": "4",
+            "event_type": "trial_request",
+            "event_date": "4/30/2022"
+          },
+          {
+            "event_id": "9",
+            "contact_id": "4",
+            "event_type": "webinar",
+            "event_date": "5/14/2022"
+          },
+          {
+            "event_id": 1001,
+            "contact_id": 1001,
+            "event_type": "webinar",
+            "event_date": "4/22/2022"
+          },
+          {
+            "event_id": 1002,
+            "contact_id": 1001,
+            "event_type": "trial_request",
+            "event_date": "4/28/2022"
+          },
+          {
+            "event_id": 1003,
+            "contact_id": 1001,
+            "event_type": "whitepaper_download",
+            "event_date": "4/28/2022"
+          },
+          {
+            "event_id": 1004,
+            "contact_id": 1002,
+            "event_type": "handson_lab",
+            "event_date": "4/24/2022"
+          },
+          {
+            "event_id": 1005,
+            "contact_id": 1002,
+            "event_type": "trial_request",
+            "event_date": "4/28/2022"
+          },
+          {
+            "event_id": 1006,
+            "contact_id": 1002,
+            "event_type": "conference_registration",
+            "event_date": "4/28/2022"
+          },
+          {
+            "event_id": 1007,
+            "contact_id": 1003,
+            "event_type": "whitepaper_download",
+            "event_date": "4/28/2022"
+          },
+          {
+            "event_id": 1008,
+            "contact_id": 1004,
+            "event_type": "trial_request",
+            "event_date": "4/28/2022"
+          },
+          {
+            "event_id": 1009,
+            "contact_id": 1004,
+            "event_type": "webinar",
+            "event_date": "5/19/2022"
+          }
+        ],
+        "crm_contacts": [
+          {
+            "contact_id": "1",
+            "email": "andy.markus@att.net"
+          },
+          {
+            "contact_id": "2",
+            "email": "rajan.bhatt@capitalone.com"
+          },
+          {
+            "contact_id": "3",
+            "email": "lissa_rogers@jetblue.com"
+          },
+          {
+            "contact_id": "4",
+            "email": "kevinliu@square.com"
+          },
+          {
+            "contact_id": 1001,
+            "email": "andy.markus@att.net"
+          },
+          {
+            "contact_id": 1002,
+            "email": "rajan.bhatt@capitalone.com"
+          },
+          {
+            "contact_id": 1003,
+            "email": "lissa_rogers@jetblue.com"
+          },
+          {
+            "contact_id": 1004,
+            "email": "kevinliu@square.com"
+          }
+        ]
+      },
+      "expected_output": [
+        {
+          "email": "andy.markus@att.net"
+        },
+        {
+          "email": "kevinliu@square.com"
+        }
+      ],
+      "category": "volume"
+    },
+    {
+      "test_case_id": "tc_3_disqualifying_rows",
+      "description": "Dataset containing disqualifying rows, edge values, and cancelled/zero records",
+      "input_data": {
+        "marketing_touches": [
+          {
+            "event_id": "1",
+            "contact_id": "1",
+            "event_type": "webinar",
+            "event_date": "4/17/2022"
+          },
+          {
+            "event_id": "2",
+            "contact_id": "1",
+            "event_type": "trial_request",
+            "event_date": "4/23/2022"
+          },
+          {
+            "event_id": "3",
+            "contact_id": "1",
+            "event_type": "whitepaper_download",
+            "event_date": "4/30/2022"
+          },
+          {
+            "event_id": "4",
+            "contact_id": "2",
+            "event_type": "handson_lab",
+            "event_date": "4/19/2022"
+          },
+          {
+            "event_id": "5",
+            "contact_id": "2",
+            "event_type": "trial_request",
+            "event_date": "4/23/2022"
+          },
+          {
+            "event_id": "6",
+            "contact_id": "2",
+            "event_type": "conference_registration",
+            "event_date": "4/24/2022"
+          },
+          {
+            "event_id": "7",
+            "contact_id": "3",
+            "event_type": "whitepaper_download",
+            "event_date": "4/30/2022"
+          },
+          {
+            "event_id": "8",
+            "contact_id": "4",
+            "event_type": "trial_request",
+            "event_date": "4/30/2022"
+          },
+          {
+            "event_id": "9",
+            "contact_id": "4",
+            "event_type": "webinar",
+            "event_date": "5/14/2022"
+          },
+          {
+            "event_id": 5001,
+            "contact_id": 5001,
+            "event_type": "webinar",
+            "event_date": "4/17/2017"
+          },
+          {
+            "event_id": 5002,
+            "contact_id": 5001,
+            "event_type": "trial_request",
+            "event_date": "4/23/2017"
+          },
+          {
+            "event_id": 5003,
+            "contact_id": 5001,
+            "event_type": "whitepaper_download",
+            "event_date": "4/28/2017"
+          },
+          {
+            "event_id": 5004,
+            "contact_id": 5002,
+            "event_type": "handson_lab",
+            "event_date": "4/19/2017"
+          }
+        ],
+        "crm_contacts": [
+          {
+            "contact_id": "1",
+            "email": "andy.markus@att.net"
+          },
+          {
+            "contact_id": "2",
+            "email": "rajan.bhatt@capitalone.com"
+          },
+          {
+            "contact_id": "3",
+            "email": "lissa_rogers@jetblue.com"
+          },
+          {
+            "contact_id": "4",
+            "email": "kevinliu@square.com"
+          },
+          {
+            "contact_id": 5001,
+            "email": "andy.markus@att.net"
+          },
+          {
+            "contact_id": 5002,
+            "email": "rajan.bhatt@capitalone.com"
+          }
+        ]
+      },
+      "expected_output": [
+        {
+          "email": "andy.markus@att.net"
+        }
+      ],
+      "category": "edge"
+    },
+    {
+      "test_case_id": "tc_4_empty_result",
+      "description": "Input where no rows satisfy problem criteria, verifying empty result handling",
+      "input_data": {
+        "marketing_touches": [],
+        "crm_contacts": []
+      },
+      "expected_output": [],
+      "category": "edge"
+    },
+    {
+      "test_case_id": "tc_5_ties_and_nulls",
+      "description": "Tied ranking metrics, unmatched join keys, and NULL values in nullable attributes",
+      "input_data": {
+        "marketing_touches": [
+          {
+            "event_id": "1",
+            "contact_id": "1",
+            "event_type": "webinar",
+            "event_date": "4/17/2022"
+          },
+          {
+            "event_id": "2",
+            "contact_id": "1",
+            "event_type": "trial_request",
+            "event_date": "4/23/2022"
+          },
+          {
+            "event_id": "3",
+            "contact_id": "1",
+            "event_type": "whitepaper_download",
+            "event_date": "4/30/2022"
+          },
+          {
+            "event_id": "4",
+            "contact_id": "2",
+            "event_type": "handson_lab",
+            "event_date": "4/19/2022"
+          },
+          {
+            "event_id": "5",
+            "contact_id": "2",
+            "event_type": "trial_request",
+            "event_date": "4/23/2022"
+          },
+          {
+            "event_id": "6",
+            "contact_id": "2",
+            "event_type": "conference_registration",
+            "event_date": "4/24/2022"
+          },
+          {
+            "event_id": "7",
+            "contact_id": "3",
+            "event_type": "whitepaper_download",
+            "event_date": "4/30/2022"
+          },
+          {
+            "event_id": "8",
+            "contact_id": "4",
+            "event_type": "trial_request",
+            "event_date": "4/30/2022"
+          },
+          {
+            "event_id": "9",
+            "contact_id": "4",
+            "event_type": "webinar",
+            "event_date": "5/14/2022"
+          },
+          {
+            "event_id": 9001,
+            "contact_id": 9001,
+            "event_type": "webinar",
+            "event_date": "4/17/2022"
+          },
+          {
+            "event_id": 9502,
+            "contact_id": 9501,
+            "event_type": null,
+            "event_date": "4/23/2022"
+          }
+        ],
+        "crm_contacts": [
+          {
+            "contact_id": "1",
+            "email": "andy.markus@att.net"
+          },
+          {
+            "contact_id": "2",
+            "email": "rajan.bhatt@capitalone.com"
+          },
+          {
+            "contact_id": "3",
+            "email": "lissa_rogers@jetblue.com"
+          },
+          {
+            "contact_id": "4",
+            "email": "kevinliu@square.com"
+          },
+          {
+            "contact_id": 9001,
+            "email": "andy.markus@att.net"
+          },
+          {
+            "contact_id": 9502,
+            "email": "rajan.bhatt@capitalone.com"
+          }
+        ]
+      },
+      "expected_output": [
+        {
+          "email": "andy.markus@att.net"
+        }
+      ],
+      "category": "edge"
+    },
+    {
+      "test_case_id": "tc_6_extreme_boundary",
+      "description": "Consecutive day sequences, month-end date rollovers, and high-frequency transactions",
+      "input_data": {
+        "marketing_touches": [
+          {
+            "event_id": "1",
+            "contact_id": "1",
+            "event_type": "webinar",
+            "event_date": "4/17/2022"
+          },
+          {
+            "event_id": "2",
+            "contact_id": "1",
+            "event_type": "trial_request",
+            "event_date": "4/23/2022"
+          },
+          {
+            "event_id": "3",
+            "contact_id": "1",
+            "event_type": "whitepaper_download",
+            "event_date": "4/30/2022"
+          },
+          {
+            "event_id": "4",
+            "contact_id": "2",
+            "event_type": "handson_lab",
+            "event_date": "4/19/2022"
+          },
+          {
+            "event_id": "5",
+            "contact_id": "2",
+            "event_type": "trial_request",
+            "event_date": "4/23/2022"
+          },
+          {
+            "event_id": "6",
+            "contact_id": "2",
+            "event_type": "conference_registration",
+            "event_date": "4/24/2022"
+          },
+          {
+            "event_id": "7",
+            "contact_id": "3",
+            "event_type": "whitepaper_download",
+            "event_date": "4/30/2022"
+          },
+          {
+            "event_id": "8",
+            "contact_id": "4",
+            "event_type": "trial_request",
+            "event_date": "4/30/2022"
+          },
+          {
+            "event_id": "9",
+            "contact_id": "4",
+            "event_type": "webinar",
+            "event_date": "5/14/2022"
+          },
+          {
+            "event_id": 8001,
+            "contact_id": 8001,
+            "event_type": "webinar",
+            "event_date": "4/18/2022"
+          },
+          {
+            "event_id": 8002,
+            "contact_id": 8001,
+            "event_type": "trial_request",
+            "event_date": "4/24/2022"
+          },
+          {
+            "event_id": 8003,
+            "contact_id": 8001,
+            "event_type": "whitepaper_download",
+            "event_date": "4/28/2022"
+          },
+          {
+            "event_id": 8004,
+            "contact_id": 8002,
+            "event_type": "handson_lab",
+            "event_date": "4/20/2022"
+          },
+          {
+            "event_id": 8005,
+            "contact_id": 8002,
+            "event_type": "trial_request",
+            "event_date": "4/24/2022"
+          },
+          {
+            "event_id": 8006,
+            "contact_id": 8002,
+            "event_type": "conference_registration",
+            "event_date": "4/25/2022"
+          },
+          {
+            "event_id": 8007,
+            "contact_id": 8003,
+            "event_type": "whitepaper_download",
+            "event_date": "4/28/2022"
+          },
+          {
+            "event_id": 8008,
+            "contact_id": 8004,
+            "event_type": "trial_request",
+            "event_date": "4/28/2022"
+          },
+          {
+            "event_id": 8009,
+            "contact_id": 8004,
+            "event_type": "webinar",
+            "event_date": "5/15/2022"
+          }
+        ],
+        "crm_contacts": [
+          {
+            "contact_id": "1",
+            "email": "andy.markus@att.net"
+          },
+          {
+            "contact_id": "2",
+            "email": "rajan.bhatt@capitalone.com"
+          },
+          {
+            "contact_id": "3",
+            "email": "lissa_rogers@jetblue.com"
+          },
+          {
+            "contact_id": "4",
+            "email": "kevinliu@square.com"
+          },
+          {
+            "contact_id": 8001,
+            "email": "andy.markus@att.net"
+          },
+          {
+            "contact_id": 8002,
+            "email": "rajan.bhatt@capitalone.com"
+          },
+          {
+            "contact_id": 8003,
+            "email": "lissa_rogers@jetblue.com"
+          },
+          {
+            "contact_id": 8004,
+            "email": "kevinliu@square.com"
+          }
+        ]
+      },
+      "expected_output": [
+        {
+          "email": "andy.markus@att.net"
+        },
+        {
+          "email": "kevinliu@square.com"
+        }
+      ],
+      "category": "boundary"
+    }
+  ],
+  "order_sensitive": false,
+  "expected_output": []
+}

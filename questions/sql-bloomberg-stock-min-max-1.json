@@ -1,0 +1,444 @@
+{
+  "question_id": "q_050_sql_bloomberg_stock_min_max_1",
+  "slug": "sql-bloomberg-stock-min-max-1",
+  "title": "FAANG Stock Min-Max (Part 1)",
+  "difficulty": "Medium",
+  "company": "Bloomberg",
+  "premium": false,
+  "question": "The Bloomberg terminal is the go-to resource for financial professionals, offering convenient access to a wide array of financial datasets. As a Data Analyst at Bloomberg, you have access to historical data on stock performance.\n\nCurrently, you're analyzing the highest and lowest open prices for each FAANG stock by month over the years.\n\nFor each FAANG stock, display the ticker symbol, the month and year ('Mon-YYYY') with the corresponding highest and lowest open prices (refer to the Example Output format). Ensure that the results are sorted by ticker symbol.",
+  "notes": [
+    "Note that the table below displays randomly selected AAPL data.",
+    "Apple Inc. (AAPL) achieved its highest opening price of \\$176.76 in May 2023 and its lowest opening price of \\$142.28 in January 2023.",
+    "The dataset you are querying against may have different input & output - this is just an example!"
+  ],
+  "tables": [
+    {
+      "table_name": "stock_prices",
+      "columns": [
+        {
+          "column_name": "date",
+          "data_type": "DATETIME"
+        },
+        {
+          "column_name": "ticker",
+          "data_type": "VARCHAR(255)"
+        },
+        {
+          "column_name": "open",
+          "data_type": "DECIMAL(10,2)"
+        },
+        {
+          "column_name": "high",
+          "data_type": "DECIMAL(10,2)"
+        },
+        {
+          "column_name": "low",
+          "data_type": "DECIMAL(10,2)"
+        },
+        {
+          "column_name": "close",
+          "data_type": "DECIMAL(10,2)"
+        }
+      ]
+    }
+  ],
+  "sample_data": {
+    "stock_prices": [
+      {
+        "date": "01/31/2023 00:00:00",
+        "ticker": "AAPL",
+        "open": "142.28",
+        "high": "142.70",
+        "low": "144.34",
+        "close": "144.29"
+      },
+      {
+        "date": "02/28/2023 00:00:00",
+        "ticker": "AAPL",
+        "open": "146.83",
+        "high": "147.05",
+        "low": "149.08",
+        "close": "147.41"
+      },
+      {
+        "date": "03/31/2023 00:00:00",
+        "ticker": "AAPL",
+        "open": "161.91",
+        "high": "162.44",
+        "low": "165.00",
+        "close": "164.90"
+      },
+      {
+        "date": "04/30/2023 00:00:00",
+        "ticker": "AAPL",
+        "open": "167.88",
+        "high": "168.49",
+        "low": "169.85",
+        "close": "169.68"
+      },
+      {
+        "date": "05/31/2023 00:00:00",
+        "ticker": "AAPL",
+        "open": "176.76",
+        "high": "177.33",
+        "low": "179.35",
+        "close": "177.25"
+      }
+    ]
+  },
+  "sample_output": [
+    {
+      "ticker": "AAPL",
+      "highest_mth": "May-2023",
+      "highest_open": "176.76",
+      "lowest_mth": "Jan-2023",
+      "lowest_open": "142.28"
+    }
+  ],
+  "reference_sql": "WITH ranked AS (\n  SELECT \n    ticker,\n    DATE_FORMAT(date, '%b-%Y') AS mth,\n    open AS open_price,\n    ROW_NUMBER() OVER (PARTITION BY ticker ORDER BY open DESC) AS rn_high,\n    ROW_NUMBER() OVER (PARTITION BY ticker ORDER BY open ASC) AS rn_low\n  FROM stock_prices\n)\nSELECT \n  h.ticker, \n  h.mth AS highest_mth, \n  h.open_price AS highest_open, \n  l.mth AS lowest_mth, \n  l.open_price AS lowest_open\nFROM (SELECT ticker, mth, open_price FROM ranked WHERE rn_high = 1) h\nJOIN (SELECT ticker, mth, open_price FROM ranked WHERE rn_low = 1) l ON h.ticker = l.ticker\nORDER BY h.ticker;",
+  "tags": [
+    "bloomberg",
+    "date-manipulation",
+    "finance",
+    "medium"
+  ],
+  "related_questions": [
+    "sql-bloomberg-stock-monthly-change",
+    "sql-bloomberg-underperforming-stocks"
+  ],
+  "sources": [
+    [
+      "DataLemur page (free)",
+      "https://datalemur.com/questions/sql-bloomberg-stock-min-max-1"
+    ],
+    [
+      "DataLemur PDF",
+      "Page 54"
+    ]
+  ],
+  "test_cases": [
+    {
+      "test_case_id": "tc_1_baseline",
+      "description": "Baseline sample input data from problem description",
+      "input_data": {
+        "stock_prices": [
+          {
+            "date": "01/31/2023 00:00:00",
+            "ticker": "AAPL",
+            "open": "142.28",
+            "high": "142.70",
+            "low": "144.34",
+            "close": "144.29"
+          },
+          {
+            "date": "02/28/2023 00:00:00",
+            "ticker": "AAPL",
+            "open": "146.83",
+            "high": "147.05",
+            "low": "149.08",
+            "close": "147.41"
+          },
+          {
+            "date": "03/31/2023 00:00:00",
+            "ticker": "AAPL",
+            "open": "161.91",
+            "high": "162.44",
+            "low": "165.00",
+            "close": "164.90"
+          },
+          {
+            "date": "04/30/2023 00:00:00",
+            "ticker": "AAPL",
+            "open": "167.88",
+            "high": "168.49",
+            "low": "169.85",
+            "close": "169.68"
+          },
+          {
+            "date": "05/31/2023 00:00:00",
+            "ticker": "AAPL",
+            "open": "176.76",
+            "high": "177.33",
+            "low": "179.35",
+            "close": "177.25"
+          }
+        ]
+      },
+      "expected_output": [
+        {
+          "ticker": "AAPL",
+          "highest_mth": "May-2023",
+          "highest_open": 176.76,
+          "lowest_mth": "Jan-2023",
+          "lowest_open": 142.28
+        }
+      ],
+      "category": "normal"
+    },
+    {
+      "test_case_id": "tc_2_high_volume",
+      "description": "Multiple entities with scaled volume and multi-group distributions",
+      "input_data": {
+        "stock_prices": [
+          {
+            "date": "01/31/2023 00:00:00",
+            "ticker": "AAPL",
+            "open": "142.28",
+            "high": "142.70",
+            "low": "144.34",
+            "close": "144.29"
+          },
+          {
+            "date": "02/28/2023 00:00:00",
+            "ticker": "AAPL",
+            "open": "146.83",
+            "high": "147.05",
+            "low": "149.08",
+            "close": "147.41"
+          },
+          {
+            "date": "03/31/2023 00:00:00",
+            "ticker": "AAPL",
+            "open": "161.91",
+            "high": "162.44",
+            "low": "165.00",
+            "close": "164.90"
+          },
+          {
+            "date": "04/30/2023 00:00:00",
+            "ticker": "AAPL",
+            "open": "167.88",
+            "high": "168.49",
+            "low": "169.85",
+            "close": "169.68"
+          },
+          {
+            "date": "05/31/2023 00:00:00",
+            "ticker": "AAPL",
+            "open": "176.76",
+            "high": "177.33",
+            "low": "179.35",
+            "close": "177.25"
+          },
+          {
+            "date": "01/28/2023 00:00:00",
+            "ticker": "AAPL",
+            "open": "142.28",
+            "high": "142.70",
+            "low": "144.34",
+            "close": "144.29"
+          },
+          {
+            "date": "02/28/2023 00:00:00",
+            "ticker": "AAPL",
+            "open": "146.83",
+            "high": "147.05",
+            "low": "149.08",
+            "close": "147.41"
+          },
+          {
+            "date": "03/28/2023 00:00:00",
+            "ticker": "AAPL",
+            "open": "161.91",
+            "high": "162.44",
+            "low": "165.00",
+            "close": "164.90"
+          },
+          {
+            "date": "04/28/2023 00:00:00",
+            "ticker": "AAPL",
+            "open": "167.88",
+            "high": "168.49",
+            "low": "169.85",
+            "close": "169.68"
+          },
+          {
+            "date": "05/28/2023 00:00:00",
+            "ticker": "AAPL",
+            "open": "176.76",
+            "high": "177.33",
+            "low": "179.35",
+            "close": "177.25"
+          }
+        ]
+      },
+      "expected_output": [
+        {
+          "ticker": "AAPL",
+          "highest_mth": "May-2023",
+          "highest_open": 176.76,
+          "lowest_mth": "Jan-2023",
+          "lowest_open": 142.28
+        }
+      ],
+      "category": "volume"
+    },
+    {
+      "test_case_id": "tc_3_disqualifying_rows",
+      "description": "Dataset containing disqualifying rows, edge values, and cancelled/zero records",
+      "input_data": {
+        "stock_prices": [
+          {
+            "date": "01/31/2023 00:00:00",
+            "ticker": "AAPL",
+            "open": "142.28",
+            "high": "142.70",
+            "low": "144.34",
+            "close": "144.29"
+          },
+          {
+            "date": "02/28/2023 00:00:00",
+            "ticker": "AAPL",
+            "open": "146.83",
+            "high": "147.05",
+            "low": "149.08",
+            "close": "147.41"
+          },
+          {
+            "date": "03/31/2023 00:00:00",
+            "ticker": "AAPL",
+            "open": "161.91",
+            "high": "162.44",
+            "low": "165.00",
+            "close": "164.90"
+          },
+          {
+            "date": "04/30/2023 00:00:00",
+            "ticker": "AAPL",
+            "open": "167.88",
+            "high": "168.49",
+            "low": "169.85",
+            "close": "169.68"
+          },
+          {
+            "date": "05/31/2023 00:00:00",
+            "ticker": "AAPL",
+            "open": "176.76",
+            "high": "177.33",
+            "low": "179.35",
+            "close": "177.25"
+          },
+          {
+            "date": "01/28/2018 00:00:00",
+            "ticker": "AAPL",
+            "open": "142.28",
+            "high": "142.70",
+            "low": "144.34",
+            "close": "144.29"
+          },
+          {
+            "date": "02/28/2018 00:00:00",
+            "ticker": "AAPL",
+            "open": "146.83",
+            "high": "147.05",
+            "low": "149.08",
+            "close": "147.41"
+          }
+        ]
+      },
+      "expected_output": [
+        {
+          "ticker": "AAPL",
+          "highest_mth": "May-2023",
+          "highest_open": 176.76,
+          "lowest_mth": "Jan-2023",
+          "lowest_open": 142.28
+        }
+      ],
+      "category": "edge"
+    },
+    {
+      "test_case_id": "tc_4_empty_result",
+      "description": "Input where no rows satisfy problem criteria, verifying empty result handling",
+      "input_data": {
+        "stock_prices": []
+      },
+      "expected_output": [],
+      "category": "edge"
+    },
+    {
+      "test_case_id": "tc_5_ties_and_nulls",
+      "description": "Tied ranking metrics, unmatched join keys, and NULL values in nullable attributes",
+      "input_data": {
+        "stock_prices": [
+          {
+            "date": "01/31/2023 00:00:00",
+            "ticker": "AAPL",
+            "open": "142.28",
+            "high": "142.70",
+            "low": "144.34",
+            "close": "144.29"
+          },
+          {
+            "date": "02/28/2023 00:00:00",
+            "ticker": "AAPL",
+            "open": "146.83",
+            "high": "147.05",
+            "low": "149.08",
+            "close": "147.41"
+          },
+          {
+            "date": "03/31/2023 00:00:00",
+            "ticker": "AAPL",
+            "open": "161.91",
+            "high": "162.44",
+            "low": "165.00",
+            "close": "164.90"
+          },
+          {
+            "date": "04/30/2023 00:00:00",
+            "ticker": "AAPL",
+            "open": "167.88",
+            "high": "168.49",
+            "low": "169.85",
+            "close": "169.68"
+          },
+          {
+            "date": "05/31/2023 00:00:00",
+            "ticker": "AAPL",
+            "open": "176.76",
+            "high": "177.33",
+            "low": "179.35",
+            "close": "177.25"
+          },
+          {
+            "date": "01/31/2023 00:00:00",
+            "ticker": "AAPL",
+            "open": "142.28",
+            "high": "142.70",
+            "low": "144.34",
+            "close": "144.29"
+          },
+          {
+            "date": "02/28/2023 00:00:00",
+            "ticker": "AAPL",
+            "open": "146.83",
+            "high": "147.05",
+            "low": "149.08",
+            "close": "147.41"
+          }
+        ]
+      },
+      "expected_output": [
+        {
+          "ticker": "AAPL",
+          "highest_mth": "May-2023",
+          "highest_open": 176.76,
+          "lowest_mth": "Jan-2023",
+          "lowest_open": 142.28
+        }
+      ],
+      "category": "edge"
+    }
+  ],
+  "order_sensitive": true,
+  "expected_output": [
+    {
+      "ticker": "AAPL",
+      "highest_mth": "May-2023",
+      "highest_open": 176.76,
+      "lowest_mth": "Jan-2023",
+      "lowest_open": 142.28
+    }
+  ]
+}

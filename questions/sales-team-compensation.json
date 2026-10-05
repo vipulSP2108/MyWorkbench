@@ -1,0 +1,440 @@
+{
+  "question_id": "q_068_sales_team_compensation",
+  "slug": "sales-team-compensation",
+  "title": "Sales Team Compensation",
+  "difficulty": "Medium",
+  "company": "Oracle",
+  "premium": true,
+  "question": "As the Sales Operations Analyst at Oracle, you must help the VP of Sales work out the final compensation earned by each salesperson for the year. The structure is a fixed base salary, a commission based on total deals, and possible accelerators for beating quota.\n\nEach salesperson earns a fixed base salary plus a percentage commission on their total deals. If they beat their quota, any sales after that receive an accelerator: a higher commission rate applied to the commissions after they hit the quota.\n\nWrite a query that calculates total compensation per salesperson. Output the employee ID and total compensation, sorted in descending order; in the case of ties, sort employee IDs ascending.",
+  "notes": [],
+  "tables": [
+    {
+      "table_name": "employee_contract",
+      "columns": [
+        {
+          "column_name": "employee_id",
+          "data_type": "INT"
+        },
+        {
+          "column_name": "base",
+          "data_type": "INT"
+        },
+        {
+          "column_name": "commission",
+          "data_type": "DOUBLE"
+        },
+        {
+          "column_name": "quota",
+          "data_type": "INT"
+        },
+        {
+          "column_name": "accelerator",
+          "data_type": "DOUBLE"
+        }
+      ]
+    },
+    {
+      "table_name": "deals",
+      "columns": [
+        {
+          "column_name": "employee_id",
+          "data_type": "INT"
+        },
+        {
+          "column_name": "deal_size",
+          "data_type": "INT"
+        }
+      ]
+    }
+  ],
+  "sample_data": {
+    "employee_contract": [
+      {
+        "employee_id": 101,
+        "base": 60000,
+        "commission": 0.1,
+        "quota": 500000,
+        "accelerator": 1.5
+      },
+      {
+        "employee_id": 102,
+        "base": 50000,
+        "commission": 0.1,
+        "quota": 400000,
+        "accelerator": 1.5
+      }
+    ],
+    "deals": [
+      {
+        "employee_id": 101,
+        "deal_size": 400000
+      },
+      {
+        "employee_id": 101,
+        "deal_size": 400000
+      },
+      {
+        "employee_id": 102,
+        "deal_size": 100000
+      },
+      {
+        "employee_id": 102,
+        "deal_size": 200000
+      }
+    ]
+  },
+  "sample_output": [
+    {
+      "employee_id": 101,
+      "total_compensation": 155000
+    },
+    {
+      "employee_id": 102,
+      "total_compensation": 80000
+    }
+  ],
+  "reference_sql": "WITH deal_totals AS (\n  SELECT employee_id, SUM(deal_size) AS total_deals\n  FROM deals\n  GROUP BY employee_id\n)\nSELECT \n  c.employee_id,\n  ROUND(c.base + \n    CASE \n      WHEN IFNULL(d.total_deals, 0) >= c.quota THEN (c.commission * c.quota) + (c.accelerator * (d.total_deals - c.quota))\n      ELSE c.commission * IFNULL(d.total_deals, 0)\n    END, 2) AS total_compensation\nFROM employee_contract c\nLEFT JOIN deal_totals d ON c.employee_id = d.employee_id\nORDER BY total_compensation DESC, c.employee_id;",
+  "tags": [
+    "aggregation",
+    "conditional-logic",
+    "cte",
+    "date-manipulation",
+    "ecommerce",
+    "finance",
+    "hr",
+    "join",
+    "left-join",
+    "math",
+    "medium",
+    "oracle"
+  ],
+  "related_questions": [],
+  "sources": [
+    [
+      "DataLemur blog: 10 Oracle SQL questions (#2)",
+      "https://datalemur.com/blog/oracle-sql-interview-questions"
+    ],
+    [
+      "DataLemur page (locked)",
+      "https://datalemur.com/questions/sales-team-compensation"
+    ],
+    [
+      "DataLemur PDF",
+      "Page 72"
+    ]
+  ],
+  "test_cases": [
+    {
+      "test_case_id": "tc_1_baseline",
+      "description": "Baseline sample input data from problem description",
+      "input_data": {
+        "employee_contract": [
+          {
+            "employee_id": 101,
+            "base": 60000,
+            "commission": 0.1,
+            "quota": 500000,
+            "accelerator": 1.5
+          },
+          {
+            "employee_id": 102,
+            "base": 50000,
+            "commission": 0.1,
+            "quota": 400000,
+            "accelerator": 1.5
+          }
+        ],
+        "deals": [
+          {
+            "employee_id": 101,
+            "deal_size": 400000
+          },
+          {
+            "employee_id": 101,
+            "deal_size": 400000
+          },
+          {
+            "employee_id": 102,
+            "deal_size": 100000
+          },
+          {
+            "employee_id": 102,
+            "deal_size": 200000
+          }
+        ]
+      },
+      "expected_output": [
+        {
+          "employee_id": 101,
+          "total_compensation": 560000.0
+        },
+        {
+          "employee_id": 102,
+          "total_compensation": 80000.0
+        }
+      ],
+      "category": "normal"
+    },
+    {
+      "test_case_id": "tc_2_high_volume",
+      "description": "Multiple entities with scaled volume and multi-group distributions",
+      "input_data": {
+        "employee_contract": [
+          {
+            "employee_id": 101,
+            "base": 60000,
+            "commission": 0.1,
+            "quota": 500000,
+            "accelerator": 1.5
+          },
+          {
+            "employee_id": 102,
+            "base": 50000,
+            "commission": 0.1,
+            "quota": 400000,
+            "accelerator": 1.5
+          },
+          {
+            "employee_id": 1101,
+            "base": 60000,
+            "commission": 0.1,
+            "quota": 500000,
+            "accelerator": 1.5
+          },
+          {
+            "employee_id": 1102,
+            "base": 50000,
+            "commission": 0.1,
+            "quota": 400000,
+            "accelerator": 1.5
+          }
+        ],
+        "deals": [
+          {
+            "employee_id": 101,
+            "deal_size": 400000
+          },
+          {
+            "employee_id": 101,
+            "deal_size": 400000
+          },
+          {
+            "employee_id": 102,
+            "deal_size": 100000
+          },
+          {
+            "employee_id": 102,
+            "deal_size": 200000
+          },
+          {
+            "employee_id": 1101,
+            "deal_size": 400000
+          },
+          {
+            "employee_id": 1101,
+            "deal_size": 400000
+          },
+          {
+            "employee_id": 1102,
+            "deal_size": 100000
+          },
+          {
+            "employee_id": 1102,
+            "deal_size": 200000
+          }
+        ]
+      },
+      "expected_output": [
+        {
+          "employee_id": 101,
+          "total_compensation": 560000.0
+        },
+        {
+          "employee_id": 1101,
+          "total_compensation": 560000.0
+        },
+        {
+          "employee_id": 102,
+          "total_compensation": 80000.0
+        },
+        {
+          "employee_id": 1102,
+          "total_compensation": 80000.0
+        }
+      ],
+      "category": "volume"
+    },
+    {
+      "test_case_id": "tc_3_disqualifying_rows",
+      "description": "Dataset containing disqualifying rows, edge values, and cancelled/zero records",
+      "input_data": {
+        "employee_contract": [
+          {
+            "employee_id": 101,
+            "base": 60000,
+            "commission": 0.1,
+            "quota": 500000,
+            "accelerator": 1.5
+          },
+          {
+            "employee_id": 102,
+            "base": 50000,
+            "commission": 0.1,
+            "quota": 400000,
+            "accelerator": 1.5
+          },
+          {
+            "employee_id": 5101,
+            "base": 60000,
+            "commission": 0.1,
+            "quota": 500000,
+            "accelerator": 1.5
+          }
+        ],
+        "deals": [
+          {
+            "employee_id": 101,
+            "deal_size": 400000
+          },
+          {
+            "employee_id": 101,
+            "deal_size": 400000
+          },
+          {
+            "employee_id": 102,
+            "deal_size": 100000
+          },
+          {
+            "employee_id": 102,
+            "deal_size": 200000
+          },
+          {
+            "employee_id": 5101,
+            "deal_size": 400000
+          },
+          {
+            "employee_id": 5101,
+            "deal_size": 400000
+          }
+        ]
+      },
+      "expected_output": [
+        {
+          "employee_id": 101,
+          "total_compensation": 560000.0
+        },
+        {
+          "employee_id": 5101,
+          "total_compensation": 560000.0
+        },
+        {
+          "employee_id": 102,
+          "total_compensation": 80000.0
+        }
+      ],
+      "category": "edge"
+    },
+    {
+      "test_case_id": "tc_4_empty_result",
+      "description": "Input where no rows satisfy problem criteria, verifying empty result handling",
+      "input_data": {
+        "employee_contract": [],
+        "deals": []
+      },
+      "expected_output": [],
+      "category": "edge"
+    },
+    {
+      "test_case_id": "tc_5_ties_and_nulls",
+      "description": "Tied ranking metrics, unmatched join keys, and NULL values in nullable attributes",
+      "input_data": {
+        "employee_contract": [
+          {
+            "employee_id": 101,
+            "base": 60000,
+            "commission": 0.1,
+            "quota": 500000,
+            "accelerator": 1.5
+          },
+          {
+            "employee_id": 102,
+            "base": 50000,
+            "commission": 0.1,
+            "quota": 400000,
+            "accelerator": 1.5
+          },
+          {
+            "employee_id": 9101,
+            "base": 60000,
+            "commission": 0.1,
+            "quota": 500000,
+            "accelerator": 1.5
+          },
+          {
+            "employee_id": 9602,
+            "base": 50000,
+            "commission": 0.1,
+            "quota": 400000,
+            "accelerator": 1.5
+          }
+        ],
+        "deals": [
+          {
+            "employee_id": 101,
+            "deal_size": 400000
+          },
+          {
+            "employee_id": 101,
+            "deal_size": 400000
+          },
+          {
+            "employee_id": 102,
+            "deal_size": 100000
+          },
+          {
+            "employee_id": 102,
+            "deal_size": 200000
+          },
+          {
+            "employee_id": 9101,
+            "deal_size": 400000
+          },
+          {
+            "employee_id": 9601,
+            "deal_size": 400000
+          }
+        ]
+      },
+      "expected_output": [
+        {
+          "employee_id": 101,
+          "total_compensation": 560000.0
+        },
+        {
+          "employee_id": 9101,
+          "total_compensation": 100000.0
+        },
+        {
+          "employee_id": 102,
+          "total_compensation": 80000.0
+        },
+        {
+          "employee_id": 9602,
+          "total_compensation": 50000.0
+        }
+      ],
+      "category": "edge"
+    }
+  ],
+  "order_sensitive": true,
+  "expected_output": [
+    {
+      "employee_id": 101,
+      "total_compensation": 560000.0
+    },
+    {
+      "employee_id": 102,
+      "total_compensation": 80000.0
+    }
+  ]
+}

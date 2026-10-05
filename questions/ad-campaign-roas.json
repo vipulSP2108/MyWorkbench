@@ -1,0 +1,278 @@
+{
+  "question_id": "q_030_ad_campaign_roas",
+  "slug": "ad-campaign-roas",
+  "title": "Ad Campaign ROAS",
+  "difficulty": "Easy",
+  "company": "Google",
+  "premium": true,
+  "question": "Google evaluates campaign efficiency using Return on Ad Spend (ROAS = Total Revenue / Total Spend).\n\nWrite a query to calculate total ROAS for each advertiser across all their ad campaigns. Output the advertiser ID and ROAS rounded to 2 decimal places, ordered by advertiser ID ascending.",
+  "notes": [],
+  "tables": [
+    {
+      "table_name": "ad_campaigns",
+      "columns": [
+        {
+          "column_name": "campaign_id",
+          "data_type": "INT"
+        },
+        {
+          "column_name": "spend",
+          "data_type": "DECIMAL(10,2)"
+        },
+        {
+          "column_name": "revenue",
+          "data_type": "DECIMAL(10,2)"
+        },
+        {
+          "column_name": "advertiser_id",
+          "data_type": "INT"
+        }
+      ]
+    }
+  ],
+  "sample_data": {
+    "ad_campaigns": [
+      {
+        "campaign_id": 1,
+        "spend": "1000.00",
+        "revenue": "900.00",
+        "advertiser_id": 1
+      },
+      {
+        "campaign_id": 2,
+        "spend": "3000.00",
+        "revenue": "12000.00",
+        "advertiser_id": 2
+      },
+      {
+        "campaign_id": 3,
+        "spend": "5000.00",
+        "revenue": "7500.00",
+        "advertiser_id": 3
+      }
+    ]
+  },
+  "sample_output": [
+    {
+      "advertiser_id": 1,
+      "roas": "0.90"
+    },
+    {
+      "advertiser_id": 2,
+      "roas": "4.00"
+    },
+    {
+      "advertiser_id": 3,
+      "roas": "1.50"
+    }
+  ],
+  "reference_sql": "SELECT advertiser_id,\n       ROUND(SUM(revenue) / SUM(spend), 2) AS roas\nFROM ad_campaigns\nGROUP BY advertiser_id\nORDER BY advertiser_id;",
+  "tags": [
+    "aggregation",
+    "easy",
+    "ecommerce",
+    "finance",
+    "google",
+    "math"
+  ],
+  "related_questions": [],
+  "sources": [
+    [
+      "Text supplied by you (not checkable against the locked page)",
+      "https://datalemur.com/questions/ad-campaign-roas"
+    ],
+    [
+      "DataLemur PDF",
+      "Page 34"
+    ]
+  ],
+  "test_cases": [
+    {
+      "test_case_id": "tc_1_baseline",
+      "description": "Baseline sample input data from problem description",
+      "input_data": {
+        "ad_campaigns": [
+          {
+            "campaign_id": 1,
+            "spend": "1000.00",
+            "revenue": "900.00",
+            "advertiser_id": 1
+          },
+          {
+            "campaign_id": 2,
+            "spend": "3000.00",
+            "revenue": "12000.00",
+            "advertiser_id": 2
+          },
+          {
+            "campaign_id": 3,
+            "spend": "5000.00",
+            "revenue": "7500.00",
+            "advertiser_id": 3
+          }
+        ]
+      },
+      "expected_output": [
+        {
+          "advertiser_id": 1,
+          "roas": 0.9
+        },
+        {
+          "advertiser_id": 2,
+          "roas": 4.0
+        },
+        {
+          "advertiser_id": 3,
+          "roas": 1.5
+        }
+      ],
+      "category": "normal"
+    },
+    {
+      "test_case_id": "tc_2_high_volume",
+      "description": "Multiple entities with scaled volume and multi-group distributions",
+      "input_data": {
+        "ad_campaigns": [
+          {
+            "campaign_id": 1,
+            "spend": "1000.00",
+            "revenue": "900.00",
+            "advertiser_id": 1
+          },
+          {
+            "campaign_id": 2,
+            "spend": "3000.00",
+            "revenue": "12000.00",
+            "advertiser_id": 2
+          },
+          {
+            "campaign_id": 3,
+            "spend": "5000.00",
+            "revenue": "7500.00",
+            "advertiser_id": 3
+          },
+          {
+            "campaign_id": 1001,
+            "spend": 1500.0,
+            "revenue": 1350.0,
+            "advertiser_id": 1001
+          },
+          {
+            "campaign_id": 1002,
+            "spend": 4500.0,
+            "revenue": 18000.0,
+            "advertiser_id": 1002
+          },
+          {
+            "campaign_id": 1003,
+            "spend": 7500.0,
+            "revenue": 11250.0,
+            "advertiser_id": 1003
+          }
+        ]
+      },
+      "expected_output": [
+        {
+          "advertiser_id": 1,
+          "roas": 0.9
+        },
+        {
+          "advertiser_id": 2,
+          "roas": 4.0
+        },
+        {
+          "advertiser_id": 3,
+          "roas": 1.5
+        },
+        {
+          "advertiser_id": 1001,
+          "roas": 0.9
+        },
+        {
+          "advertiser_id": 1002,
+          "roas": 4.0
+        },
+        {
+          "advertiser_id": 1003,
+          "roas": 1.5
+        }
+      ],
+      "category": "volume"
+    },
+    {
+      "test_case_id": "tc_3_disqualifying_rows",
+      "description": "Dataset containing disqualifying rows, edge values, and cancelled/zero records",
+      "input_data": {
+        "ad_campaigns": [
+          {
+            "campaign_id": 1,
+            "spend": "1000.00",
+            "revenue": "900.00",
+            "advertiser_id": 1
+          },
+          {
+            "campaign_id": 2,
+            "spend": "3000.00",
+            "revenue": "12000.00",
+            "advertiser_id": 2
+          },
+          {
+            "campaign_id": 3,
+            "spend": "5000.00",
+            "revenue": "7500.00",
+            "advertiser_id": 3
+          },
+          {
+            "campaign_id": 5001,
+            "spend": 0,
+            "revenue": "900.00",
+            "advertiser_id": 5001
+          }
+        ]
+      },
+      "expected_output": [
+        {
+          "advertiser_id": 1,
+          "roas": 0.9
+        },
+        {
+          "advertiser_id": 2,
+          "roas": 4.0
+        },
+        {
+          "advertiser_id": 3,
+          "roas": 1.5
+        },
+        {
+          "advertiser_id": 5001,
+          "roas": null
+        }
+      ],
+      "category": "edge"
+    },
+    {
+      "test_case_id": "tc_4_empty_result",
+      "description": "Input where no rows satisfy problem criteria, verifying empty result handling",
+      "input_data": {
+        "ad_campaigns": []
+      },
+      "expected_output": [],
+      "category": "edge"
+    }
+  ],
+  "order_sensitive": true,
+  "expected_output": [
+    {
+      "advertiser_id": 1,
+      "roas": 0.9
+    },
+    {
+      "advertiser_id": 2,
+      "roas": 4.0
+    },
+    {
+      "advertiser_id": 3,
+      "roas": 1.5
+    }
+  ]
+}

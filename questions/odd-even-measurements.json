@@ -1,0 +1,363 @@
+{
+  "question_id": "q_048_odd_even_measurements",
+  "slug": "odd-even-measurements",
+  "title": "Odd and Even Measurements",
+  "difficulty": "Medium",
+  "company": "Google",
+  "premium": false,
+  "question": "Assume you're given a table with measurement values obtained from a Google sensor over multiple days with measurements taken multiple times within each day.\n\nWrite a query to calculate the sum of odd-numbered and even-numbered measurements separately for a particular day and display the results in two different columns. Refer to the Example Output below for the desired format.\n\nDefinition:\n\n*Effective April 15th, 2023, the question and solution for this question have been revised.*",
+  "notes": [
+    "Within a day, measurements taken at 1st, 3rd, and 5th times are considered odd-numbered measurements, and measurements taken at 2nd, 4th, and 6th times are considered even-numbered measurements.",
+    "Based on the results,",
+    "On 07/10/2022, the sum of the odd-numbered measurements is 2355.75, while the sum of the even-numbered measurements is 1662.74.",
+    "On 07/11/2022, there are only two measurements available. The sum of the odd-numbered measurements is 1124.50, and the sum of the even-numbered measurements is 1234.14.",
+    "The dataset you are querying against may have different input & output - this is just an example!",
+    "p.s. read this blog post for more Google SQL Interview Questions"
+  ],
+  "tables": [
+    {
+      "table_name": "measurements",
+      "columns": [
+        {
+          "column_name": "measurement_id",
+          "data_type": "INT"
+        },
+        {
+          "column_name": "measurement_value",
+          "data_type": "DECIMAL(10,2)"
+        },
+        {
+          "column_name": "measurement_time",
+          "data_type": "DATETIME"
+        }
+      ]
+    }
+  ],
+  "sample_data": {
+    "measurements": [
+      {
+        "measurement_id": "131233",
+        "measurement_value": "1109.51",
+        "measurement_time": "07/10/2022 09:00:00"
+      },
+      {
+        "measurement_id": "135211",
+        "measurement_value": "1662.74",
+        "measurement_time": "07/10/2022 11:00:00"
+      },
+      {
+        "measurement_id": "523542",
+        "measurement_value": "1246.24",
+        "measurement_time": "07/10/2022 13:15:00"
+      },
+      {
+        "measurement_id": "143562",
+        "measurement_value": "1124.50",
+        "measurement_time": "07/11/2022 15:00:00"
+      },
+      {
+        "measurement_id": "346462",
+        "measurement_value": "1234.14",
+        "measurement_time": "07/11/2022 16:45:00"
+      }
+    ]
+  },
+  "sample_output": [
+    {
+      "measurement_day": "07/10/2022 00:00:00",
+      "odd_sum": "2355.75",
+      "even_sum": "1662.74"
+    },
+    {
+      "measurement_day": "07/11/2022 00:00:00",
+      "odd_sum": "1124.50",
+      "even_sum": "1234.14"
+    }
+  ],
+  "reference_sql": "WITH ranked AS (\n  SELECT \n    CAST(measurement_time AS DATE) AS measurement_day,\n    measurement_value,\n    ROW_NUMBER() OVER (PARTITION BY CAST(measurement_time AS DATE) ORDER BY measurement_time) AS rn\n  FROM measurements\n)\nSELECT \n  measurement_day,\n  SUM(CASE WHEN rn % 2 = 1 THEN measurement_value ELSE 0 END) AS odd_sum,\n  SUM(CASE WHEN rn % 2 = 0 THEN measurement_value ELSE 0 END) AS even_sum\nFROM ranked\nGROUP BY measurement_day\nORDER BY measurement_day;",
+  "tags": [
+    "aggregation",
+    "date-manipulation",
+    "google",
+    "medium"
+  ],
+  "related_questions": [],
+  "sources": [
+    [
+      "DataLemur page (free)",
+      "https://datalemur.com/questions/odd-even-measurements"
+    ],
+    [
+      "DataLemur PDF",
+      "Page 52"
+    ]
+  ],
+  "test_cases": [
+    {
+      "test_case_id": "tc_1_baseline",
+      "description": "Baseline sample input data from problem description",
+      "input_data": {
+        "measurements": [
+          {
+            "measurement_id": "131233",
+            "measurement_value": "1109.51",
+            "measurement_time": "07/10/2022 09:00:00"
+          },
+          {
+            "measurement_id": "135211",
+            "measurement_value": "1662.74",
+            "measurement_time": "07/10/2022 11:00:00"
+          },
+          {
+            "measurement_id": "523542",
+            "measurement_value": "1246.24",
+            "measurement_time": "07/10/2022 13:15:00"
+          },
+          {
+            "measurement_id": "143562",
+            "measurement_value": "1124.50",
+            "measurement_time": "07/11/2022 15:00:00"
+          },
+          {
+            "measurement_id": "346462",
+            "measurement_value": "1234.14",
+            "measurement_time": "07/11/2022 16:45:00"
+          }
+        ]
+      },
+      "expected_output": [
+        {
+          "measurement_day": "2022-07-10",
+          "odd_sum": 2355.75,
+          "even_sum": 1662.74
+        },
+        {
+          "measurement_day": "2022-07-11",
+          "odd_sum": 1124.5,
+          "even_sum": 1234.14
+        }
+      ],
+      "category": "normal"
+    },
+    {
+      "test_case_id": "tc_2_high_volume",
+      "description": "Multiple entities with scaled volume and multi-group distributions",
+      "input_data": {
+        "measurements": [
+          {
+            "measurement_id": "131233",
+            "measurement_value": "1109.51",
+            "measurement_time": "07/10/2022 09:00:00"
+          },
+          {
+            "measurement_id": "135211",
+            "measurement_value": "1662.74",
+            "measurement_time": "07/10/2022 11:00:00"
+          },
+          {
+            "measurement_id": "523542",
+            "measurement_value": "1246.24",
+            "measurement_time": "07/10/2022 13:15:00"
+          },
+          {
+            "measurement_id": "143562",
+            "measurement_value": "1124.50",
+            "measurement_time": "07/11/2022 15:00:00"
+          },
+          {
+            "measurement_id": "346462",
+            "measurement_value": "1234.14",
+            "measurement_time": "07/11/2022 16:45:00"
+          },
+          {
+            "measurement_id": 132233,
+            "measurement_value": "1109.51",
+            "measurement_time": "07/15/2022 09:00:00"
+          },
+          {
+            "measurement_id": 136211,
+            "measurement_value": "1662.74",
+            "measurement_time": "07/15/2022 11:00:00"
+          },
+          {
+            "measurement_id": 524542,
+            "measurement_value": "1246.24",
+            "measurement_time": "07/15/2022 13:15:00"
+          },
+          {
+            "measurement_id": 144562,
+            "measurement_value": "1124.50",
+            "measurement_time": "07/16/2022 15:00:00"
+          },
+          {
+            "measurement_id": 347462,
+            "measurement_value": "1234.14",
+            "measurement_time": "07/16/2022 16:45:00"
+          }
+        ]
+      },
+      "expected_output": [
+        {
+          "measurement_day": "2022-07-10",
+          "odd_sum": 2355.75,
+          "even_sum": 1662.74
+        },
+        {
+          "measurement_day": "2022-07-11",
+          "odd_sum": 1124.5,
+          "even_sum": 1234.14
+        },
+        {
+          "measurement_day": "2022-07-15",
+          "odd_sum": 2355.75,
+          "even_sum": 1662.74
+        },
+        {
+          "measurement_day": "2022-07-16",
+          "odd_sum": 1124.5,
+          "even_sum": 1234.14
+        }
+      ],
+      "category": "volume"
+    },
+    {
+      "test_case_id": "tc_3_disqualifying_rows",
+      "description": "Dataset containing disqualifying rows, edge values, and cancelled/zero records",
+      "input_data": {
+        "measurements": [
+          {
+            "measurement_id": "131233",
+            "measurement_value": "1109.51",
+            "measurement_time": "07/10/2022 09:00:00"
+          },
+          {
+            "measurement_id": "135211",
+            "measurement_value": "1662.74",
+            "measurement_time": "07/10/2022 11:00:00"
+          },
+          {
+            "measurement_id": "523542",
+            "measurement_value": "1246.24",
+            "measurement_time": "07/10/2022 13:15:00"
+          },
+          {
+            "measurement_id": "143562",
+            "measurement_value": "1124.50",
+            "measurement_time": "07/11/2022 15:00:00"
+          },
+          {
+            "measurement_id": "346462",
+            "measurement_value": "1234.14",
+            "measurement_time": "07/11/2022 16:45:00"
+          },
+          {
+            "measurement_id": 136233,
+            "measurement_value": "1109.51",
+            "measurement_time": "07/10/2017 09:00:00"
+          },
+          {
+            "measurement_id": 140211,
+            "measurement_value": "1662.74",
+            "measurement_time": "07/10/2017 11:00:00"
+          }
+        ]
+      },
+      "expected_output": [
+        {
+          "measurement_day": "2017-07-10",
+          "odd_sum": 1109.51,
+          "even_sum": 1662.74
+        },
+        {
+          "measurement_day": "2022-07-10",
+          "odd_sum": 2355.75,
+          "even_sum": 1662.74
+        },
+        {
+          "measurement_day": "2022-07-11",
+          "odd_sum": 1124.5,
+          "even_sum": 1234.14
+        }
+      ],
+      "category": "edge"
+    },
+    {
+      "test_case_id": "tc_4_empty_result",
+      "description": "Input where no rows satisfy problem criteria, verifying empty result handling",
+      "input_data": {
+        "measurements": []
+      },
+      "expected_output": [],
+      "category": "edge"
+    },
+    {
+      "test_case_id": "tc_5_ties_and_nulls",
+      "description": "Tied ranking metrics, unmatched join keys, and NULL values in nullable attributes",
+      "input_data": {
+        "measurements": [
+          {
+            "measurement_id": "131233",
+            "measurement_value": "1109.51",
+            "measurement_time": "07/10/2022 09:00:00"
+          },
+          {
+            "measurement_id": "135211",
+            "measurement_value": "1662.74",
+            "measurement_time": "07/10/2022 11:00:00"
+          },
+          {
+            "measurement_id": "523542",
+            "measurement_value": "1246.24",
+            "measurement_time": "07/10/2022 13:15:00"
+          },
+          {
+            "measurement_id": "143562",
+            "measurement_value": "1124.50",
+            "measurement_time": "07/11/2022 15:00:00"
+          },
+          {
+            "measurement_id": "346462",
+            "measurement_value": "1234.14",
+            "measurement_time": "07/11/2022 16:45:00"
+          },
+          {
+            "measurement_id": 140233,
+            "measurement_value": "1109.51",
+            "measurement_time": "07/10/2022 09:00:00"
+          },
+          {
+            "measurement_id": 144711,
+            "measurement_value": "1662.74",
+            "measurement_time": "07/10/2022 11:00:00"
+          }
+        ]
+      },
+      "expected_output": [
+        {
+          "measurement_day": "2022-07-10",
+          "odd_sum": 4018.49,
+          "even_sum": 2772.25
+        },
+        {
+          "measurement_day": "2022-07-11",
+          "odd_sum": 1124.5,
+          "even_sum": 1234.14
+        }
+      ],
+      "category": "edge"
+    }
+  ],
+  "order_sensitive": false,
+  "expected_output": [
+    {
+      "measurement_day": "2022-07-10",
+      "odd_sum": 2355.75,
+      "even_sum": 1662.74
+    },
+    {
+      "measurement_day": "2022-07-11",
+      "odd_sum": 1124.5,
+      "even_sum": 1234.14
+    }
+  ]
+}

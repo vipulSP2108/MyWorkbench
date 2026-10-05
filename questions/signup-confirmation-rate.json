@@ -1,0 +1,379 @@
+{
+  "question_id": "q_041_signup_confirmation_rate",
+  "slug": "signup-confirmation-rate",
+  "title": "Signup Activation Rate",
+  "difficulty": "Medium",
+  "company": "TikTok",
+  "premium": false,
+  "question": "New TikTok users sign up with their emails. They confirmed their signup by replying to the text confirmation to activate their accounts. Users may receive multiple text messages for account confirmation until they have confirmed their new account.\n\nA senior analyst is interested to know the activation rate of specified users in the emails table. Write a query to find the activation rate. Round the percentage to 2 decimal places.\n\nDefinitions:\n\nAssumptions:\n\n*Effective April 4th 2023, we added an assumption to the question to provide additional clarity.*",
+  "notes": [
+    "emails table contain the information of user signup details.",
+    "texts table contains the users' activation information.",
+    "The analyst is interested in the activation rate of specific users in the emails table, which may not include all users that could potentially be found in the texts table.",
+    "For example, user 123 in the emails table may not be in the texts table and vice versa.",
+    "'Confirmed' in signup_action means the user has activated their account and successfully completed the signup process.",
+    "67% of users have successfully completed their signup and activated their accounts. The remaining 33% have not yet replied to the text to confirm their signup.",
+    "The dataset you are querying against may have different input & output - this is just an example!"
+  ],
+  "tables": [
+    {
+      "table_name": "emails",
+      "columns": [
+        {
+          "column_name": "email_id",
+          "data_type": "INT"
+        },
+        {
+          "column_name": "user_id",
+          "data_type": "INT"
+        },
+        {
+          "column_name": "signup_date",
+          "data_type": "DATETIME"
+        }
+      ]
+    },
+    {
+      "table_name": "texts",
+      "columns": [
+        {
+          "column_name": "text_id",
+          "data_type": "INT"
+        },
+        {
+          "column_name": "email_id",
+          "data_type": "INT"
+        },
+        {
+          "column_name": "signup_action",
+          "data_type": "VARCHAR(255)"
+        }
+      ]
+    }
+  ],
+  "sample_data": {
+    "emails": [
+      {
+        "email_id": "125",
+        "user_id": "7771",
+        "signup_date": "06/14/2022 00:00:00"
+      },
+      {
+        "email_id": "236",
+        "user_id": "6950",
+        "signup_date": "07/01/2022 00:00:00"
+      },
+      {
+        "email_id": "433",
+        "user_id": "1052",
+        "signup_date": "07/09/2022 00:00:00"
+      }
+    ],
+    "texts": [
+      {
+        "text_id": "6878",
+        "email_id": "125",
+        "signup_action": "Confirmed"
+      },
+      {
+        "text_id": "6920",
+        "email_id": "236",
+        "signup_action": "Not Confirmed"
+      },
+      {
+        "text_id": "6994",
+        "email_id": "236",
+        "signup_action": "Confirmed"
+      }
+    ]
+  },
+  "sample_output": [
+    {
+      "confirm_rate": "0.67"
+    }
+  ],
+  "reference_sql": "SELECT \n  ROUND(COUNT(t.email_id) / COUNT(e.email_id), 2) AS confirm_rate\nFROM emails e\nLEFT JOIN texts t ON e.email_id = t.email_id AND t.signup_action = 'Confirmed';",
+  "tags": [
+    "aggregation",
+    "math",
+    "medium",
+    "tiktok"
+  ],
+  "related_questions": [],
+  "sources": [
+    [
+      "DataLemur page (free)",
+      "https://datalemur.com/questions/signup-confirmation-rate"
+    ],
+    [
+      "DataLemur PDF",
+      "Page 45"
+    ]
+  ],
+  "test_cases": [
+    {
+      "test_case_id": "tc_1_baseline",
+      "description": "Baseline sample input data from problem description",
+      "input_data": {
+        "emails": [
+          {
+            "email_id": "125",
+            "user_id": "7771",
+            "signup_date": "06/14/2022 00:00:00"
+          },
+          {
+            "email_id": "236",
+            "user_id": "6950",
+            "signup_date": "07/01/2022 00:00:00"
+          },
+          {
+            "email_id": "433",
+            "user_id": "1052",
+            "signup_date": "07/09/2022 00:00:00"
+          }
+        ],
+        "texts": [
+          {
+            "text_id": "6878",
+            "email_id": "125",
+            "signup_action": "Confirmed"
+          },
+          {
+            "text_id": "6920",
+            "email_id": "236",
+            "signup_action": "Not Confirmed"
+          },
+          {
+            "text_id": "6994",
+            "email_id": "236",
+            "signup_action": "Confirmed"
+          }
+        ]
+      },
+      "expected_output": [
+        {
+          "confirm_rate": 0.67
+        }
+      ],
+      "category": "normal"
+    },
+    {
+      "test_case_id": "tc_2_high_volume",
+      "description": "Multiple entities with scaled volume and multi-group distributions",
+      "input_data": {
+        "emails": [
+          {
+            "email_id": "125",
+            "user_id": "7771",
+            "signup_date": "06/14/2022 00:00:00"
+          },
+          {
+            "email_id": "236",
+            "user_id": "6950",
+            "signup_date": "07/01/2022 00:00:00"
+          },
+          {
+            "email_id": "433",
+            "user_id": "1052",
+            "signup_date": "07/09/2022 00:00:00"
+          },
+          {
+            "email_id": 1125,
+            "user_id": 8771,
+            "signup_date": "06/19/2022 00:00:00"
+          },
+          {
+            "email_id": 1236,
+            "user_id": 7950,
+            "signup_date": "07/06/2022 00:00:00"
+          },
+          {
+            "email_id": 1433,
+            "user_id": 2052,
+            "signup_date": "07/14/2022 00:00:00"
+          }
+        ],
+        "texts": [
+          {
+            "text_id": "6878",
+            "email_id": "125",
+            "signup_action": "Confirmed"
+          },
+          {
+            "text_id": "6920",
+            "email_id": "236",
+            "signup_action": "Not Confirmed"
+          },
+          {
+            "text_id": "6994",
+            "email_id": "236",
+            "signup_action": "Confirmed"
+          },
+          {
+            "text_id": 7878,
+            "email_id": 1125,
+            "signup_action": "Confirmed"
+          },
+          {
+            "text_id": 7920,
+            "email_id": 1236,
+            "signup_action": "Not Confirmed"
+          },
+          {
+            "text_id": 7994,
+            "email_id": 1236,
+            "signup_action": "Confirmed"
+          }
+        ]
+      },
+      "expected_output": [
+        {
+          "confirm_rate": 0.67
+        }
+      ],
+      "category": "volume"
+    },
+    {
+      "test_case_id": "tc_3_disqualifying_rows",
+      "description": "Dataset containing disqualifying rows, edge values, and cancelled/zero records",
+      "input_data": {
+        "emails": [
+          {
+            "email_id": "125",
+            "user_id": "7771",
+            "signup_date": "06/14/2022 00:00:00"
+          },
+          {
+            "email_id": "236",
+            "user_id": "6950",
+            "signup_date": "07/01/2022 00:00:00"
+          },
+          {
+            "email_id": "433",
+            "user_id": "1052",
+            "signup_date": "07/09/2022 00:00:00"
+          },
+          {
+            "email_id": 5125,
+            "user_id": 12771,
+            "signup_date": "06/14/2017 00:00:00"
+          }
+        ],
+        "texts": [
+          {
+            "text_id": "6878",
+            "email_id": "125",
+            "signup_action": "Confirmed"
+          },
+          {
+            "text_id": "6920",
+            "email_id": "236",
+            "signup_action": "Not Confirmed"
+          },
+          {
+            "text_id": "6994",
+            "email_id": "236",
+            "signup_action": "Confirmed"
+          },
+          {
+            "text_id": 11878,
+            "email_id": 5125,
+            "signup_action": "Confirmed"
+          }
+        ]
+      },
+      "expected_output": [
+        {
+          "confirm_rate": 0.75
+        }
+      ],
+      "category": "edge"
+    },
+    {
+      "test_case_id": "tc_4_empty_result",
+      "description": "Input where no rows satisfy problem criteria, verifying empty result handling",
+      "input_data": {
+        "emails": [],
+        "texts": []
+      },
+      "expected_output": [
+        {
+          "confirm_rate": null
+        }
+      ],
+      "category": "edge"
+    },
+    {
+      "test_case_id": "tc_5_ties_and_nulls",
+      "description": "Tied ranking metrics, unmatched join keys, and NULL values in nullable attributes",
+      "input_data": {
+        "emails": [
+          {
+            "email_id": "125",
+            "user_id": "7771",
+            "signup_date": "06/14/2022 00:00:00"
+          },
+          {
+            "email_id": "236",
+            "user_id": "6950",
+            "signup_date": "07/01/2022 00:00:00"
+          },
+          {
+            "email_id": "433",
+            "user_id": "1052",
+            "signup_date": "07/09/2022 00:00:00"
+          },
+          {
+            "email_id": 9125,
+            "user_id": 16771,
+            "signup_date": "06/14/2022 00:00:00"
+          },
+          {
+            "email_id": 9736,
+            "user_id": 16450,
+            "signup_date": "07/01/2022 00:00:00"
+          }
+        ],
+        "texts": [
+          {
+            "text_id": "6878",
+            "email_id": "125",
+            "signup_action": "Confirmed"
+          },
+          {
+            "text_id": "6920",
+            "email_id": "236",
+            "signup_action": "Not Confirmed"
+          },
+          {
+            "text_id": "6994",
+            "email_id": "236",
+            "signup_action": "Confirmed"
+          },
+          {
+            "text_id": 15878,
+            "email_id": 9125,
+            "signup_action": "Confirmed"
+          },
+          {
+            "text_id": 16420,
+            "email_id": 9736,
+            "signup_action": "Not Confirmed"
+          }
+        ]
+      },
+      "expected_output": [
+        {
+          "confirm_rate": 0.6
+        }
+      ],
+      "category": "edge"
+    }
+  ],
+  "order_sensitive": false,
+  "expected_output": [
+    {
+      "confirm_rate": 0.67
+    }
+  ]
+}

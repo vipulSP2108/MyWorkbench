@@ -1,0 +1,305 @@
+{
+  "question_id": "q_051_booking_referral_source",
+  "slug": "booking-referral-source",
+  "title": "Booking Referral Source",
+  "difficulty": "Medium",
+  "company": "Airbnb",
+  "premium": true,
+  "question": "The Airbnb Booking Recommendations team is trying to understand the “substitutability” of two rentals and whether one rental is a good substitute for another. They want you to write a query to determine if two Airbnb rentals have the same exact amenities offered.\n\nOutput the count of matching rental ids.\n\nAssumptions:\n- If property 1 has kitchen and pool, and property 2 has kitchen and pool too, then it is a good substitute and represents a count of 1 matching rental.\n- If property 3 has kitchen, pool and fireplace, and property 4 only has pool and fireplace, then it is not a good substitute.",
+  "notes": [
+    "A pair of rentals is a good substitute if and only if both rentals offer the exact same set of amenities.",
+    "Count each matching pair once (i.e. where rental_id_1 < rental_id_2)."
+  ],
+  "tables": [
+    {
+      "table_name": "rental_amenities",
+      "columns": [
+        {
+          "column_name": "rental_id",
+          "data_type": "INT"
+        },
+        {
+          "column_name": "amenities",
+          "data_type": "VARCHAR"
+        }
+      ]
+    }
+  ],
+  "sample_data": {
+    "rental_amenities": [
+      {
+        "rental_id": 123,
+        "amenities": "pool"
+      },
+      {
+        "rental_id": 123,
+        "amenities": "kitchen"
+      },
+      {
+        "rental_id": 234,
+        "amenities": "hot tub"
+      },
+      {
+        "rental_id": 234,
+        "amenities": "fireplace"
+      },
+      {
+        "rental_id": 345,
+        "amenities": "kitchen"
+      },
+      {
+        "rental_id": 345,
+        "amenities": "pool"
+      },
+      {
+        "rental_id": 456,
+        "amenities": "pool"
+      },
+      {
+        "rental_id": 789,
+        "amenities": "pool"
+      },
+      {
+        "rental_id": 789,
+        "amenities": "kitchen"
+      }
+    ]
+  },
+  "sample_output": [
+    {
+      "substitutes": 3
+    }
+  ],
+  "reference_sql": "WITH rental_lists AS (\n  SELECT \n    rental_id,\n    GROUP_CONCAT(amenities ORDER BY amenities) AS amenity_list\n  FROM rental_amenities\n  GROUP BY rental_id\n)\nSELECT COUNT(*) AS substitutes\nFROM rental_lists r1\nJOIN rental_lists r2\n  ON r1.amenity_list = r2.amenity_list\n AND r1.rental_id < r2.rental_id;",
+  "tags": [
+    "aggregation",
+    "airbnb",
+    "array-overlap",
+    "cte",
+    "group-concat",
+    "join",
+    "self-join",
+    "set-comparison",
+    "medium"
+  ],
+  "related_questions": [],
+  "sources": [
+    [
+      "DataLemur / Airbnb SQL Interview Question",
+      "https://datalemur.com/questions/matching-rental-amenities"
+    ]
+  ],
+  "test_cases": [
+    {
+      "test_case_id": "tc_1_baseline",
+      "description": "Baseline sample input data from problem description",
+      "input_data": {
+        "rental_amenities": [
+          {
+            "rental_id": 123,
+            "amenities": "pool"
+          },
+          {
+            "rental_id": 123,
+            "amenities": "kitchen"
+          },
+          {
+            "rental_id": 234,
+            "amenities": "hot tub"
+          },
+          {
+            "rental_id": 234,
+            "amenities": "fireplace"
+          },
+          {
+            "rental_id": 345,
+            "amenities": "kitchen"
+          },
+          {
+            "rental_id": 345,
+            "amenities": "pool"
+          },
+          {
+            "rental_id": 456,
+            "amenities": "pool"
+          },
+          {
+            "rental_id": 789,
+            "amenities": "pool"
+          },
+          {
+            "rental_id": 789,
+            "amenities": "kitchen"
+          }
+        ]
+      },
+      "expected_output": [
+        {
+          "substitutes": 3
+        }
+      ],
+      "category": "normal"
+    },
+    {
+      "test_case_id": "tc_2_no_matches",
+      "description": "Rentals with completely distinct amenities resulting in zero matching pairs",
+      "input_data": {
+        "rental_amenities": [
+          {
+            "rental_id": 101,
+            "amenities": "wifi"
+          },
+          {
+            "rental_id": 102,
+            "amenities": "pool"
+          },
+          {
+            "rental_id": 103,
+            "amenities": "kitchen"
+          },
+          {
+            "rental_id": 104,
+            "amenities": "hot tub"
+          }
+        ]
+      },
+      "expected_output": [
+        {
+          "substitutes": 0
+        }
+      ],
+      "category": "edge"
+    },
+    {
+      "test_case_id": "tc_3_superset_not_match",
+      "description": "Validates assumption that subset or superset does not constitute a match",
+      "input_data": {
+        "rental_amenities": [
+          {
+            "rental_id": 1,
+            "amenities": "kitchen"
+          },
+          {
+            "rental_id": 1,
+            "amenities": "pool"
+          },
+          {
+            "rental_id": 1,
+            "amenities": "fireplace"
+          },
+          {
+            "rental_id": 2,
+            "amenities": "pool"
+          },
+          {
+            "rental_id": 2,
+            "amenities": "fireplace"
+          },
+          {
+            "rental_id": 3,
+            "amenities": "kitchen"
+          },
+          {
+            "rental_id": 3,
+            "amenities": "pool"
+          },
+          {
+            "rental_id": 4,
+            "amenities": "pool"
+          },
+          {
+            "rental_id": 4,
+            "amenities": "kitchen"
+          },
+          {
+            "rental_id": 4,
+            "amenities": "fireplace"
+          }
+        ]
+      },
+      "expected_output": [
+        {
+          "substitutes": 1
+        }
+      ],
+      "category": "edge"
+    },
+    {
+      "test_case_id": "tc_4_multiple_clusters",
+      "description": "Multiple distinct matching clusters of rentals",
+      "input_data": {
+        "rental_amenities": [
+          {
+            "rental_id": 10,
+            "amenities": "wifi"
+          },
+          {
+            "rental_id": 10,
+            "amenities": "desk"
+          },
+          {
+            "rental_id": 20,
+            "amenities": "desk"
+          },
+          {
+            "rental_id": 20,
+            "amenities": "wifi"
+          },
+          {
+            "rental_id": 30,
+            "amenities": "wifi"
+          },
+          {
+            "rental_id": 30,
+            "amenities": "desk"
+          },
+          {
+            "rental_id": 40,
+            "amenities": "balcony"
+          },
+          {
+            "rental_id": 40,
+            "amenities": "ocean view"
+          },
+          {
+            "rental_id": 50,
+            "amenities": "ocean view"
+          },
+          {
+            "rental_id": 50,
+            "amenities": "balcony"
+          },
+          {
+            "rental_id": 60,
+            "amenities": "sauna"
+          }
+        ]
+      },
+      "expected_output": [
+        {
+          "substitutes": 4
+        }
+      ],
+      "category": "volume"
+    },
+    {
+      "test_case_id": "tc_5_empty_dataset",
+      "description": "Empty rental_amenities dataset edge case",
+      "input_data": {
+        "rental_amenities": []
+      },
+      "expected_output": [
+        {
+          "substitutes": 0
+        }
+      ],
+      "category": "edge"
+    }
+  ],
+  "order_sensitive": false,
+  "expected_output": [
+    {
+      "substitutes": 3
+    }
+  ]
+}

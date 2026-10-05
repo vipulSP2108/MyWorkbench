@@ -1,0 +1,398 @@
+{
+  "question_id": "q_061_linkedin_power_creators_part2",
+  "slug": "linkedin-power-creators-part2",
+  "title": "LinkedIn Power Creators (Part 2)",
+  "difficulty": "Medium",
+  "company": "LinkedIn",
+  "premium": true,
+  "question": "The LinkedIn Creator team is analyzing user influence across organizations. An individual creator is considered a Power Creator if their personal follower count is strictly greater than the combined total follower count of all companies they work for.\n\nWrite a query to return the profile IDs of these power creators in ascending order.",
+  "notes": [
+    "A person can work at multiple companies.",
+    "Compare personal followers against the sum of company followers for all companies they are associated with."
+  ],
+  "tables": [
+    {
+      "table_name": "personal_profiles",
+      "columns": [
+        {
+          "column_name": "profile_id",
+          "data_type": "INT"
+        },
+        {
+          "column_name": "name",
+          "data_type": "VARCHAR(255)"
+        },
+        {
+          "column_name": "followers",
+          "data_type": "INT"
+        }
+      ]
+    },
+    {
+      "table_name": "employee_company",
+      "columns": [
+        {
+          "column_name": "personal_profile_id",
+          "data_type": "INT"
+        },
+        {
+          "column_name": "company_id",
+          "data_type": "INT"
+        }
+      ]
+    },
+    {
+      "table_name": "company_pages",
+      "columns": [
+        {
+          "column_name": "company_id",
+          "data_type": "INT"
+        },
+        {
+          "column_name": "name",
+          "data_type": "VARCHAR(255)"
+        },
+        {
+          "column_name": "followers",
+          "data_type": "INT"
+        }
+      ]
+    }
+  ],
+  "sample_data": {
+    "personal_profiles": [
+      {
+        "profile_id": 1,
+        "name": "Nick Singh",
+        "followers": 100000
+      },
+      {
+        "profile_id": 2,
+        "name": "Zach Wilson",
+        "followers": 50000
+      },
+      {
+        "profile_id": 3,
+        "name": "Daliana Liu",
+        "followers": 120000
+      }
+    ],
+    "employee_company": [
+      {
+        "personal_profile_id": 1,
+        "company_id": 10
+      },
+      {
+        "personal_profile_id": 1,
+        "company_id": 20
+      },
+      {
+        "personal_profile_id": 2,
+        "company_id": 30
+      },
+      {
+        "personal_profile_id": 3,
+        "company_id": 10
+      },
+      {
+        "personal_profile_id": 3,
+        "company_id": 40
+      }
+    ],
+    "company_pages": [
+      {
+        "company_id": 10,
+        "name": "DataLemur",
+        "followers": 20000
+      },
+      {
+        "company_id": 20,
+        "name": "Ace The DS Interview",
+        "followers": 30000
+      },
+      {
+        "company_id": 30,
+        "name": "Big Tech Corp",
+        "followers": 100000
+      },
+      {
+        "company_id": 40,
+        "name": "Podcast Media",
+        "followers": 40000
+      }
+    ]
+  },
+  "sample_output": [
+    {
+      "profile_id": 1
+    },
+    {
+      "profile_id": 3
+    }
+  ],
+  "expected_output": [
+    {
+      "profile_id": 1
+    },
+    {
+      "profile_id": 3
+    }
+  ],
+  "reference_sql": "SELECT \n  pp.profile_id\nFROM personal_profiles pp\nJOIN employee_company ec ON pp.profile_id = ec.personal_profile_id\nJOIN company_pages cp ON ec.company_id = cp.company_id\nGROUP BY pp.profile_id, pp.followers\nHAVING pp.followers > SUM(cp.followers)\nORDER BY pp.profile_id ASC;",
+  "tags": [
+    "aggregation",
+    "linkedin",
+    "join",
+    "medium",
+    "social-media"
+  ],
+  "order_sensitive": true,
+  "test_cases": [
+    {
+      "test_case_id": "tc_1_baseline",
+      "description": "Baseline: Profile 1 (100k > 50k sum) and Profile 3 (120k > 60k sum) qualify",
+      "input_data": {
+        "personal_profiles": [
+          {
+            "profile_id": 1,
+            "name": "Nick Singh",
+            "followers": 100000
+          },
+          {
+            "profile_id": 2,
+            "name": "Zach Wilson",
+            "followers": 50000
+          },
+          {
+            "profile_id": 3,
+            "name": "Daliana Liu",
+            "followers": 120000
+          }
+        ],
+        "employee_company": [
+          {
+            "personal_profile_id": 1,
+            "company_id": 10
+          },
+          {
+            "personal_profile_id": 1,
+            "company_id": 20
+          },
+          {
+            "personal_profile_id": 2,
+            "company_id": 30
+          },
+          {
+            "personal_profile_id": 3,
+            "company_id": 10
+          },
+          {
+            "personal_profile_id": 3,
+            "company_id": 40
+          }
+        ],
+        "company_pages": [
+          {
+            "company_id": 10,
+            "name": "DataLemur",
+            "followers": 20000
+          },
+          {
+            "company_id": 20,
+            "name": "Ace The DS Interview",
+            "followers": 30000
+          },
+          {
+            "company_id": 30,
+            "name": "Big Tech Corp",
+            "followers": 100000
+          },
+          {
+            "company_id": 40,
+            "name": "Podcast Media",
+            "followers": 40000
+          }
+        ]
+      },
+      "expected_output": [
+        {
+          "profile_id": 1
+        },
+        {
+          "profile_id": 3
+        }
+      ],
+      "category": "normal"
+    },
+    {
+      "test_case_id": "tc_2_no_qualifying_creators",
+      "description": "Edge case: Company followers exceed creator followers for all profiles",
+      "input_data": {
+        "personal_profiles": [
+          {
+            "profile_id": 10,
+            "name": "Creator A",
+            "followers": 10000
+          },
+          {
+            "profile_id": 20,
+            "name": "Creator B",
+            "followers": 5000
+          }
+        ],
+        "employee_company": [
+          {
+            "personal_profile_id": 10,
+            "company_id": 1
+          },
+          {
+            "personal_profile_id": 20,
+            "company_id": 2
+          }
+        ],
+        "company_pages": [
+          {
+            "company_id": 1,
+            "name": "Global Corp",
+            "followers": 500000
+          },
+          {
+            "company_id": 2,
+            "name": "Mega Corp",
+            "followers": 100000
+          }
+        ]
+      },
+      "expected_output": [],
+      "category": "edge"
+    },
+    {
+      "test_case_id": "tc_3_multi_company_fails_on_one",
+      "description": "Edge case: Creator works at 3 companies, exceeds 2 but smaller than the 3rd, thus excluded",
+      "category": "edge",
+      "input_data": {
+        "employee_company": [
+          {
+            "personal_profile_id": 50,
+            "company_id": 1
+          },
+          {
+            "personal_profile_id": 50,
+            "company_id": 2
+          },
+          {
+            "personal_profile_id": 50,
+            "company_id": 3
+          }
+        ],
+        "personal_profiles": [
+          {
+            "profile_id": 50,
+            "followers": 100000
+          }
+        ],
+        "company_pages": [
+          {
+            "company_id": 1,
+            "followers": 30000
+          },
+          {
+            "company_id": 2,
+            "followers": 50000
+          },
+          {
+            "company_id": 3,
+            "followers": 150000
+          }
+        ]
+      },
+      "expected_output": []
+    },
+    {
+      "test_case_id": "tc_4_strict_asc_ordering_volume",
+      "description": "Volume & Ordering: Multiple qualifying creators inserted in reverse order to enforce ORDER BY profile_id ASC",
+      "category": "volume",
+      "input_data": {
+        "employee_company": [
+          {
+            "personal_profile_id": 888,
+            "company_id": 10
+          },
+          {
+            "personal_profile_id": 555,
+            "company_id": 11
+          },
+          {
+            "personal_profile_id": 222,
+            "company_id": 12
+          }
+        ],
+        "personal_profiles": [
+          {
+            "profile_id": 888,
+            "followers": 50000
+          },
+          {
+            "profile_id": 555,
+            "followers": 60000
+          },
+          {
+            "profile_id": 222,
+            "followers": 70000
+          }
+        ],
+        "company_pages": [
+          {
+            "company_id": 10,
+            "followers": 10000
+          },
+          {
+            "company_id": 11,
+            "followers": 15000
+          },
+          {
+            "company_id": 12,
+            "followers": 20000
+          }
+        ]
+      },
+      "expected_output": [
+        {
+          "profile_id": 222
+        },
+        {
+          "profile_id": 555
+        },
+        {
+          "profile_id": 888
+        }
+      ]
+    },
+    {
+      "test_case_id": "tc_5_exact_equal_boundary",
+      "description": "Boundary case: Creator followers exactly equal to company followers is excluded (must be strictly greater)",
+      "category": "boundary",
+      "input_data": {
+        "employee_company": [
+          {
+            "personal_profile_id": 99,
+            "company_id": 1
+          }
+        ],
+        "personal_profiles": [
+          {
+            "profile_id": 99,
+            "followers": 25000
+          }
+        ],
+        "company_pages": [
+          {
+            "company_id": 1,
+            "followers": 25000
+          }
+        ]
+      },
+      "expected_output": []
+    }
+  ]
+}

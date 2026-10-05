@@ -1,0 +1,338 @@
+{
+  "question_id": "q_021_total_drugs_sales",
+  "slug": "total-drugs-sales",
+  "title": "Pharmacy Analytics (Part 3)",
+  "difficulty": "Easy",
+  "company": "CVS Health",
+  "premium": false,
+  "question": "CVS Health wants to gain a clearer understanding of its pharmacy sales and the performance of various products.\n\nWrite a query to calculate the total drug sales for each manufacturer. Round the answer to the nearest million and report your results in descending order of total sales. In case of any duplicates, sort them alphabetically by the manufacturer name.\n\nSince this data will be displayed on a dashboard viewed by business stakeholders, please format your results as follows: \"$36 million\".\n\nIf you like this question, try out Pharmacy Analytics (Part 4)!",
+  "notes": [
+    "The total sales for Biogen is \\$4 million (\\$2,041,758.41 + \\$500,101.61 + \\$1,084,258.00 = \\$3,626,118.02) and for Eli Lilly is \\$3 million (\\$293,452.54 + \\$2,521,023.73 = \\$2,814,476.27).",
+    "The dataset you are querying against may have different input & output - this is just an example!"
+  ],
+  "tables": [
+    {
+      "table_name": "pharmacy_sales",
+      "columns": [
+        {
+          "column_name": "product_id",
+          "data_type": "INT"
+        },
+        {
+          "column_name": "units_sold",
+          "data_type": "INT"
+        },
+        {
+          "column_name": "total_sales",
+          "data_type": "DECIMAL(10,2)"
+        },
+        {
+          "column_name": "cogs",
+          "data_type": "DECIMAL(10,2)"
+        },
+        {
+          "column_name": "manufacturer",
+          "data_type": "VARCHAR(255)"
+        },
+        {
+          "column_name": "drug",
+          "data_type": "VARCHAR(255)"
+        }
+      ]
+    }
+  ],
+  "sample_data": {
+    "pharmacy_sales": [
+      {
+        "product_id": "94",
+        "units_sold": "132362",
+        "total_sales": "2041758.41",
+        "cogs": "1373721.70",
+        "manufacturer": "Biogen",
+        "drug": "UP and UP"
+      },
+      {
+        "product_id": "9",
+        "units_sold": "37410",
+        "total_sales": "293452.54",
+        "cogs": "208876.01",
+        "manufacturer": "Eli Lilly",
+        "drug": "Zyprexa"
+      },
+      {
+        "product_id": "61",
+        "units_sold": "77023",
+        "total_sales": "500101.61",
+        "cogs": "419174.97",
+        "manufacturer": "Biogen",
+        "drug": "Varicose Relief"
+      },
+      {
+        "product_id": "136",
+        "units_sold": "144814",
+        "total_sales": "1084258.00",
+        "cogs": "1006447.73",
+        "manufacturer": "Biogen",
+        "drug": "Burkhart"
+      }
+    ]
+  },
+  "sample_output": [
+    {
+      "manufacturer": "Biogen",
+      "sale": "$4 million"
+    },
+    {
+      "manufacturer": "Eli Lilly",
+      "sale": "$3 million"
+    }
+  ],
+  "reference_sql": "SELECT \n  manufacturer,\n  CONCAT('$', ROUND(SUM(total_sales) / 1000000), ' million') AS sale\nFROM pharmacy_sales\nGROUP BY manufacturer\nORDER BY SUM(total_sales) DESC, manufacturer;",
+  "tags": [
+    "aggregation",
+    "cvs health",
+    "easy",
+    "ecommerce",
+    "healthcare",
+    "math",
+    "social-media"
+  ],
+  "related_questions": [
+    "top-profitable-drugs",
+    "non-profitable-drugs",
+    "top-drugs-sold"
+  ],
+  "sources": [
+    [
+      "DataLemur page (free)",
+      "https://datalemur.com/questions/total-drugs-sales"
+    ],
+    [
+      "DataLemur PDF",
+      "Page 25"
+    ]
+  ],
+  "test_cases": [
+    {
+      "test_case_id": "tc_1_baseline",
+      "description": "Baseline sample input data from problem description",
+      "input_data": {
+        "pharmacy_sales": [
+          {
+            "product_id": "94",
+            "units_sold": "132362",
+            "total_sales": "2041758.41",
+            "cogs": "1373721.70",
+            "manufacturer": "Biogen",
+            "drug": "UP and UP"
+          },
+          {
+            "product_id": "9",
+            "units_sold": "37410",
+            "total_sales": "293452.54",
+            "cogs": "208876.01",
+            "manufacturer": "Eli Lilly",
+            "drug": "Zyprexa"
+          },
+          {
+            "product_id": "61",
+            "units_sold": "77023",
+            "total_sales": "500101.61",
+            "cogs": "419174.97",
+            "manufacturer": "Biogen",
+            "drug": "Varicose Relief"
+          },
+          {
+            "product_id": "136",
+            "units_sold": "144814",
+            "total_sales": "1084258.00",
+            "cogs": "1006447.73",
+            "manufacturer": "Biogen",
+            "drug": "Burkhart"
+          }
+        ]
+      },
+      "expected_output": [
+        {
+          "manufacturer": "Biogen",
+          "sale": "$4.0 million"
+        },
+        {
+          "manufacturer": "Eli Lilly",
+          "sale": "$0.0 million"
+        }
+      ],
+      "category": "normal"
+    },
+    {
+      "test_case_id": "tc_2_high_volume",
+      "description": "Multiple entities with scaled volume and multi-group distributions",
+      "input_data": {
+        "pharmacy_sales": [
+          {
+            "product_id": "94",
+            "units_sold": "132362",
+            "total_sales": "2041758.41",
+            "cogs": "1373721.70",
+            "manufacturer": "Biogen",
+            "drug": "UP and UP"
+          },
+          {
+            "product_id": "9",
+            "units_sold": "37410",
+            "total_sales": "293452.54",
+            "cogs": "208876.01",
+            "manufacturer": "Eli Lilly",
+            "drug": "Zyprexa"
+          },
+          {
+            "product_id": "61",
+            "units_sold": "77023",
+            "total_sales": "500101.61",
+            "cogs": "419174.97",
+            "manufacturer": "Biogen",
+            "drug": "Varicose Relief"
+          },
+          {
+            "product_id": "136",
+            "units_sold": "144814",
+            "total_sales": "1084258.00",
+            "cogs": "1006447.73",
+            "manufacturer": "Biogen",
+            "drug": "Burkhart"
+          },
+          {
+            "product_id": 1094,
+            "units_sold": "132362",
+            "total_sales": 3062637.61,
+            "cogs": "1373721.70",
+            "manufacturer": "Biogen",
+            "drug": "UP and UP"
+          },
+          {
+            "product_id": 1009,
+            "units_sold": "37410",
+            "total_sales": 440178.81,
+            "cogs": "208876.01",
+            "manufacturer": "Eli Lilly",
+            "drug": "Zyprexa"
+          },
+          {
+            "product_id": 1061,
+            "units_sold": "77023",
+            "total_sales": 750152.42,
+            "cogs": "419174.97",
+            "manufacturer": "Biogen",
+            "drug": "Varicose Relief"
+          },
+          {
+            "product_id": 1136,
+            "units_sold": "144814",
+            "total_sales": 1626387.0,
+            "cogs": "1006447.73",
+            "manufacturer": "Biogen",
+            "drug": "Burkhart"
+          }
+        ]
+      },
+      "expected_output": [
+        {
+          "manufacturer": "Biogen",
+          "sale": "$9.0 million"
+        },
+        {
+          "manufacturer": "Eli Lilly",
+          "sale": "$1.0 million"
+        }
+      ],
+      "category": "volume"
+    },
+    {
+      "test_case_id": "tc_3_disqualifying_rows",
+      "description": "Dataset containing disqualifying rows, edge values, and cancelled/zero records",
+      "input_data": {
+        "pharmacy_sales": [
+          {
+            "product_id": "94",
+            "units_sold": "132362",
+            "total_sales": "2041758.41",
+            "cogs": "1373721.70",
+            "manufacturer": "Biogen",
+            "drug": "UP and UP"
+          },
+          {
+            "product_id": "9",
+            "units_sold": "37410",
+            "total_sales": "293452.54",
+            "cogs": "208876.01",
+            "manufacturer": "Eli Lilly",
+            "drug": "Zyprexa"
+          },
+          {
+            "product_id": "61",
+            "units_sold": "77023",
+            "total_sales": "500101.61",
+            "cogs": "419174.97",
+            "manufacturer": "Biogen",
+            "drug": "Varicose Relief"
+          },
+          {
+            "product_id": "136",
+            "units_sold": "144814",
+            "total_sales": "1084258.00",
+            "cogs": "1006447.73",
+            "manufacturer": "Biogen",
+            "drug": "Burkhart"
+          },
+          {
+            "product_id": 5094,
+            "units_sold": "132362",
+            "total_sales": "2041758.41",
+            "cogs": "1373721.70",
+            "manufacturer": "Biogen",
+            "drug": "UP and UP"
+          },
+          {
+            "product_id": 5009,
+            "units_sold": "37410",
+            "total_sales": "293452.54",
+            "cogs": "208876.01",
+            "manufacturer": "Eli Lilly",
+            "drug": "Zyprexa"
+          }
+        ]
+      },
+      "expected_output": [
+        {
+          "manufacturer": "Biogen",
+          "sale": "$6.0 million"
+        },
+        {
+          "manufacturer": "Eli Lilly",
+          "sale": "$1.0 million"
+        }
+      ],
+      "category": "edge"
+    },
+    {
+      "test_case_id": "tc_4_empty_result",
+      "description": "Input where no rows satisfy problem criteria, verifying empty result handling",
+      "input_data": {
+        "pharmacy_sales": []
+      },
+      "expected_output": [],
+      "category": "edge"
+    }
+  ],
+  "order_sensitive": true,
+  "expected_output": [
+    {
+      "manufacturer": "Biogen",
+      "sale": "$4.0 million"
+    },
+    {
+      "manufacturer": "Eli Lilly",
+      "sale": "$0.0 million"
+    }
+  ]
+}

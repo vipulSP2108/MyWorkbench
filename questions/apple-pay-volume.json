@@ -1,0 +1,346 @@
+{
+  "question_id": "q_024_apple_pay_volume",
+  "slug": "apple-pay-volume",
+  "title": "ApplePay Volume",
+  "difficulty": "Easy",
+  "company": "Visa",
+  "premium": true,
+  "question": "Visa is analysing its partnership with ApplePay. Calculate the total transaction volume for each merchant where the transaction was performed via ApplePay.\n\nOutput the merchant ID and the total transactions. For merchants with no ApplePay transactions, output their total transaction volume as 0. Display the result in descending order of the transaction volume.\n\nTip from the source: check the spelling of the payment methods.",
+  "notes": [],
+  "tables": [
+    {
+      "table_name": "payments",
+      "columns": [
+        {
+          "column_name": "merchant_id",
+          "data_type": "INT"
+        },
+        {
+          "column_name": "transaction_amount",
+          "data_type": "INT"
+        },
+        {
+          "column_name": "payment_method",
+          "data_type": "VARCHAR(255)"
+        }
+      ]
+    }
+  ],
+  "sample_data": {
+    "payments": [
+      {
+        "merchant_id": 1,
+        "transaction_amount": 600,
+        "payment_method": "Contactless Chip"
+      },
+      {
+        "merchant_id": 1,
+        "transaction_amount": 850,
+        "payment_method": "apple pay"
+      },
+      {
+        "merchant_id": 1,
+        "transaction_amount": 500,
+        "payment_method": "Apple Pay"
+      },
+      {
+        "merchant_id": 2,
+        "transaction_amount": 560,
+        "payment_method": "Magstripe"
+      },
+      {
+        "merchant_id": 2,
+        "transaction_amount": 400,
+        "payment_method": "Samsung Pay"
+      },
+      {
+        "merchant_id": 4,
+        "transaction_amount": 1200,
+        "payment_method": "apple pay"
+      }
+    ]
+  },
+  "sample_output": [
+    {
+      "merchant_id": 1,
+      "total_transaction": 1350
+    },
+    {
+      "merchant_id": 4,
+      "total_transaction": 1200
+    },
+    {
+      "merchant_id": 2,
+      "total_transaction": 0
+    }
+  ],
+  "reference_sql": "SELECT \n  merchant_id,\n  SUM(CASE WHEN LOWER(payment_method) = 'apple pay' THEN transaction_amount ELSE 0 END) AS total_transaction\nFROM payments\nGROUP BY merchant_id\nORDER BY total_transaction DESC, merchant_id ASC;",
+  "tags": [
+    "aggregation",
+    "easy",
+    "ecommerce",
+    "finance",
+    "visa"
+  ],
+  "related_questions": [],
+  "sources": [
+    [
+      "DataLemur blog: 10 Visa SQL questions (#1)",
+      "https://datalemur.com/blog/visa-sql-interview-questions"
+    ],
+    [
+      "DataLemur page (locked)",
+      "https://datalemur.com/questions/apple-pay-volume"
+    ],
+    [
+      "DataLemur PDF",
+      "Page 28"
+    ]
+  ],
+  "test_cases": [
+    {
+      "test_case_id": "tc_1_baseline",
+      "description": "Baseline sample input data from problem description",
+      "input_data": {
+        "payments": [
+          {
+            "merchant_id": 1,
+            "transaction_amount": 600,
+            "payment_method": "Contactless Chip"
+          },
+          {
+            "merchant_id": 1,
+            "transaction_amount": 850,
+            "payment_method": "apple pay"
+          },
+          {
+            "merchant_id": 1,
+            "transaction_amount": 500,
+            "payment_method": "Apple Pay"
+          },
+          {
+            "merchant_id": 2,
+            "transaction_amount": 560,
+            "payment_method": "Magstripe"
+          },
+          {
+            "merchant_id": 2,
+            "transaction_amount": 400,
+            "payment_method": "Samsung Pay"
+          },
+          {
+            "merchant_id": 4,
+            "transaction_amount": 1200,
+            "payment_method": "apple pay"
+          }
+        ]
+      },
+      "expected_output": [
+        {
+          "merchant_id": 1,
+          "total_transaction": 1350
+        },
+        {
+          "merchant_id": 4,
+          "total_transaction": 1200
+        },
+        {
+          "merchant_id": 2,
+          "total_transaction": 0
+        }
+      ],
+      "category": "normal"
+    },
+    {
+      "test_case_id": "tc_2_high_volume",
+      "description": "Multiple entities with scaled volume and multi-group distributions",
+      "input_data": {
+        "payments": [
+          {
+            "merchant_id": 1,
+            "transaction_amount": 600,
+            "payment_method": "Contactless Chip"
+          },
+          {
+            "merchant_id": 1,
+            "transaction_amount": 850,
+            "payment_method": "apple pay"
+          },
+          {
+            "merchant_id": 1,
+            "transaction_amount": 500,
+            "payment_method": "Apple Pay"
+          },
+          {
+            "merchant_id": 2,
+            "transaction_amount": 560,
+            "payment_method": "Magstripe"
+          },
+          {
+            "merchant_id": 2,
+            "transaction_amount": 400,
+            "payment_method": "Samsung Pay"
+          },
+          {
+            "merchant_id": 4,
+            "transaction_amount": 1200,
+            "payment_method": "apple pay"
+          },
+          {
+            "merchant_id": 1001,
+            "transaction_amount": 900.0,
+            "payment_method": "Contactless Chip"
+          },
+          {
+            "merchant_id": 1001,
+            "transaction_amount": 1275.0,
+            "payment_method": "apple pay"
+          },
+          {
+            "merchant_id": 1001,
+            "transaction_amount": 750.0,
+            "payment_method": "Apple Pay"
+          },
+          {
+            "merchant_id": 1002,
+            "transaction_amount": 840.0,
+            "payment_method": "Magstripe"
+          },
+          {
+            "merchant_id": 1002,
+            "transaction_amount": 600.0,
+            "payment_method": "Samsung Pay"
+          },
+          {
+            "merchant_id": 1004,
+            "transaction_amount": 1800.0,
+            "payment_method": "apple pay"
+          }
+        ]
+      },
+      "expected_output": [
+        {
+          "merchant_id": 1001,
+          "total_transaction": 2025
+        },
+        {
+          "merchant_id": 1004,
+          "total_transaction": 1800
+        },
+        {
+          "merchant_id": 1,
+          "total_transaction": 1350
+        },
+        {
+          "merchant_id": 4,
+          "total_transaction": 1200
+        },
+        {
+          "merchant_id": 2,
+          "total_transaction": 0
+        },
+        {
+          "merchant_id": 1002,
+          "total_transaction": 0
+        }
+      ],
+      "category": "volume"
+    },
+    {
+      "test_case_id": "tc_3_disqualifying_rows",
+      "description": "Dataset containing disqualifying rows, edge values, and cancelled/zero records",
+      "input_data": {
+        "payments": [
+          {
+            "merchant_id": 1,
+            "transaction_amount": 600,
+            "payment_method": "Contactless Chip"
+          },
+          {
+            "merchant_id": 1,
+            "transaction_amount": 850,
+            "payment_method": "apple pay"
+          },
+          {
+            "merchant_id": 1,
+            "transaction_amount": 500,
+            "payment_method": "Apple Pay"
+          },
+          {
+            "merchant_id": 2,
+            "transaction_amount": 560,
+            "payment_method": "Magstripe"
+          },
+          {
+            "merchant_id": 2,
+            "transaction_amount": 400,
+            "payment_method": "Samsung Pay"
+          },
+          {
+            "merchant_id": 4,
+            "transaction_amount": 1200,
+            "payment_method": "apple pay"
+          },
+          {
+            "merchant_id": 5001,
+            "transaction_amount": 0,
+            "payment_method": "Contactless Chip"
+          },
+          {
+            "merchant_id": 5001,
+            "transaction_amount": 0,
+            "payment_method": "apple pay"
+          },
+          {
+            "merchant_id": 5001,
+            "transaction_amount": 0,
+            "payment_method": "Apple Pay"
+          }
+        ]
+      },
+      "expected_output": [
+        {
+          "merchant_id": 1,
+          "total_transaction": 1350
+        },
+        {
+          "merchant_id": 4,
+          "total_transaction": 1200
+        },
+        {
+          "merchant_id": 2,
+          "total_transaction": 0
+        },
+        {
+          "merchant_id": 5001,
+          "total_transaction": 0
+        }
+      ],
+      "category": "edge"
+    },
+    {
+      "test_case_id": "tc_4_empty_result",
+      "description": "Input where no rows satisfy problem criteria, verifying empty result handling",
+      "input_data": {
+        "payments": []
+      },
+      "expected_output": [],
+      "category": "edge"
+    }
+  ],
+  "order_sensitive": true,
+  "expected_output": [
+    {
+      "merchant_id": 1,
+      "total_transaction": 1350
+    },
+    {
+      "merchant_id": 4,
+      "total_transaction": 1200
+    },
+    {
+      "merchant_id": 2,
+      "total_transaction": 0
+    }
+  ]
+}

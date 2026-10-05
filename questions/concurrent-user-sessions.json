@@ -1,0 +1,272 @@
+{
+  "question_id": "q_089_concurrent_user_sessions",
+  "slug": "concurrent-user-sessions",
+  "title": "User Concurrent Sessions",
+  "difficulty": "Hard",
+  "company": "Pinterest",
+  "premium": true,
+  "question": "Assume you are given a table of user sessions, each with a start time and an end time. A session is concurrent with another\nsession if their start and end times overlap.\nWrite a query to output the session that is concurrent with the largest number of other sessions.",
+  "notes": [],
+  "tables": [
+    {
+      "table_name": "user_sessions",
+      "columns": [
+        {
+          "column_name": "session_id",
+          "data_type": "INT"
+        },
+        {
+          "column_name": "user_id",
+          "data_type": "INT"
+        },
+        {
+          "column_name": "start_time",
+          "data_type": "DATETIME"
+        },
+        {
+          "column_name": "end_time",
+          "data_type": "DATETIME"
+        }
+      ]
+    }
+  ],
+  "sample_data": {
+    "user_sessions": [
+      {
+        "session_id": 1,
+        "user_id": 101,
+        "start_time": "2022-01-01 10:00:00",
+        "end_time": "2022-01-01 12:00:00"
+      },
+      {
+        "session_id": 2,
+        "user_id": 102,
+        "start_time": "2022-01-01 10:30:00",
+        "end_time": "2022-01-01 14:00:00"
+      },
+      {
+        "session_id": 3,
+        "user_id": 103,
+        "start_time": "2022-01-01 11:00:00",
+        "end_time": "2022-01-01 13:00:00"
+      },
+      {
+        "session_id": 4,
+        "user_id": 104,
+        "start_time": "2022-01-01 13:30:00",
+        "end_time": "2022-01-01 15:00:00"
+      }
+    ]
+  },
+  "sample_output": [
+    {
+      "session_id": 2,
+      "concurrent_sessions": 3
+    }
+  ],
+  "reference_sql": "SELECT \n  a.session_id,\n  COUNT(b.session_id) AS concurrent_sessions\nFROM user_sessions a\nJOIN user_sessions b \n  ON a.session_id != b.session_id \n AND a.start_time < b.end_time \n AND a.end_time > b.start_time\nGROUP BY a.session_id\nORDER BY concurrent_sessions DESC, a.session_id\nLIMIT 1;",
+  "tags": [
+    "aggregation",
+    "hard",
+    "join",
+    "left-join",
+    "pinterest"
+  ],
+  "related_questions": [],
+  "sources": [
+    [
+      "Nick Singh (DataLemur founder): 30 SQL & DB design questions",
+      "https://www.nicksingh.com/posts/30-sql-and-database-design-questions-from-real-data-science-interviews"
+    ],
+    [
+      "DataLemur page (locked)",
+      "https://datalemur.com/questions/concurrent-user-sessions"
+    ],
+    [
+      "DataLemur PDF",
+      "Page 93"
+    ]
+  ],
+  "test_cases": [
+    {
+      "test_case_id": "tc_1_baseline",
+      "description": "Baseline: Session 2 overlaps with 3 other sessions (1, 3, 4)",
+      "input_data": {
+        "user_sessions": [
+          {
+            "session_id": 1,
+            "user_id": 101,
+            "start_time": "2022-01-01 10:00:00",
+            "end_time": "2022-01-01 12:00:00"
+          },
+          {
+            "session_id": 2,
+            "user_id": 102,
+            "start_time": "2022-01-01 10:30:00",
+            "end_time": "2022-01-01 14:00:00"
+          },
+          {
+            "session_id": 3,
+            "user_id": 103,
+            "start_time": "2022-01-01 11:00:00",
+            "end_time": "2022-01-01 13:00:00"
+          },
+          {
+            "session_id": 4,
+            "user_id": 104,
+            "start_time": "2022-01-01 13:30:00",
+            "end_time": "2022-01-01 15:00:00"
+          }
+        ]
+      },
+      "expected_output": [
+        {
+          "session_id": 2,
+          "concurrent_sessions": 3
+        }
+      ],
+      "category": "normal"
+    },
+    {
+      "test_case_id": "tc_2_no_overlapping_sessions",
+      "description": "Edge case: Disjoint sessions with zero overlap",
+      "input_data": {
+        "user_sessions": [
+          {
+            "session_id": 10,
+            "user_id": 1,
+            "start_time": "2022-02-01 08:00:00",
+            "end_time": "2022-02-01 09:00:00"
+          },
+          {
+            "session_id": 20,
+            "user_id": 2,
+            "start_time": "2022-02-01 09:30:00",
+            "end_time": "2022-02-01 10:30:00"
+          }
+        ]
+      },
+      "expected_output": [],
+      "category": "edge"
+    },
+    {
+      "test_case_id": "tc_3_touching_endpoints_boundary",
+      "description": "Boundary case: Sessions touching at endpoints (10:00 to 11:00 and 11:00 to 12:00) do not overlap",
+      "category": "boundary",
+      "input_data": {
+        "user_sessions": [
+          {
+            "session_id": 101,
+            "user_id": 1,
+            "start_time": "2022-03-01 10:00:00",
+            "end_time": "2022-03-01 11:00:00"
+          },
+          {
+            "session_id": 102,
+            "user_id": 2,
+            "start_time": "2022-03-01 11:00:00",
+            "end_time": "2022-03-01 12:00:00"
+          },
+          {
+            "session_id": 103,
+            "user_id": 3,
+            "start_time": "2022-03-01 12:00:00",
+            "end_time": "2022-03-01 13:00:00"
+          }
+        ]
+      },
+      "expected_output": []
+    },
+    {
+      "test_case_id": "tc_4_tie_breaker_lower_session_id",
+      "description": "Edge case: Tie-breaker on session_id when multiple sessions have identical peak concurrency",
+      "category": "edge",
+      "input_data": {
+        "user_sessions": [
+          {
+            "session_id": 20,
+            "user_id": 1,
+            "start_time": "2022-04-01 10:00:00",
+            "end_time": "2022-04-01 12:00:00"
+          },
+          {
+            "session_id": 21,
+            "user_id": 2,
+            "start_time": "2022-04-01 11:00:00",
+            "end_time": "2022-04-01 13:00:00"
+          },
+          {
+            "session_id": 10,
+            "user_id": 3,
+            "start_time": "2022-04-01 15:00:00",
+            "end_time": "2022-04-01 17:00:00"
+          },
+          {
+            "session_id": 11,
+            "user_id": 4,
+            "start_time": "2022-04-01 16:00:00",
+            "end_time": "2022-04-01 18:00:00"
+          }
+        ]
+      },
+      "expected_output": [
+        {
+          "session_id": 10,
+          "concurrent_sessions": 1
+        }
+      ]
+    },
+    {
+      "test_case_id": "tc_5_enclosing_long_session_volume",
+      "description": "Volume: Long all-day session enclosing multiple shorter sessions (peak concurrency = 4)",
+      "category": "volume",
+      "input_data": {
+        "user_sessions": [
+          {
+            "session_id": 500,
+            "user_id": 99,
+            "start_time": "2022-05-01 08:00:00",
+            "end_time": "2022-05-01 20:00:00"
+          },
+          {
+            "session_id": 501,
+            "user_id": 1,
+            "start_time": "2022-05-01 09:00:00",
+            "end_time": "2022-05-01 10:00:00"
+          },
+          {
+            "session_id": 502,
+            "user_id": 2,
+            "start_time": "2022-05-01 11:00:00",
+            "end_time": "2022-05-01 12:00:00"
+          },
+          {
+            "session_id": 503,
+            "user_id": 3,
+            "start_time": "2022-05-01 13:00:00",
+            "end_time": "2022-05-01 14:00:00"
+          },
+          {
+            "session_id": 504,
+            "user_id": 4,
+            "start_time": "2022-05-01 15:00:00",
+            "end_time": "2022-05-01 16:00:00"
+          }
+        ]
+      },
+      "expected_output": [
+        {
+          "session_id": 500,
+          "concurrent_sessions": 4
+        }
+      ]
+    }
+  ],
+  "order_sensitive": true,
+  "expected_output": [
+    {
+      "session_id": 2,
+      "concurrent_sessions": 3
+    }
+  ]
+}

@@ -1,0 +1,369 @@
+{
+  "question_id": "q_027_sql_highest_products",
+  "slug": "sql-highest-products",
+  "title": "Highest Number of Products",
+  "difficulty": "Easy",
+  "company": "eBay",
+  "premium": true,
+  "question": "You are given a table with information on various orders made by eBay customers. Write a query to obtain the user IDs and the number of products purchased by the top 3 customers; these customers must have spent at least $1,000 in total.\n\nOutput the user id and number of products in descending order. To break ties (for example, two customers who both bought 10 products), the user who spent more takes precedence.",
+  "notes": [],
+  "tables": [
+    {
+      "table_name": "user_transactions",
+      "columns": [
+        {
+          "column_name": "transaction_id",
+          "data_type": "INT"
+        },
+        {
+          "column_name": "product_id",
+          "data_type": "INT"
+        },
+        {
+          "column_name": "user_id",
+          "data_type": "INT"
+        },
+        {
+          "column_name": "spend",
+          "data_type": "DECIMAL(10,2)"
+        }
+      ]
+    }
+  ],
+  "sample_data": {
+    "user_transactions": [
+      {
+        "transaction_id": 131432,
+        "product_id": 1324,
+        "user_id": 128,
+        "spend": "699.78"
+      },
+      {
+        "transaction_id": 131433,
+        "product_id": 1313,
+        "user_id": 128,
+        "spend": "501.00"
+      },
+      {
+        "transaction_id": 153853,
+        "product_id": 2134,
+        "user_id": 102,
+        "spend": "1001.20"
+      },
+      {
+        "transaction_id": 247826,
+        "product_id": 8476,
+        "user_id": 133,
+        "spend": "1051.00"
+      },
+      {
+        "transaction_id": 247265,
+        "product_id": 3255,
+        "user_id": 133,
+        "spend": "1474.00"
+      },
+      {
+        "transaction_id": 136495,
+        "product_id": 3677,
+        "user_id": 133,
+        "spend": "247.56"
+      }
+    ]
+  },
+  "sample_output": [
+    {
+      "user_id": 133,
+      "product_num": 3
+    },
+    {
+      "user_id": 128,
+      "product_num": 2
+    },
+    {
+      "user_id": 102,
+      "product_num": 1
+    }
+  ],
+  "reference_sql": "SELECT user_id, COUNT(product_id) AS num_products\nFROM user_transactions\nGROUP BY user_id\nORDER BY COUNT(product_id) DESC, user_id\nLIMIT 3;",
+  "tags": [
+    "aggregation",
+    "easy",
+    "ebay",
+    "ecommerce",
+    "finance",
+    "ranking",
+    "window-function"
+  ],
+  "related_questions": [],
+  "sources": [
+    [
+      "DataLemur blog: 11 eBay SQL questions (#1)",
+      "https://datalemur.com/blog/ebay-sql-interview-questions"
+    ],
+    [
+      "DataLemur page (locked)",
+      "https://datalemur.com/questions/sql-highest-products"
+    ],
+    [
+      "DataLemur PDF",
+      "Page 31"
+    ]
+  ],
+  "test_cases": [
+    {
+      "test_case_id": "tc_1_baseline",
+      "description": "Baseline sample input data from problem description",
+      "input_data": {
+        "user_transactions": [
+          {
+            "transaction_id": 131432,
+            "product_id": 1324,
+            "user_id": 128,
+            "spend": "699.78"
+          },
+          {
+            "transaction_id": 131433,
+            "product_id": 1313,
+            "user_id": 128,
+            "spend": "501.00"
+          },
+          {
+            "transaction_id": 153853,
+            "product_id": 2134,
+            "user_id": 102,
+            "spend": "1001.20"
+          },
+          {
+            "transaction_id": 247826,
+            "product_id": 8476,
+            "user_id": 133,
+            "spend": "1051.00"
+          },
+          {
+            "transaction_id": 247265,
+            "product_id": 3255,
+            "user_id": 133,
+            "spend": "1474.00"
+          },
+          {
+            "transaction_id": 136495,
+            "product_id": 3677,
+            "user_id": 133,
+            "spend": "247.56"
+          }
+        ]
+      },
+      "expected_output": [
+        {
+          "user_id": 133,
+          "num_products": 3
+        },
+        {
+          "user_id": 128,
+          "num_products": 2
+        },
+        {
+          "user_id": 102,
+          "num_products": 1
+        }
+      ],
+      "category": "normal"
+    },
+    {
+      "test_case_id": "tc_2_high_volume",
+      "description": "Multiple entities with scaled volume and multi-group distributions",
+      "input_data": {
+        "user_transactions": [
+          {
+            "transaction_id": 131432,
+            "product_id": 1324,
+            "user_id": 128,
+            "spend": "699.78"
+          },
+          {
+            "transaction_id": 131433,
+            "product_id": 1313,
+            "user_id": 128,
+            "spend": "501.00"
+          },
+          {
+            "transaction_id": 153853,
+            "product_id": 2134,
+            "user_id": 102,
+            "spend": "1001.20"
+          },
+          {
+            "transaction_id": 247826,
+            "product_id": 8476,
+            "user_id": 133,
+            "spend": "1051.00"
+          },
+          {
+            "transaction_id": 247265,
+            "product_id": 3255,
+            "user_id": 133,
+            "spend": "1474.00"
+          },
+          {
+            "transaction_id": 136495,
+            "product_id": 3677,
+            "user_id": 133,
+            "spend": "247.56"
+          },
+          {
+            "transaction_id": 132432,
+            "product_id": 2324,
+            "user_id": 1128,
+            "spend": 1049.67
+          },
+          {
+            "transaction_id": 132433,
+            "product_id": 2313,
+            "user_id": 1128,
+            "spend": 751.5
+          },
+          {
+            "transaction_id": 154853,
+            "product_id": 3134,
+            "user_id": 1102,
+            "spend": 1501.8
+          },
+          {
+            "transaction_id": 248826,
+            "product_id": 9476,
+            "user_id": 1133,
+            "spend": 1576.5
+          },
+          {
+            "transaction_id": 248265,
+            "product_id": 4255,
+            "user_id": 1133,
+            "spend": 2211.0
+          },
+          {
+            "transaction_id": 137495,
+            "product_id": 4677,
+            "user_id": 1133,
+            "spend": 371.34
+          }
+        ]
+      },
+      "expected_output": [
+        {
+          "user_id": 133,
+          "num_products": 3
+        },
+        {
+          "user_id": 1133,
+          "num_products": 3
+        },
+        {
+          "user_id": 128,
+          "num_products": 2
+        }
+      ],
+      "category": "volume"
+    },
+    {
+      "test_case_id": "tc_3_disqualifying_rows",
+      "description": "Dataset containing disqualifying rows, edge values, and cancelled/zero records",
+      "input_data": {
+        "user_transactions": [
+          {
+            "transaction_id": 131432,
+            "product_id": 1324,
+            "user_id": 128,
+            "spend": "699.78"
+          },
+          {
+            "transaction_id": 131433,
+            "product_id": 1313,
+            "user_id": 128,
+            "spend": "501.00"
+          },
+          {
+            "transaction_id": 153853,
+            "product_id": 2134,
+            "user_id": 102,
+            "spend": "1001.20"
+          },
+          {
+            "transaction_id": 247826,
+            "product_id": 8476,
+            "user_id": 133,
+            "spend": "1051.00"
+          },
+          {
+            "transaction_id": 247265,
+            "product_id": 3255,
+            "user_id": 133,
+            "spend": "1474.00"
+          },
+          {
+            "transaction_id": 136495,
+            "product_id": 3677,
+            "user_id": 133,
+            "spend": "247.56"
+          },
+          {
+            "transaction_id": 136432,
+            "product_id": 6324,
+            "user_id": 5128,
+            "spend": 0
+          },
+          {
+            "transaction_id": 136433,
+            "product_id": 6313,
+            "user_id": 5128,
+            "spend": 0
+          },
+          {
+            "transaction_id": 158853,
+            "product_id": 7134,
+            "user_id": 5102,
+            "spend": 0
+          }
+        ]
+      },
+      "expected_output": [
+        {
+          "user_id": 133,
+          "num_products": 3
+        },
+        {
+          "user_id": 128,
+          "num_products": 2
+        },
+        {
+          "user_id": 5128,
+          "num_products": 2
+        }
+      ],
+      "category": "edge"
+    },
+    {
+      "test_case_id": "tc_4_empty_result",
+      "description": "Input where no rows satisfy problem criteria, verifying empty result handling",
+      "input_data": {
+        "user_transactions": []
+      },
+      "expected_output": [],
+      "category": "edge"
+    }
+  ],
+  "order_sensitive": true,
+  "expected_output": [
+    {
+      "user_id": 133,
+      "num_products": 3
+    },
+    {
+      "user_id": 128,
+      "num_products": 2
+    },
+    {
+      "user_id": 102,
+      "num_products": 1
+    }
+  ]
+}

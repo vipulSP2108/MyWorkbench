@@ -1,0 +1,371 @@
+{
+  "question_id": "q_065_email_table_transformation",
+  "slug": "email-table-transformation",
+  "title": "Email Table Transformation",
+  "difficulty": "Medium",
+  "company": "Facebook",
+  "premium": true,
+  "question": "Facebook logs user email interactions in a row-based format. Write a query to transform (pivot) this data so that each user has a single output row showing their total counts for emails sent, opened, and clicked. Order by user ID in ascending order.",
+  "notes": [],
+  "tables": [
+    {
+      "table_name": "email_logs",
+      "columns": [
+        {
+          "column_name": "email_id",
+          "data_type": "INT"
+        },
+        {
+          "column_name": "user_id",
+          "data_type": "INT"
+        },
+        {
+          "column_name": "action_type",
+          "data_type": "VARCHAR(255)"
+        },
+        {
+          "column_name": "action_date",
+          "data_type": "DATETIME"
+        }
+      ]
+    }
+  ],
+  "sample_data": {
+    "email_logs": [
+      {
+        "email_id": 1,
+        "user_id": 101,
+        "action_type": "sent",
+        "action_date": "01/01/2022 08:00:00"
+      },
+      {
+        "email_id": 2,
+        "user_id": 101,
+        "action_type": "opened",
+        "action_date": "01/01/2022 08:05:00"
+      },
+      {
+        "email_id": 3,
+        "user_id": 101,
+        "action_type": "clicked",
+        "action_date": "01/01/2022 08:06:00"
+      },
+      {
+        "email_id": 4,
+        "user_id": 102,
+        "action_type": "sent",
+        "action_date": "01/02/2022 09:00:00"
+      }
+    ]
+  },
+  "sample_output": [
+    {
+      "user_id": 101,
+      "emails_sent": 1,
+      "emails_opened": 1,
+      "emails_clicked": 1
+    },
+    {
+      "user_id": 102,
+      "emails_sent": 1,
+      "emails_opened": 0,
+      "emails_clicked": 0
+    }
+  ],
+  "reference_sql": "SELECT \n  user_id,\n  MAX(CASE WHEN action_type = 'open' THEN action_date END) AS open_date,\n  MAX(CASE WHEN action_type = 'click' THEN action_date END) AS click_date\nFROM email_logs\nGROUP BY user_id\nORDER BY user_id;",
+  "tags": [
+    "aggregation",
+    "ecommerce",
+    "facebook",
+    "medium",
+    "social-media"
+  ],
+  "related_questions": [],
+  "sources": [
+    [
+      "Text supplied by you (not checkable against the locked page)",
+      "https://datalemur.com/questions/email-table-transformation"
+    ],
+    [
+      "DataLemur PDF",
+      "Page 69"
+    ]
+  ],
+  "test_cases": [
+    {
+      "test_case_id": "tc_1_baseline",
+      "description": "Baseline sample input data from problem description",
+      "input_data": {
+        "email_logs": [
+          {
+            "email_id": 1,
+            "user_id": 101,
+            "action_type": "sent",
+            "action_date": "01/01/2022 08:00:00"
+          },
+          {
+            "email_id": 2,
+            "user_id": 101,
+            "action_type": "opened",
+            "action_date": "01/01/2022 08:05:00"
+          },
+          {
+            "email_id": 3,
+            "user_id": 101,
+            "action_type": "clicked",
+            "action_date": "01/01/2022 08:06:00"
+          },
+          {
+            "email_id": 4,
+            "user_id": 102,
+            "action_type": "sent",
+            "action_date": "01/02/2022 09:00:00"
+          }
+        ]
+      },
+      "expected_output": [
+        {
+          "user_id": 101,
+          "open_date": null,
+          "click_date": null
+        },
+        {
+          "user_id": 102,
+          "open_date": null,
+          "click_date": null
+        }
+      ],
+      "category": "normal"
+    },
+    {
+      "test_case_id": "tc_2_high_volume",
+      "description": "Multiple entities with scaled volume and multi-group distributions",
+      "input_data": {
+        "email_logs": [
+          {
+            "email_id": 1,
+            "user_id": 101,
+            "action_type": "sent",
+            "action_date": "01/01/2022 08:00:00"
+          },
+          {
+            "email_id": 2,
+            "user_id": 101,
+            "action_type": "opened",
+            "action_date": "01/01/2022 08:05:00"
+          },
+          {
+            "email_id": 3,
+            "user_id": 101,
+            "action_type": "clicked",
+            "action_date": "01/01/2022 08:06:00"
+          },
+          {
+            "email_id": 4,
+            "user_id": 102,
+            "action_type": "sent",
+            "action_date": "01/02/2022 09:00:00"
+          },
+          {
+            "email_id": 1001,
+            "user_id": 1101,
+            "action_type": "sent",
+            "action_date": "01/06/2022 08:00:00"
+          },
+          {
+            "email_id": 1002,
+            "user_id": 1101,
+            "action_type": "opened",
+            "action_date": "01/06/2022 08:05:00"
+          },
+          {
+            "email_id": 1003,
+            "user_id": 1101,
+            "action_type": "clicked",
+            "action_date": "01/06/2022 08:06:00"
+          },
+          {
+            "email_id": 1004,
+            "user_id": 1102,
+            "action_type": "sent",
+            "action_date": "01/07/2022 09:00:00"
+          }
+        ]
+      },
+      "expected_output": [
+        {
+          "user_id": 101,
+          "open_date": null,
+          "click_date": null
+        },
+        {
+          "user_id": 102,
+          "open_date": null,
+          "click_date": null
+        },
+        {
+          "user_id": 1101,
+          "open_date": null,
+          "click_date": null
+        },
+        {
+          "user_id": 1102,
+          "open_date": null,
+          "click_date": null
+        }
+      ],
+      "category": "volume"
+    },
+    {
+      "test_case_id": "tc_3_disqualifying_rows",
+      "description": "Dataset containing disqualifying rows, edge values, and cancelled/zero records",
+      "input_data": {
+        "email_logs": [
+          {
+            "email_id": 1,
+            "user_id": 101,
+            "action_type": "sent",
+            "action_date": "01/01/2022 08:00:00"
+          },
+          {
+            "email_id": 2,
+            "user_id": 101,
+            "action_type": "opened",
+            "action_date": "01/01/2022 08:05:00"
+          },
+          {
+            "email_id": 3,
+            "user_id": 101,
+            "action_type": "clicked",
+            "action_date": "01/01/2022 08:06:00"
+          },
+          {
+            "email_id": 4,
+            "user_id": 102,
+            "action_type": "sent",
+            "action_date": "01/02/2022 09:00:00"
+          },
+          {
+            "email_id": 5001,
+            "user_id": 5101,
+            "action_type": "sent",
+            "action_date": "01/01/2017 08:00:00"
+          },
+          {
+            "email_id": 5002,
+            "user_id": 5101,
+            "action_type": "opened",
+            "action_date": "01/01/2017 08:05:00"
+          }
+        ]
+      },
+      "expected_output": [
+        {
+          "user_id": 101,
+          "open_date": null,
+          "click_date": null
+        },
+        {
+          "user_id": 102,
+          "open_date": null,
+          "click_date": null
+        },
+        {
+          "user_id": 5101,
+          "open_date": null,
+          "click_date": null
+        }
+      ],
+      "category": "edge"
+    },
+    {
+      "test_case_id": "tc_4_empty_result",
+      "description": "Input where no rows satisfy problem criteria, verifying empty result handling",
+      "input_data": {
+        "email_logs": []
+      },
+      "expected_output": [],
+      "category": "edge"
+    },
+    {
+      "test_case_id": "tc_5_ties_and_nulls",
+      "description": "Tied ranking metrics, unmatched join keys, and NULL values in nullable attributes",
+      "input_data": {
+        "email_logs": [
+          {
+            "email_id": 1,
+            "user_id": 101,
+            "action_type": "sent",
+            "action_date": "01/01/2022 08:00:00"
+          },
+          {
+            "email_id": 2,
+            "user_id": 101,
+            "action_type": "opened",
+            "action_date": "01/01/2022 08:05:00"
+          },
+          {
+            "email_id": 3,
+            "user_id": 101,
+            "action_type": "clicked",
+            "action_date": "01/01/2022 08:06:00"
+          },
+          {
+            "email_id": 4,
+            "user_id": 102,
+            "action_type": "sent",
+            "action_date": "01/02/2022 09:00:00"
+          },
+          {
+            "email_id": 9001,
+            "user_id": 9101,
+            "action_type": "sent",
+            "action_date": "01/01/2022 08:00:00"
+          },
+          {
+            "email_id": 9502,
+            "user_id": 9601,
+            "action_type": null,
+            "action_date": "01/01/2022 08:05:00"
+          }
+        ]
+      },
+      "expected_output": [
+        {
+          "user_id": 101,
+          "open_date": null,
+          "click_date": null
+        },
+        {
+          "user_id": 102,
+          "open_date": null,
+          "click_date": null
+        },
+        {
+          "user_id": 9101,
+          "open_date": null,
+          "click_date": null
+        },
+        {
+          "user_id": 9601,
+          "open_date": null,
+          "click_date": null
+        }
+      ],
+      "category": "edge"
+    }
+  ],
+  "order_sensitive": true,
+  "expected_output": [
+    {
+      "user_id": 101,
+      "open_date": null,
+      "click_date": null
+    },
+    {
+      "user_id": 102,
+      "open_date": null,
+      "click_date": null
+    }
+  ]
+}

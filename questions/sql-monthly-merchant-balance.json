@@ -1,0 +1,431 @@
+{
+  "question_id": "q_090_sql_monthly_merchant_balance",
+  "slug": "sql-monthly-merchant-balance",
+  "title": "Monthly Merchant Balance",
+  "difficulty": "Hard",
+  "company": "Visa",
+  "premium": true,
+  "question": "You have access to all the transactions for a given merchant account. Write a query to print the cumulative balance of the merchant account at the end of each day, with the total balance reset back to zero at the end of the month.\n\nOutput the transaction date and the cumulative balance.",
+  "notes": [],
+  "tables": [
+    {
+      "table_name": "transactions",
+      "columns": [
+        {
+          "column_name": "transaction_id",
+          "data_type": "INT"
+        },
+        {
+          "column_name": "type",
+          "data_type": "VARCHAR(50)"
+        },
+        {
+          "column_name": "amount",
+          "data_type": "DECIMAL(10,2)"
+        },
+        {
+          "column_name": "transaction_date",
+          "data_type": "DATETIME"
+        }
+      ]
+    }
+  ],
+  "sample_data": {
+    "transactions": [
+      {
+        "transaction_id": 19153,
+        "type": "deposit",
+        "amount": "65.90",
+        "transaction_date": "07/10/2022 10:00:00"
+      },
+      {
+        "transaction_id": 53151,
+        "type": "deposit",
+        "amount": "178.55",
+        "transaction_date": "07/08/2022 10:00:00"
+      },
+      {
+        "transaction_id": 29776,
+        "type": "withdrawal",
+        "amount": "25.90",
+        "transaction_date": "07/08/2022 10:00:00"
+      },
+      {
+        "transaction_id": 16461,
+        "type": "withdrawal",
+        "amount": "45.99",
+        "transaction_date": "07/08/2022 10:00:00"
+      },
+      {
+        "transaction_id": 77134,
+        "type": "deposit",
+        "amount": "32.60",
+        "transaction_date": "07/10/2022 10:00:00"
+      }
+    ]
+  },
+  "sample_output": [
+    {
+      "transaction_date": "07/08/2022 12:00:00",
+      "balance": "106.66"
+    },
+    {
+      "transaction_date": "07/10/2022 12:00:00",
+      "balance": "205.16"
+    }
+  ],
+  "reference_sql": "SELECT \n  DATE_FORMAT(transaction_date, '%Y-%m') AS transaction_month,\n  SUM(CASE WHEN type = 'credit' THEN amount ELSE -amount END) AS balance\nFROM transactions\nGROUP BY DATE_FORMAT(transaction_date, '%Y-%m')\nORDER BY transaction_month;",
+  "tags": [
+    "aggregation",
+    "date-manipulation",
+    "finance",
+    "hard",
+    "visa"
+  ],
+  "related_questions": [],
+  "sources": [
+    [
+      "DataLemur blog: 20 Advanced SQL questions",
+      "https://datalemur.com/blog/advanced-sql-interview-questions"
+    ],
+    [
+      "DataLemur page (locked)",
+      "https://datalemur.com/questions/sql-monthly-merchant-balance"
+    ],
+    [
+      "DataLemur PDF",
+      "Page 94"
+    ]
+  ],
+  "test_cases": [
+    {
+      "test_case_id": "tc_1_baseline",
+      "description": "Baseline sample input data from problem description",
+      "input_data": {
+        "transactions": [
+          {
+            "transaction_id": 19153,
+            "type": "deposit",
+            "amount": "65.90",
+            "transaction_date": "07/10/2022 10:00:00"
+          },
+          {
+            "transaction_id": 53151,
+            "type": "deposit",
+            "amount": "178.55",
+            "transaction_date": "07/08/2022 10:00:00"
+          },
+          {
+            "transaction_id": 29776,
+            "type": "withdrawal",
+            "amount": "25.90",
+            "transaction_date": "07/08/2022 10:00:00"
+          },
+          {
+            "transaction_id": 16461,
+            "type": "withdrawal",
+            "amount": "45.99",
+            "transaction_date": "07/08/2022 10:00:00"
+          },
+          {
+            "transaction_id": 77134,
+            "type": "deposit",
+            "amount": "32.60",
+            "transaction_date": "07/10/2022 10:00:00"
+          }
+        ]
+      },
+      "expected_output": [
+        {
+          "transaction_month": "2022-07",
+          "balance": -348.94
+        }
+      ],
+      "category": "normal"
+    },
+    {
+      "test_case_id": "tc_2_high_volume",
+      "description": "Multiple entities with scaled volume and multi-group distributions",
+      "input_data": {
+        "transactions": [
+          {
+            "transaction_id": 19153,
+            "type": "deposit",
+            "amount": "65.90",
+            "transaction_date": "07/10/2022 10:00:00"
+          },
+          {
+            "transaction_id": 53151,
+            "type": "deposit",
+            "amount": "178.55",
+            "transaction_date": "07/08/2022 10:00:00"
+          },
+          {
+            "transaction_id": 29776,
+            "type": "withdrawal",
+            "amount": "25.90",
+            "transaction_date": "07/08/2022 10:00:00"
+          },
+          {
+            "transaction_id": 16461,
+            "type": "withdrawal",
+            "amount": "45.99",
+            "transaction_date": "07/08/2022 10:00:00"
+          },
+          {
+            "transaction_id": 77134,
+            "type": "deposit",
+            "amount": "32.60",
+            "transaction_date": "07/10/2022 10:00:00"
+          },
+          {
+            "transaction_id": 20153,
+            "type": "deposit",
+            "amount": 98.85,
+            "transaction_date": "07/15/2022 10:00:00"
+          },
+          {
+            "transaction_id": 54151,
+            "type": "deposit",
+            "amount": 267.83,
+            "transaction_date": "07/13/2022 10:00:00"
+          },
+          {
+            "transaction_id": 30776,
+            "type": "withdrawal",
+            "amount": 38.85,
+            "transaction_date": "07/13/2022 10:00:00"
+          },
+          {
+            "transaction_id": 17461,
+            "type": "withdrawal",
+            "amount": 68.98,
+            "transaction_date": "07/13/2022 10:00:00"
+          },
+          {
+            "transaction_id": 78134,
+            "type": "deposit",
+            "amount": 48.9,
+            "transaction_date": "07/15/2022 10:00:00"
+          }
+        ]
+      },
+      "expected_output": [
+        {
+          "transaction_month": "2022-07",
+          "balance": -872.35
+        }
+      ],
+      "category": "volume"
+    },
+    {
+      "test_case_id": "tc_3_disqualifying_rows",
+      "description": "Dataset containing disqualifying rows, edge values, and cancelled/zero records",
+      "input_data": {
+        "transactions": [
+          {
+            "transaction_id": 19153,
+            "type": "deposit",
+            "amount": "65.90",
+            "transaction_date": "07/10/2022 10:00:00"
+          },
+          {
+            "transaction_id": 53151,
+            "type": "deposit",
+            "amount": "178.55",
+            "transaction_date": "07/08/2022 10:00:00"
+          },
+          {
+            "transaction_id": 29776,
+            "type": "withdrawal",
+            "amount": "25.90",
+            "transaction_date": "07/08/2022 10:00:00"
+          },
+          {
+            "transaction_id": 16461,
+            "type": "withdrawal",
+            "amount": "45.99",
+            "transaction_date": "07/08/2022 10:00:00"
+          },
+          {
+            "transaction_id": 77134,
+            "type": "deposit",
+            "amount": "32.60",
+            "transaction_date": "07/10/2022 10:00:00"
+          },
+          {
+            "transaction_id": 24153,
+            "type": "deposit",
+            "amount": 0,
+            "transaction_date": "07/10/2017 10:00:00"
+          },
+          {
+            "transaction_id": 58151,
+            "type": "deposit",
+            "amount": 0,
+            "transaction_date": "07/08/2017 10:00:00"
+          }
+        ]
+      },
+      "expected_output": [
+        {
+          "transaction_month": "2017-07",
+          "balance": 0.0
+        },
+        {
+          "transaction_month": "2022-07",
+          "balance": -348.94
+        }
+      ],
+      "category": "edge"
+    },
+    {
+      "test_case_id": "tc_4_empty_result",
+      "description": "Input where no rows satisfy problem criteria, verifying empty result handling",
+      "input_data": {
+        "transactions": []
+      },
+      "expected_output": [],
+      "category": "edge"
+    },
+    {
+      "test_case_id": "tc_5_ties_and_nulls",
+      "description": "Tied ranking metrics, unmatched join keys, and NULL values in nullable attributes",
+      "input_data": {
+        "transactions": [
+          {
+            "transaction_id": 19153,
+            "type": "deposit",
+            "amount": "65.90",
+            "transaction_date": "07/10/2022 10:00:00"
+          },
+          {
+            "transaction_id": 53151,
+            "type": "deposit",
+            "amount": "178.55",
+            "transaction_date": "07/08/2022 10:00:00"
+          },
+          {
+            "transaction_id": 29776,
+            "type": "withdrawal",
+            "amount": "25.90",
+            "transaction_date": "07/08/2022 10:00:00"
+          },
+          {
+            "transaction_id": 16461,
+            "type": "withdrawal",
+            "amount": "45.99",
+            "transaction_date": "07/08/2022 10:00:00"
+          },
+          {
+            "transaction_id": 77134,
+            "type": "deposit",
+            "amount": "32.60",
+            "transaction_date": "07/10/2022 10:00:00"
+          },
+          {
+            "transaction_id": 28153,
+            "type": "deposit",
+            "amount": "65.90",
+            "transaction_date": "07/10/2022 10:00:00"
+          },
+          {
+            "transaction_id": 62651,
+            "type": null,
+            "amount": "178.55",
+            "transaction_date": "07/08/2022 10:00:00"
+          }
+        ]
+      },
+      "expected_output": [
+        {
+          "transaction_month": "2022-07",
+          "balance": -593.39
+        }
+      ],
+      "category": "edge"
+    },
+    {
+      "test_case_id": "tc_6_extreme_boundary",
+      "description": "Consecutive day sequences, month-end date rollovers, and high-frequency transactions",
+      "input_data": {
+        "transactions": [
+          {
+            "transaction_id": 19153,
+            "type": "deposit",
+            "amount": "65.90",
+            "transaction_date": "07/10/2022 10:00:00"
+          },
+          {
+            "transaction_id": 53151,
+            "type": "deposit",
+            "amount": "178.55",
+            "transaction_date": "07/08/2022 10:00:00"
+          },
+          {
+            "transaction_id": 29776,
+            "type": "withdrawal",
+            "amount": "25.90",
+            "transaction_date": "07/08/2022 10:00:00"
+          },
+          {
+            "transaction_id": 16461,
+            "type": "withdrawal",
+            "amount": "45.99",
+            "transaction_date": "07/08/2022 10:00:00"
+          },
+          {
+            "transaction_id": 77134,
+            "type": "deposit",
+            "amount": "32.60",
+            "transaction_date": "07/10/2022 10:00:00"
+          },
+          {
+            "transaction_id": 27153,
+            "type": "deposit",
+            "amount": 131.8,
+            "transaction_date": "07/11/2022 10:00:00"
+          },
+          {
+            "transaction_id": 61151,
+            "type": "deposit",
+            "amount": 357.1,
+            "transaction_date": "07/09/2022 10:00:00"
+          },
+          {
+            "transaction_id": 37776,
+            "type": "withdrawal",
+            "amount": 51.8,
+            "transaction_date": "07/09/2022 10:00:00"
+          },
+          {
+            "transaction_id": 24461,
+            "type": "withdrawal",
+            "amount": 91.98,
+            "transaction_date": "07/09/2022 10:00:00"
+          },
+          {
+            "transaction_id": 85134,
+            "type": "deposit",
+            "amount": 65.2,
+            "transaction_date": "07/11/2022 10:00:00"
+          }
+        ]
+      },
+      "expected_output": [
+        {
+          "transaction_month": "2022-07",
+          "balance": -1046.82
+        }
+      ],
+      "category": "boundary"
+    }
+  ],
+  "order_sensitive": false,
+  "expected_output": [
+    {
+      "transaction_month": "2022-07",
+      "balance": -348.94
+    }
+  ]
+}

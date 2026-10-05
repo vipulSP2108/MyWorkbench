@@ -1,0 +1,306 @@
+{
+  "question_id": "q_062_money_transfer_relationships",
+  "slug": "money-transfer-relationships",
+  "title": "Unique Money Transfer Relationships",
+  "difficulty": "Medium",
+  "company": "PayPal",
+  "premium": true,
+  "question": "You are given a table of PayPal payments showing the payer, the recipient, and the amount paid. A two-way unique relationship is established when two people send money back and forth.\n\nWrite a query to find the number of two-way unique relationships in this data.\n\nAssumption: a payer can send money to the same recipient multiple times.",
+  "notes": [],
+  "tables": [
+    {
+      "table_name": "payments",
+      "columns": [
+        {
+          "column_name": "payer_id",
+          "data_type": "INT"
+        },
+        {
+          "column_name": "recipient_id",
+          "data_type": "INT"
+        },
+        {
+          "column_name": "amount",
+          "data_type": "INT"
+        }
+      ]
+    }
+  ],
+  "sample_data": {
+    "payments": [
+      {
+        "payer_id": 101,
+        "recipient_id": 201,
+        "amount": 30
+      },
+      {
+        "payer_id": 201,
+        "recipient_id": 101,
+        "amount": 10
+      },
+      {
+        "payer_id": 101,
+        "recipient_id": 301,
+        "amount": 20
+      },
+      {
+        "payer_id": 301,
+        "recipient_id": 101,
+        "amount": 80
+      },
+      {
+        "payer_id": 201,
+        "recipient_id": 301,
+        "amount": 70
+      }
+    ]
+  },
+  "sample_output": [
+    {
+      "unique_relationships": 2
+    }
+  ],
+  "reference_sql": "WITH unique_pairs AS (\n  SELECT DISTINCT\n    LEAST(payer_id, recipient_id) AS p1,\n    GREATEST(payer_id, recipient_id) AS p2\n  FROM payments\n)\nSELECT COUNT(*) AS unique_relationships FROM unique_pairs;",
+  "tags": [
+    "finance",
+    "medium",
+    "paypal"
+  ],
+  "related_questions": [],
+  "sources": [
+    [
+      "DataLemur blog: 11 PayPal SQL questions (#3)",
+      "https://datalemur.com/blog/paypal-sql-interview-questions"
+    ],
+    [
+      "DataLemur page (locked)",
+      "https://datalemur.com/questions/money-transfer-relationships"
+    ],
+    [
+      "DataLemur PDF",
+      "Page 66"
+    ]
+  ],
+  "test_cases": [
+    {
+      "test_case_id": "tc_1_baseline",
+      "description": "Baseline sample input data from problem description",
+      "input_data": {
+        "payments": [
+          {
+            "payer_id": 101,
+            "recipient_id": 201,
+            "amount": 30
+          },
+          {
+            "payer_id": 201,
+            "recipient_id": 101,
+            "amount": 10
+          },
+          {
+            "payer_id": 101,
+            "recipient_id": 301,
+            "amount": 20
+          },
+          {
+            "payer_id": 301,
+            "recipient_id": 101,
+            "amount": 80
+          },
+          {
+            "payer_id": 201,
+            "recipient_id": 301,
+            "amount": 70
+          }
+        ]
+      },
+      "expected_output": [
+        {
+          "unique_relationships": 3
+        }
+      ],
+      "category": "normal"
+    },
+    {
+      "test_case_id": "tc_2_high_volume",
+      "description": "Multiple entities with scaled volume and multi-group distributions",
+      "input_data": {
+        "payments": [
+          {
+            "payer_id": 101,
+            "recipient_id": 201,
+            "amount": 30
+          },
+          {
+            "payer_id": 201,
+            "recipient_id": 101,
+            "amount": 10
+          },
+          {
+            "payer_id": 101,
+            "recipient_id": 301,
+            "amount": 20
+          },
+          {
+            "payer_id": 301,
+            "recipient_id": 101,
+            "amount": 80
+          },
+          {
+            "payer_id": 201,
+            "recipient_id": 301,
+            "amount": 70
+          },
+          {
+            "payer_id": 1101,
+            "recipient_id": 1201,
+            "amount": 45.0
+          },
+          {
+            "payer_id": 1201,
+            "recipient_id": 1101,
+            "amount": 15.0
+          },
+          {
+            "payer_id": 1101,
+            "recipient_id": 1301,
+            "amount": 30.0
+          },
+          {
+            "payer_id": 1301,
+            "recipient_id": 1101,
+            "amount": 120.0
+          },
+          {
+            "payer_id": 1201,
+            "recipient_id": 1301,
+            "amount": 105.0
+          }
+        ]
+      },
+      "expected_output": [
+        {
+          "unique_relationships": 6
+        }
+      ],
+      "category": "volume"
+    },
+    {
+      "test_case_id": "tc_3_disqualifying_rows",
+      "description": "Dataset containing disqualifying rows, edge values, and cancelled/zero records",
+      "input_data": {
+        "payments": [
+          {
+            "payer_id": 101,
+            "recipient_id": 201,
+            "amount": 30
+          },
+          {
+            "payer_id": 201,
+            "recipient_id": 101,
+            "amount": 10
+          },
+          {
+            "payer_id": 101,
+            "recipient_id": 301,
+            "amount": 20
+          },
+          {
+            "payer_id": 301,
+            "recipient_id": 101,
+            "amount": 80
+          },
+          {
+            "payer_id": 201,
+            "recipient_id": 301,
+            "amount": 70
+          },
+          {
+            "payer_id": 5101,
+            "recipient_id": 5201,
+            "amount": 0
+          },
+          {
+            "payer_id": 5201,
+            "recipient_id": 5101,
+            "amount": 0
+          }
+        ]
+      },
+      "expected_output": [
+        {
+          "unique_relationships": 4
+        }
+      ],
+      "category": "edge"
+    },
+    {
+      "test_case_id": "tc_4_empty_result",
+      "description": "Input where no rows satisfy problem criteria, verifying empty result handling",
+      "input_data": {
+        "payments": []
+      },
+      "expected_output": [
+        {
+          "unique_relationships": 0
+        }
+      ],
+      "category": "edge"
+    },
+    {
+      "test_case_id": "tc_5_ties_and_nulls",
+      "description": "Tied ranking metrics, unmatched join keys, and NULL values in nullable attributes",
+      "input_data": {
+        "payments": [
+          {
+            "payer_id": 101,
+            "recipient_id": 201,
+            "amount": 30
+          },
+          {
+            "payer_id": 201,
+            "recipient_id": 101,
+            "amount": 10
+          },
+          {
+            "payer_id": 101,
+            "recipient_id": 301,
+            "amount": 20
+          },
+          {
+            "payer_id": 301,
+            "recipient_id": 101,
+            "amount": 80
+          },
+          {
+            "payer_id": 201,
+            "recipient_id": 301,
+            "amount": 70
+          },
+          {
+            "payer_id": 9101,
+            "recipient_id": 9201,
+            "amount": 30
+          },
+          {
+            "payer_id": 9701,
+            "recipient_id": 9601,
+            "amount": 10
+          }
+        ]
+      },
+      "expected_output": [
+        {
+          "unique_relationships": 5
+        }
+      ],
+      "category": "edge"
+    }
+  ],
+  "order_sensitive": false,
+  "expected_output": [
+    {
+      "unique_relationships": 3
+    }
+  ]
+}

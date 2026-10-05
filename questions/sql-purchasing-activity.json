@@ -1,0 +1,601 @@
+{
+  "question_id": "q_070_sql_purchasing_activity",
+  "slug": "sql-purchasing-activity",
+  "title": "Cumulative Purchases by Product Type",
+  "difficulty": "Medium",
+  "company": "Amazon",
+  "premium": true,
+  "question": "Assume you are given a table of spending activity by product type. Write a query to calculate the cumulative spend for each\nproduct type over time, in chronological order.",
+  "notes": [],
+  "tables": [
+    {
+      "table_name": "purchases",
+      "columns": [
+        {
+          "column_name": "order_id",
+          "data_type": "INT"
+        },
+        {
+          "column_name": "product_type",
+          "data_type": "VARCHAR(255)"
+        },
+        {
+          "column_name": "spend",
+          "data_type": "DECIMAL(10,2)"
+        },
+        {
+          "column_name": "order_date",
+          "data_type": "DATE"
+        }
+      ]
+    }
+  ],
+  "sample_data": {
+    "purchases": [
+      {
+        "order_id": "1",
+        "product_type": "Books",
+        "spend": "20.00",
+        "order_date": "01/01/2022"
+      },
+      {
+        "order_id": "2",
+        "product_type": "Toys",
+        "spend": "15.50",
+        "order_date": "01/01/2022"
+      },
+      {
+        "order_id": "3",
+        "product_type": "Books",
+        "spend": "30.00",
+        "order_date": "01/02/2022"
+      },
+      {
+        "order_id": "4",
+        "product_type": "Books",
+        "spend": "12.25",
+        "order_date": "01/03/2022"
+      },
+      {
+        "order_id": "5",
+        "product_type": "Toys",
+        "spend": "8.00",
+        "order_date": "01/03/2022"
+      },
+      {
+        "order_id": "6",
+        "product_type": "Toys",
+        "spend": "20.00",
+        "order_date": "01/05/2022"
+      }
+    ]
+  },
+  "sample_output": [
+    {
+      "product_type": "Books",
+      "order_date": "01/01/2022",
+      "cumulative_spend": "20.00"
+    },
+    {
+      "product_type": "Books",
+      "order_date": "01/02/2022",
+      "cumulative_spend": "50.00"
+    },
+    {
+      "product_type": "Books",
+      "order_date": "01/03/2022",
+      "cumulative_spend": "62.25"
+    },
+    {
+      "product_type": "Toys",
+      "order_date": "01/01/2022",
+      "cumulative_spend": "15.50"
+    },
+    {
+      "product_type": "Toys",
+      "order_date": "01/03/2022",
+      "cumulative_spend": "23.50"
+    },
+    {
+      "product_type": "Toys",
+      "order_date": "01/05/2022",
+      "cumulative_spend": "43.50"
+    }
+  ],
+  "reference_sql": "SELECT \n  order_date,\n  product_type,\n  ROUND(SUM(spend) OVER (PARTITION BY product_type ORDER BY order_date), 2) AS cum_spend\nFROM purchases\nORDER BY product_type, order_date;",
+  "tags": [
+    "aggregation",
+    "amazon",
+    "ecommerce",
+    "medium",
+    "window-function"
+  ],
+  "related_questions": [],
+  "sources": [
+    [
+      "Nick Singh (DataLemur founder): 30 SQL & DB design questions",
+      "https://www.nicksingh.com/posts/30-sql-and-database-design-questions-from-real-data-science-interviews"
+    ],
+    [
+      "DataLemur page (locked)",
+      "https://datalemur.com/questions/sql-purchasing-activity"
+    ],
+    [
+      "DataLemur PDF",
+      "Page 74"
+    ]
+  ],
+  "test_cases": [
+    {
+      "test_case_id": "tc_1_baseline",
+      "description": "Baseline sample input data from problem description",
+      "input_data": {
+        "purchases": [
+          {
+            "order_id": "1",
+            "product_type": "Books",
+            "spend": "20.00",
+            "order_date": "01/01/2022"
+          },
+          {
+            "order_id": "2",
+            "product_type": "Toys",
+            "spend": "15.50",
+            "order_date": "01/01/2022"
+          },
+          {
+            "order_id": "3",
+            "product_type": "Books",
+            "spend": "30.00",
+            "order_date": "01/02/2022"
+          },
+          {
+            "order_id": "4",
+            "product_type": "Books",
+            "spend": "12.25",
+            "order_date": "01/03/2022"
+          },
+          {
+            "order_id": "5",
+            "product_type": "Toys",
+            "spend": "8.00",
+            "order_date": "01/03/2022"
+          },
+          {
+            "order_id": "6",
+            "product_type": "Toys",
+            "spend": "20.00",
+            "order_date": "01/05/2022"
+          }
+        ]
+      },
+      "expected_output": [
+        {
+          "order_date": "2022-01-01",
+          "product_type": "Books",
+          "cum_spend": 20.0
+        },
+        {
+          "order_date": "2022-01-02",
+          "product_type": "Books",
+          "cum_spend": 50.0
+        },
+        {
+          "order_date": "2022-01-03",
+          "product_type": "Books",
+          "cum_spend": 62.25
+        },
+        {
+          "order_date": "2022-01-01",
+          "product_type": "Toys",
+          "cum_spend": 15.5
+        },
+        {
+          "order_date": "2022-01-03",
+          "product_type": "Toys",
+          "cum_spend": 23.5
+        },
+        {
+          "order_date": "2022-01-05",
+          "product_type": "Toys",
+          "cum_spend": 43.5
+        }
+      ],
+      "category": "normal"
+    },
+    {
+      "test_case_id": "tc_2_high_volume",
+      "description": "Multiple entities with scaled volume and multi-group distributions",
+      "input_data": {
+        "purchases": [
+          {
+            "order_id": "1",
+            "product_type": "Books",
+            "spend": "20.00",
+            "order_date": "01/01/2022"
+          },
+          {
+            "order_id": "2",
+            "product_type": "Toys",
+            "spend": "15.50",
+            "order_date": "01/01/2022"
+          },
+          {
+            "order_id": "3",
+            "product_type": "Books",
+            "spend": "30.00",
+            "order_date": "01/02/2022"
+          },
+          {
+            "order_id": "4",
+            "product_type": "Books",
+            "spend": "12.25",
+            "order_date": "01/03/2022"
+          },
+          {
+            "order_id": "5",
+            "product_type": "Toys",
+            "spend": "8.00",
+            "order_date": "01/03/2022"
+          },
+          {
+            "order_id": "6",
+            "product_type": "Toys",
+            "spend": "20.00",
+            "order_date": "01/05/2022"
+          },
+          {
+            "order_id": 1001,
+            "product_type": "Books",
+            "spend": 30.0,
+            "order_date": "01/06/2022"
+          },
+          {
+            "order_id": 1002,
+            "product_type": "Toys",
+            "spend": 23.25,
+            "order_date": "01/06/2022"
+          },
+          {
+            "order_id": 1003,
+            "product_type": "Books",
+            "spend": 45.0,
+            "order_date": "01/07/2022"
+          },
+          {
+            "order_id": 1004,
+            "product_type": "Books",
+            "spend": 18.38,
+            "order_date": "01/08/2022"
+          },
+          {
+            "order_id": 1005,
+            "product_type": "Toys",
+            "spend": 12.0,
+            "order_date": "01/08/2022"
+          },
+          {
+            "order_id": 1006,
+            "product_type": "Toys",
+            "spend": 30.0,
+            "order_date": "01/10/2022"
+          }
+        ]
+      },
+      "expected_output": [
+        {
+          "order_date": "2022-01-01",
+          "product_type": "Books",
+          "cum_spend": 20.0
+        },
+        {
+          "order_date": "2022-01-02",
+          "product_type": "Books",
+          "cum_spend": 50.0
+        },
+        {
+          "order_date": "2022-01-03",
+          "product_type": "Books",
+          "cum_spend": 62.25
+        },
+        {
+          "order_date": "2022-01-06",
+          "product_type": "Books",
+          "cum_spend": 92.25
+        },
+        {
+          "order_date": "2022-01-07",
+          "product_type": "Books",
+          "cum_spend": 137.25
+        },
+        {
+          "order_date": "2022-01-08",
+          "product_type": "Books",
+          "cum_spend": 155.63
+        },
+        {
+          "order_date": "2022-01-01",
+          "product_type": "Toys",
+          "cum_spend": 15.5
+        },
+        {
+          "order_date": "2022-01-03",
+          "product_type": "Toys",
+          "cum_spend": 23.5
+        },
+        {
+          "order_date": "2022-01-05",
+          "product_type": "Toys",
+          "cum_spend": 43.5
+        },
+        {
+          "order_date": "2022-01-06",
+          "product_type": "Toys",
+          "cum_spend": 66.75
+        },
+        {
+          "order_date": "2022-01-08",
+          "product_type": "Toys",
+          "cum_spend": 78.75
+        },
+        {
+          "order_date": "2022-01-10",
+          "product_type": "Toys",
+          "cum_spend": 108.75
+        }
+      ],
+      "category": "volume"
+    },
+    {
+      "test_case_id": "tc_3_disqualifying_rows",
+      "description": "Dataset containing disqualifying rows, edge values, and cancelled/zero records",
+      "input_data": {
+        "purchases": [
+          {
+            "order_id": "1",
+            "product_type": "Books",
+            "spend": "20.00",
+            "order_date": "01/01/2022"
+          },
+          {
+            "order_id": "2",
+            "product_type": "Toys",
+            "spend": "15.50",
+            "order_date": "01/01/2022"
+          },
+          {
+            "order_id": "3",
+            "product_type": "Books",
+            "spend": "30.00",
+            "order_date": "01/02/2022"
+          },
+          {
+            "order_id": "4",
+            "product_type": "Books",
+            "spend": "12.25",
+            "order_date": "01/03/2022"
+          },
+          {
+            "order_id": "5",
+            "product_type": "Toys",
+            "spend": "8.00",
+            "order_date": "01/03/2022"
+          },
+          {
+            "order_id": "6",
+            "product_type": "Toys",
+            "spend": "20.00",
+            "order_date": "01/05/2022"
+          },
+          {
+            "order_id": 5001,
+            "product_type": "Books",
+            "spend": 0,
+            "order_date": "01/01/2017"
+          },
+          {
+            "order_id": 5002,
+            "product_type": "Toys",
+            "spend": 0,
+            "order_date": "01/01/2017"
+          },
+          {
+            "order_id": 5003,
+            "product_type": "Books",
+            "spend": 0,
+            "order_date": "01/02/2017"
+          }
+        ]
+      },
+      "expected_output": [
+        {
+          "order_date": "2017-01-01",
+          "product_type": "Books",
+          "cum_spend": 0.0
+        },
+        {
+          "order_date": "2017-01-02",
+          "product_type": "Books",
+          "cum_spend": 0.0
+        },
+        {
+          "order_date": "2022-01-01",
+          "product_type": "Books",
+          "cum_spend": 20.0
+        },
+        {
+          "order_date": "2022-01-02",
+          "product_type": "Books",
+          "cum_spend": 50.0
+        },
+        {
+          "order_date": "2022-01-03",
+          "product_type": "Books",
+          "cum_spend": 62.25
+        },
+        {
+          "order_date": "2017-01-01",
+          "product_type": "Toys",
+          "cum_spend": 0.0
+        },
+        {
+          "order_date": "2022-01-01",
+          "product_type": "Toys",
+          "cum_spend": 15.5
+        },
+        {
+          "order_date": "2022-01-03",
+          "product_type": "Toys",
+          "cum_spend": 23.5
+        },
+        {
+          "order_date": "2022-01-05",
+          "product_type": "Toys",
+          "cum_spend": 43.5
+        }
+      ],
+      "category": "edge"
+    },
+    {
+      "test_case_id": "tc_4_empty_result",
+      "description": "Input where no rows satisfy problem criteria, verifying empty result handling",
+      "input_data": {
+        "purchases": []
+      },
+      "expected_output": [],
+      "category": "edge"
+    },
+    {
+      "test_case_id": "tc_5_ties_and_nulls",
+      "description": "Tied ranking metrics, unmatched join keys, and NULL values in nullable attributes",
+      "input_data": {
+        "purchases": [
+          {
+            "order_id": "1",
+            "product_type": "Books",
+            "spend": "20.00",
+            "order_date": "01/01/2022"
+          },
+          {
+            "order_id": "2",
+            "product_type": "Toys",
+            "spend": "15.50",
+            "order_date": "01/01/2022"
+          },
+          {
+            "order_id": "3",
+            "product_type": "Books",
+            "spend": "30.00",
+            "order_date": "01/02/2022"
+          },
+          {
+            "order_id": "4",
+            "product_type": "Books",
+            "spend": "12.25",
+            "order_date": "01/03/2022"
+          },
+          {
+            "order_id": "5",
+            "product_type": "Toys",
+            "spend": "8.00",
+            "order_date": "01/03/2022"
+          },
+          {
+            "order_id": "6",
+            "product_type": "Toys",
+            "spend": "20.00",
+            "order_date": "01/05/2022"
+          },
+          {
+            "order_id": 9001,
+            "product_type": "Books",
+            "spend": "20.00",
+            "order_date": "01/01/2022"
+          },
+          {
+            "order_id": 9502,
+            "product_type": null,
+            "spend": "15.50",
+            "order_date": "01/01/2022"
+          }
+        ]
+      },
+      "expected_output": [
+        {
+          "order_date": "2022-01-01",
+          "product_type": null,
+          "cum_spend": 15.5
+        },
+        {
+          "order_date": "2022-01-01",
+          "product_type": "Books",
+          "cum_spend": 40.0
+        },
+        {
+          "order_date": "2022-01-01",
+          "product_type": "Books",
+          "cum_spend": 40.0
+        },
+        {
+          "order_date": "2022-01-02",
+          "product_type": "Books",
+          "cum_spend": 70.0
+        },
+        {
+          "order_date": "2022-01-03",
+          "product_type": "Books",
+          "cum_spend": 82.25
+        },
+        {
+          "order_date": "2022-01-01",
+          "product_type": "Toys",
+          "cum_spend": 15.5
+        },
+        {
+          "order_date": "2022-01-03",
+          "product_type": "Toys",
+          "cum_spend": 23.5
+        },
+        {
+          "order_date": "2022-01-05",
+          "product_type": "Toys",
+          "cum_spend": 43.5
+        }
+      ],
+      "category": "edge"
+    }
+  ],
+  "order_sensitive": true,
+  "expected_output": [
+    {
+      "order_date": "2022-01-01",
+      "product_type": "Books",
+      "cum_spend": 20.0
+    },
+    {
+      "order_date": "2022-01-02",
+      "product_type": "Books",
+      "cum_spend": 50.0
+    },
+    {
+      "order_date": "2022-01-03",
+      "product_type": "Books",
+      "cum_spend": 62.25
+    },
+    {
+      "order_date": "2022-01-01",
+      "product_type": "Toys",
+      "cum_spend": 15.5
+    },
+    {
+      "order_date": "2022-01-03",
+      "product_type": "Toys",
+      "cum_spend": 23.5
+    },
+    {
+      "order_date": "2022-01-05",
+      "product_type": "Toys",
+      "cum_spend": 43.5
+    }
+  ]
+}

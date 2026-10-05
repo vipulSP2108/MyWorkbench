@@ -1,0 +1,390 @@
+{
+  "question_id": "q_082_patient_call_history",
+  "slug": "patient-call-history",
+  "title": "Patient Support Analysis (Part 3)",
+  "difficulty": "Hard",
+  "company": "UnitedHealth",
+  "premium": false,
+  "question": "UnitedHealth Group (UHG) has a program called Advocate4Me, which allows policy holders (or, members) to call an advocate and receive support for their health care needs \u2013 whether that's claims and benefits support, drug coverage, pre- and post-authorisation, medical records, emergency assistance, or member portal services.\n\nWrite a query to obtain the number of unique callers who made calls within a 7-day interval of their previous calls. If a caller made more than two calls within the 7-day period, count them only once.\n\nIf you like this question, try out Patient Support Analysis (Part 4)!",
+  "notes": [
+    "Policy holder IDs 14 and 15 each made two calls within a 7-day interval. For example, ID 14 made calls on 02/17/2023 and 02/21/2023, and ID 14 on 01/08/2023 and 01/09/2023 consecutively. Hence, the count of unique callers is two.",
+    "The dataset you are querying against may have different input & output - this is just an example!"
+  ],
+  "tables": [
+    {
+      "table_name": "callers",
+      "columns": [
+        {
+          "column_name": "policy_holder_id",
+          "data_type": "INT"
+        },
+        {
+          "column_name": "case_id",
+          "data_type": "VARCHAR(255)"
+        },
+        {
+          "column_name": "call_category",
+          "data_type": "VARCHAR(255)"
+        },
+        {
+          "column_name": "call_date",
+          "data_type": "DATETIME"
+        },
+        {
+          "column_name": "call_duration_secs",
+          "data_type": "INT"
+        }
+      ]
+    }
+  ],
+  "sample_data": {
+    "callers": [
+      {
+        "policy_holder_id": "13",
+        "case_id": "894a08c6-82c6-49ed-84a0-b627752cdca7",
+        "call_category": "benefits",
+        "call_date": "01/11/2023 02:09:23",
+        "call_duration_secs": "794"
+      },
+      {
+        "policy_holder_id": "13",
+        "case_id": "7ee4e5f0-4924-47f7-8809-172bb59c6ef0",
+        "call_category": "provider network",
+        "call_date": "02/01/2023 18:41:03",
+        "call_duration_secs": "659"
+      },
+      {
+        "policy_holder_id": "14",
+        "case_id": "0b68aafa-6907-43c3-9dbd-a6c171cf5006",
+        "call_category": "claims assistance",
+        "call_date": "02/17/2023 10:03:27",
+        "call_duration_secs": "757"
+      },
+      {
+        "policy_holder_id": "14",
+        "case_id": "c4660294-9443-4aba-b6d4-f39a9d5e5f00",
+        "call_category": "benefits",
+        "call_date": "02/21/2023 13:57:31",
+        "call_duration_secs": "36"
+      },
+      {
+        "policy_holder_id": "15",
+        "case_id": "06545ac5-18f5-4ae8-9b1e-087c7dc8deca",
+        "call_category": "member portal",
+        "call_date": "01/08/2023 03:19:24",
+        "call_duration_secs": "973"
+      },
+      {
+        "policy_holder_id": "15",
+        "case_id": "9580a1ad-842a-482f-a05c-7e1c09b926b3",
+        "call_category": "provider network",
+        "call_date": "01/09/2023 01:33:06",
+        "call_duration_secs": "729"
+      }
+    ]
+  },
+  "sample_output": [
+    {
+      "policy_holder_count": 2
+    }
+  ],
+  "reference_sql": "WITH lagged_calls AS (\n  SELECT \n    policy_holder_id,\n    call_date,\n    LAG(call_date) OVER (PARTITION BY policy_holder_id ORDER BY call_date) AS prev_call_date\n  FROM callers\n)\nSELECT COUNT(DISTINCT policy_holder_id) AS policy_holder_count\nFROM lagged_calls\nWHERE prev_call_date IS NOT NULL\n  AND DATEDIFF(call_date, prev_call_date) <= 7;",
+  "tags": [
+    "aggregation",
+    "hard",
+    "healthcare",
+    "lead-lag",
+    "social-media",
+    "unitedhealth",
+    "window-function"
+  ],
+  "related_questions": [
+    "frequent-callers",
+    "uncategorized-calls-percentage",
+    "long-calls-growth"
+  ],
+  "sources": [
+    [
+      "DataLemur page (free)",
+      "https://datalemur.com/questions/patient-call-history"
+    ],
+    [
+      "DataLemur PDF",
+      "Page 86"
+    ]
+  ],
+  "test_cases": [
+    {
+      "test_case_id": "tc_1_baseline",
+      "description": "Baseline: ID 14 and ID 15 made calls within 7 days (count = 2)",
+      "input_data": {
+        "callers": [
+          {
+            "policy_holder_id": "13",
+            "case_id": "894a08c6-82c6-49ed-84a0-b627752cdca7",
+            "call_category": "benefits",
+            "call_date": "01/11/2023 02:09:23",
+            "call_duration_secs": "794"
+          },
+          {
+            "policy_holder_id": "13",
+            "case_id": "7ee4e5f0-4924-47f7-8809-172bb59c6ef0",
+            "call_category": "provider network",
+            "call_date": "02/01/2023 18:41:03",
+            "call_duration_secs": "659"
+          },
+          {
+            "policy_holder_id": "14",
+            "case_id": "0b68aafa-6907-43c3-9dbd-a6c171cf5006",
+            "call_category": "claims assistance",
+            "call_date": "02/17/2023 10:03:27",
+            "call_duration_secs": "757"
+          },
+          {
+            "policy_holder_id": "14",
+            "case_id": "c4660294-9443-4aba-b6d4-f39a9d5e5f00",
+            "call_category": "benefits",
+            "call_date": "02/21/2023 13:57:31",
+            "call_duration_secs": "36"
+          },
+          {
+            "policy_holder_id": "15",
+            "case_id": "06545ac5-18f5-4ae8-9b1e-087c7dc8deca",
+            "call_category": "member portal",
+            "call_date": "01/08/2023 03:19:24",
+            "call_duration_secs": "973"
+          },
+          {
+            "policy_holder_id": "15",
+            "case_id": "9580a1ad-842a-482f-a05c-7e1c09b926b3",
+            "call_category": "provider network",
+            "call_date": "01/09/2023 01:33:06",
+            "call_duration_secs": "729"
+          }
+        ]
+      },
+      "expected_output": [
+        {
+          "policy_holder_count": 2
+        }
+      ],
+      "category": "normal"
+    },
+    {
+      "test_case_id": "tc_2_deduplication_and_boundary",
+      "description": "Tests multiple calls deduplication (counted once) and exact 7-day boundary",
+      "input_data": {
+        "callers": [
+          {
+            "policy_holder_id": 100,
+            "case_id": "c1",
+            "call_category": "claims",
+            "call_date": "2023-03-01 10:00:00",
+            "call_duration_secs": 300
+          },
+          {
+            "policy_holder_id": 100,
+            "case_id": "c2",
+            "call_category": "claims",
+            "call_date": "2023-03-02 11:00:00",
+            "call_duration_secs": 250
+          },
+          {
+            "policy_holder_id": 100,
+            "case_id": "c3",
+            "call_category": "claims",
+            "call_date": "2023-03-04 09:00:00",
+            "call_duration_secs": 400
+          },
+          {
+            "policy_holder_id": 100,
+            "case_id": "c4",
+            "call_category": "claims",
+            "call_date": "2023-03-06 14:00:00",
+            "call_duration_secs": 150
+          },
+          {
+            "policy_holder_id": 200,
+            "case_id": "c5",
+            "call_category": "benefits",
+            "call_date": "2023-03-01 08:00:00",
+            "call_duration_secs": 100
+          },
+          {
+            "policy_holder_id": 200,
+            "case_id": "c6",
+            "call_category": "benefits",
+            "call_date": "2023-03-08 08:00:00",
+            "call_duration_secs": 120
+          },
+          {
+            "policy_holder_id": 300,
+            "case_id": "c7",
+            "call_category": "portal",
+            "call_date": "2023-03-01 12:00:00",
+            "call_duration_secs": 200
+          },
+          {
+            "policy_holder_id": 300,
+            "case_id": "c8",
+            "call_category": "portal",
+            "call_date": "2023-03-09 12:00:00",
+            "call_duration_secs": 210
+          }
+        ]
+      },
+      "expected_output": [
+        {
+          "policy_holder_count": 2
+        }
+      ],
+      "category": "boundary"
+    },
+    {
+      "test_case_id": "tc_3_no_repeat_calls",
+      "description": "Edge case: All calls separated by > 7 days or single call, returns 0",
+      "input_data": {
+        "callers": [
+          {
+            "policy_holder_id": 1,
+            "case_id": "c1",
+            "call_category": "benefits",
+            "call_date": "2023-01-01 10:00:00",
+            "call_duration_secs": 100
+          },
+          {
+            "policy_holder_id": 1,
+            "case_id": "c2",
+            "call_category": "benefits",
+            "call_date": "2023-01-15 10:00:00",
+            "call_duration_secs": 100
+          },
+          {
+            "policy_holder_id": 2,
+            "case_id": "c3",
+            "call_category": "claims",
+            "call_date": "2023-02-01 10:00:00",
+            "call_duration_secs": 100
+          }
+        ]
+      },
+      "expected_output": [
+        {
+          "policy_holder_count": 0
+        }
+      ],
+      "category": "edge"
+    },
+    {
+      "test_case_id": "tc_4_same_day_multiple_calls",
+      "description": "Edge case: Caller calls twice on the same day (morning and afternoon, interval 0 days <= 7 days)",
+      "category": "edge",
+      "input_data": {
+        "callers": [
+          {
+            "policy_holder_id": 501,
+            "case_id": "s1",
+            "call_category": "claims",
+            "call_date": "2023-04-10 09:15:00",
+            "call_duration_secs": 320
+          },
+          {
+            "policy_holder_id": 501,
+            "case_id": "s2",
+            "call_category": "claims",
+            "call_date": "2023-04-10 16:45:00",
+            "call_duration_secs": 180
+          }
+        ]
+      },
+      "expected_output": [
+        {
+          "policy_holder_count": 1
+        }
+      ]
+    },
+    {
+      "test_case_id": "tc_5_volume_multi_policy_holders",
+      "description": "Volume: 5 distinct policy holders with mixed patterns (3 qualify, 2 do not)",
+      "category": "volume",
+      "input_data": {
+        "callers": [
+          {
+            "policy_holder_id": 1,
+            "case_id": "v1",
+            "call_category": "benefits",
+            "call_date": "2023-05-01 10:00:00",
+            "call_duration_secs": 200
+          },
+          {
+            "policy_holder_id": 1,
+            "case_id": "v2",
+            "call_category": "benefits",
+            "call_date": "2023-05-05 11:00:00",
+            "call_duration_secs": 210
+          },
+          {
+            "policy_holder_id": 2,
+            "case_id": "v3",
+            "call_category": "claims",
+            "call_date": "2023-05-01 10:00:00",
+            "call_duration_secs": 150
+          },
+          {
+            "policy_holder_id": 2,
+            "case_id": "v4",
+            "call_category": "claims",
+            "call_date": "2023-05-20 10:00:00",
+            "call_duration_secs": 160
+          },
+          {
+            "policy_holder_id": 3,
+            "case_id": "v5",
+            "call_category": "portal",
+            "call_date": "2023-06-01 08:00:00",
+            "call_duration_secs": 300
+          },
+          {
+            "policy_holder_id": 3,
+            "case_id": "v6",
+            "call_category": "portal",
+            "call_date": "2023-06-07 14:00:00",
+            "call_duration_secs": 120
+          },
+          {
+            "policy_holder_id": 4,
+            "case_id": "v7",
+            "call_category": "provider",
+            "call_date": "2023-06-01 09:00:00",
+            "call_duration_secs": 100
+          },
+          {
+            "policy_holder_id": 5,
+            "case_id": "v8",
+            "call_category": "claims",
+            "call_date": "2023-07-01 10:00:00",
+            "call_duration_secs": 400
+          },
+          {
+            "policy_holder_id": 5,
+            "case_id": "v9",
+            "call_category": "claims",
+            "call_date": "2023-07-03 12:00:00",
+            "call_duration_secs": 350
+          }
+        ]
+      },
+      "expected_output": [
+        {
+          "policy_holder_count": 3
+        }
+      ]
+    }
+  ],
+  "order_sensitive": false,
+  "expected_output": [
+    {
+      "policy_holder_count": 2
+    }
+  ]
+}

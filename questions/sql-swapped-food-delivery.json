@@ -1,0 +1,520 @@
+{
+  "question_id": "q_049_sql_swapped_food_delivery",
+  "slug": "sql-swapped-food-delivery",
+  "title": "Swapped Food Delivery",
+  "difficulty": "Medium",
+  "company": "Zomato",
+  "premium": false,
+  "question": "Zomato is a leading online food delivery service that connects users with various restaurants and cuisines, allowing them to browse menus, place orders, and get meals delivered to their doorsteps.\n\nRecently, Zomato encountered an issue with their delivery system. Due to an error in the delivery driver instructions, each item's order was swapped with the item in the subsequent row. As a data analyst, you're asked to correct this swapping error and return the proper pairing of order ID and item.\n\nIf the last item has an odd order ID, it should remain as the last item in the corrected data. For example, if the last item is Order ID 7 Tandoori Chicken, then it should remain as Order ID 7 in the corrected data.\n\nIn the results, return the correct pairs of order IDs and items.",
+  "notes": [
+    "Here's a sample of the initial incorrect data:",
+    "The corrected data should look like this:",
+    "Order ID 1 is now associated with Pizza and Order ID 2 is paired with Chow Mein. This adjustment ensures that each order is correctly aligned with its respective item, addressing the initial swapping error.",
+    "Order ID 7 remains unchanged and is still associated with Tandoori Chicken. This preserves the order sequence ensuring that the last odd order ID remains unaltered.",
+    "The dataset you are querying against may have different input & output - this is just an example!"
+  ],
+  "tables": [
+    {
+      "table_name": "orders",
+      "columns": [
+        {
+          "column_name": "order_id",
+          "data_type": "INT"
+        },
+        {
+          "column_name": "item",
+          "data_type": "VARCHAR(255)"
+        }
+      ]
+    }
+  ],
+  "sample_data": {
+    "orders": [
+      {
+        "order_id": "1",
+        "item": "Chow Mein"
+      },
+      {
+        "order_id": "2",
+        "item": "Pizza"
+      },
+      {
+        "order_id": "3",
+        "item": "Pad Thai"
+      },
+      {
+        "order_id": "4",
+        "item": "Butter Chicken"
+      },
+      {
+        "order_id": "5",
+        "item": "Eggrolls"
+      },
+      {
+        "order_id": "6",
+        "item": "Burger"
+      },
+      {
+        "order_id": "7",
+        "item": "Tandoori Chicken"
+      }
+    ]
+  },
+  "sample_output": [
+    {
+      "corrected_order_id": "1",
+      "item": "Pizza"
+    },
+    {
+      "corrected_order_id": "2",
+      "item": "Chow Mein"
+    },
+    {
+      "corrected_order_id": "3",
+      "item": "Butter Chicken"
+    },
+    {
+      "corrected_order_id": "4",
+      "item": "Pad Thai"
+    },
+    {
+      "corrected_order_id": "5",
+      "item": "Burger"
+    },
+    {
+      "corrected_order_id": "6",
+      "item": "Eggrolls"
+    },
+    {
+      "corrected_order_id": "7",
+      "item": "Tandoori Chicken"
+    }
+  ],
+  "reference_sql": "SELECT \n  order_id,\n  CASE \n    WHEN order_id % 2 = 1 AND order_id = (SELECT MAX(order_id) FROM orders) THEN item\n    WHEN order_id % 2 = 1 THEN LEAD(item, 1) OVER (ORDER BY order_id)\n    ELSE LAG(item, 1) OVER (ORDER BY order_id)\n  END AS item\nFROM orders\nORDER BY order_id;",
+  "tags": [
+    "aggregation",
+    "ecommerce",
+    "lead-lag",
+    "medium",
+    "transportation",
+    "window-function",
+    "zomato"
+  ],
+  "related_questions": [],
+  "sources": [
+    [
+      "DataLemur page (free)",
+      "https://datalemur.com/questions/sql-swapped-food-delivery"
+    ],
+    [
+      "DataLemur PDF",
+      "Page 53"
+    ]
+  ],
+  "test_cases": [
+    {
+      "test_case_id": "tc_1_baseline",
+      "description": "Baseline sample input data from problem description",
+      "input_data": {
+        "orders": [
+          {
+            "order_id": "1",
+            "item": "Chow Mein"
+          },
+          {
+            "order_id": "2",
+            "item": "Pizza"
+          },
+          {
+            "order_id": "3",
+            "item": "Pad Thai"
+          },
+          {
+            "order_id": "4",
+            "item": "Butter Chicken"
+          },
+          {
+            "order_id": "5",
+            "item": "Eggrolls"
+          },
+          {
+            "order_id": "6",
+            "item": "Burger"
+          },
+          {
+            "order_id": "7",
+            "item": "Tandoori Chicken"
+          }
+        ]
+      },
+      "expected_output": [
+        {
+          "order_id": 1,
+          "item": "Pizza"
+        },
+        {
+          "order_id": 2,
+          "item": "Chow Mein"
+        },
+        {
+          "order_id": 3,
+          "item": "Butter Chicken"
+        },
+        {
+          "order_id": 4,
+          "item": "Pad Thai"
+        },
+        {
+          "order_id": 5,
+          "item": "Burger"
+        },
+        {
+          "order_id": 6,
+          "item": "Eggrolls"
+        },
+        {
+          "order_id": 7,
+          "item": "Tandoori Chicken"
+        }
+      ],
+      "category": "normal"
+    },
+    {
+      "test_case_id": "tc_2_high_volume",
+      "description": "Multiple entities with scaled volume and multi-group distributions",
+      "input_data": {
+        "orders": [
+          {
+            "order_id": "1",
+            "item": "Chow Mein"
+          },
+          {
+            "order_id": "2",
+            "item": "Pizza"
+          },
+          {
+            "order_id": "3",
+            "item": "Pad Thai"
+          },
+          {
+            "order_id": "4",
+            "item": "Butter Chicken"
+          },
+          {
+            "order_id": "5",
+            "item": "Eggrolls"
+          },
+          {
+            "order_id": "6",
+            "item": "Burger"
+          },
+          {
+            "order_id": "7",
+            "item": "Tandoori Chicken"
+          },
+          {
+            "order_id": 1001,
+            "item": "Chow Mein"
+          },
+          {
+            "order_id": 1002,
+            "item": "Pizza"
+          },
+          {
+            "order_id": 1003,
+            "item": "Pad Thai"
+          },
+          {
+            "order_id": 1004,
+            "item": "Butter Chicken"
+          },
+          {
+            "order_id": 1005,
+            "item": "Eggrolls"
+          },
+          {
+            "order_id": 1006,
+            "item": "Burger"
+          },
+          {
+            "order_id": 1007,
+            "item": "Tandoori Chicken"
+          }
+        ]
+      },
+      "expected_output": [
+        {
+          "order_id": 1,
+          "item": "Pizza"
+        },
+        {
+          "order_id": 2,
+          "item": "Chow Mein"
+        },
+        {
+          "order_id": 3,
+          "item": "Butter Chicken"
+        },
+        {
+          "order_id": 4,
+          "item": "Pad Thai"
+        },
+        {
+          "order_id": 5,
+          "item": "Burger"
+        },
+        {
+          "order_id": 6,
+          "item": "Eggrolls"
+        },
+        {
+          "order_id": 7,
+          "item": "Chow Mein"
+        },
+        {
+          "order_id": 1001,
+          "item": "Pizza"
+        },
+        {
+          "order_id": 1002,
+          "item": "Chow Mein"
+        },
+        {
+          "order_id": 1003,
+          "item": "Butter Chicken"
+        },
+        {
+          "order_id": 1004,
+          "item": "Pad Thai"
+        },
+        {
+          "order_id": 1005,
+          "item": "Burger"
+        },
+        {
+          "order_id": 1006,
+          "item": "Eggrolls"
+        },
+        {
+          "order_id": 1007,
+          "item": "Tandoori Chicken"
+        }
+      ],
+      "category": "volume"
+    },
+    {
+      "test_case_id": "tc_3_disqualifying_rows",
+      "description": "Dataset containing disqualifying rows, edge values, and cancelled/zero records",
+      "input_data": {
+        "orders": [
+          {
+            "order_id": "1",
+            "item": "Chow Mein"
+          },
+          {
+            "order_id": "2",
+            "item": "Pizza"
+          },
+          {
+            "order_id": "3",
+            "item": "Pad Thai"
+          },
+          {
+            "order_id": "4",
+            "item": "Butter Chicken"
+          },
+          {
+            "order_id": "5",
+            "item": "Eggrolls"
+          },
+          {
+            "order_id": "6",
+            "item": "Burger"
+          },
+          {
+            "order_id": "7",
+            "item": "Tandoori Chicken"
+          },
+          {
+            "order_id": 5001,
+            "item": "Chow Mein"
+          },
+          {
+            "order_id": 5002,
+            "item": "Pizza"
+          },
+          {
+            "order_id": 5003,
+            "item": "Pad Thai"
+          }
+        ]
+      },
+      "expected_output": [
+        {
+          "order_id": 1,
+          "item": "Pizza"
+        },
+        {
+          "order_id": 2,
+          "item": "Chow Mein"
+        },
+        {
+          "order_id": 3,
+          "item": "Butter Chicken"
+        },
+        {
+          "order_id": 4,
+          "item": "Pad Thai"
+        },
+        {
+          "order_id": 5,
+          "item": "Burger"
+        },
+        {
+          "order_id": 6,
+          "item": "Eggrolls"
+        },
+        {
+          "order_id": 7,
+          "item": "Chow Mein"
+        },
+        {
+          "order_id": 5001,
+          "item": "Pizza"
+        },
+        {
+          "order_id": 5002,
+          "item": "Chow Mein"
+        },
+        {
+          "order_id": 5003,
+          "item": "Pad Thai"
+        }
+      ],
+      "category": "edge"
+    },
+    {
+      "test_case_id": "tc_4_empty_result",
+      "description": "Input where no rows satisfy problem criteria, verifying empty result handling",
+      "input_data": {
+        "orders": []
+      },
+      "expected_output": [],
+      "category": "edge"
+    },
+    {
+      "test_case_id": "tc_5_ties_and_nulls",
+      "description": "Tied ranking metrics, unmatched join keys, and NULL values in nullable attributes",
+      "input_data": {
+        "orders": [
+          {
+            "order_id": "1",
+            "item": "Chow Mein"
+          },
+          {
+            "order_id": "2",
+            "item": "Pizza"
+          },
+          {
+            "order_id": "3",
+            "item": "Pad Thai"
+          },
+          {
+            "order_id": "4",
+            "item": "Butter Chicken"
+          },
+          {
+            "order_id": "5",
+            "item": "Eggrolls"
+          },
+          {
+            "order_id": "6",
+            "item": "Burger"
+          },
+          {
+            "order_id": "7",
+            "item": "Tandoori Chicken"
+          },
+          {
+            "order_id": 9001,
+            "item": "Chow Mein"
+          },
+          {
+            "order_id": 9502,
+            "item": "Pizza"
+          }
+        ]
+      },
+      "expected_output": [
+        {
+          "order_id": 1,
+          "item": "Pizza"
+        },
+        {
+          "order_id": 2,
+          "item": "Chow Mein"
+        },
+        {
+          "order_id": 3,
+          "item": "Butter Chicken"
+        },
+        {
+          "order_id": 4,
+          "item": "Pad Thai"
+        },
+        {
+          "order_id": 5,
+          "item": "Burger"
+        },
+        {
+          "order_id": 6,
+          "item": "Eggrolls"
+        },
+        {
+          "order_id": 7,
+          "item": "Chow Mein"
+        },
+        {
+          "order_id": 9001,
+          "item": "Pizza"
+        },
+        {
+          "order_id": 9502,
+          "item": "Chow Mein"
+        }
+      ],
+      "category": "edge"
+    }
+  ],
+  "order_sensitive": false,
+  "expected_output": [
+    {
+      "order_id": 1,
+      "item": "Pizza"
+    },
+    {
+      "order_id": 2,
+      "item": "Chow Mein"
+    },
+    {
+      "order_id": 3,
+      "item": "Butter Chicken"
+    },
+    {
+      "order_id": 4,
+      "item": "Pad Thai"
+    },
+    {
+      "order_id": 5,
+      "item": "Burger"
+    },
+    {
+      "order_id": 6,
+      "item": "Eggrolls"
+    },
+    {
+      "order_id": 7,
+      "item": "Tandoori Chicken"
+    }
+  ]
+}

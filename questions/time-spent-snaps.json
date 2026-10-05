@@ -1,0 +1,536 @@
+{
+  "question_id": "q_037_time_spent_snaps",
+  "slug": "time-spent-snaps",
+  "title": "Sending vs. Opening Snaps",
+  "difficulty": "Medium",
+  "company": "Snapchat",
+  "premium": false,
+  "question": "Assume you're given tables with information on Snapchat users, including their ages and time spent sending and opening snaps.\n\nWrite a query to obtain a breakdown of the time spent sending vs. opening snaps as a percentage of total time spent on these activities grouped by age group. Round the percentage to 2 decimal places in the output.\n\nNotes:\n\n*Effective April 15th, 2023, the solution has been updated and optimised.*",
+  "notes": [
+    "Calculate the following percentages:",
+    "time spent sending / (Time spent sending + Time spent opening)",
+    "Time spent opening / (Time spent sending + Time spent opening)",
+    "To avoid integer division in percentages, multiply by 100.0 and not 100.",
+    "Using the age bucket 26-30 as example, the time spent sending snaps was 5.67 and the time spent opening snaps was 3.",
+    "To calculate the percentage of time spent sending snaps, we divide the time spent sending snaps by the total time spent on sending and opening snaps, which is 5.67 + 3 = 8.67.",
+    "So, the percentage of time spent sending snaps is 5.67 / (5.67 + 3) = 65.4%, and the percentage of time spent opening snaps is 3 / (5.67 + 3) = 34.6%.",
+    "The dataset you are querying against may have different input & output - this is just an example!"
+  ],
+  "tables": [
+    {
+      "table_name": "activities",
+      "columns": [
+        {
+          "column_name": "activity_id",
+          "data_type": "INT"
+        },
+        {
+          "column_name": "user_id",
+          "data_type": "INT"
+        },
+        {
+          "column_name": "activity_type",
+          "data_type": "VARCHAR(50)"
+        },
+        {
+          "column_name": "time_spent",
+          "data_type": "FLOAT"
+        },
+        {
+          "column_name": "activity_date",
+          "data_type": "DATETIME"
+        }
+      ]
+    },
+    {
+      "table_name": "age_breakdown",
+      "columns": [
+        {
+          "column_name": "user_id",
+          "data_type": "INT"
+        },
+        {
+          "column_name": "age_bucket",
+          "data_type": "VARCHAR(50)"
+        }
+      ]
+    }
+  ],
+  "sample_data": {
+    "activities": [
+      {
+        "activity_id": "7274",
+        "user_id": "123",
+        "activity_type": "open",
+        "time_spent": "4.50",
+        "activity_date": "06/22/2022 12:00:00"
+      },
+      {
+        "activity_id": "2425",
+        "user_id": "123",
+        "activity_type": "send",
+        "time_spent": "3.50",
+        "activity_date": "06/22/2022 12:00:00"
+      },
+      {
+        "activity_id": "1413",
+        "user_id": "456",
+        "activity_type": "send",
+        "time_spent": "5.67",
+        "activity_date": "06/23/2022 12:00:00"
+      },
+      {
+        "activity_id": "1414",
+        "user_id": "789",
+        "activity_type": "chat",
+        "time_spent": "11.00",
+        "activity_date": "06/25/2022 12:00:00"
+      },
+      {
+        "activity_id": "2536",
+        "user_id": "456",
+        "activity_type": "open",
+        "time_spent": "3.00",
+        "activity_date": "06/25/2022 12:00:00"
+      }
+    ],
+    "age_breakdown": [
+      {
+        "user_id": "123",
+        "age_bucket": "31-35"
+      },
+      {
+        "user_id": "456",
+        "age_bucket": "26-30"
+      },
+      {
+        "user_id": "789",
+        "age_bucket": "21-25"
+      }
+    ]
+  },
+  "sample_output": [
+    {
+      "age_bucket": "26-30",
+      "send_perc": "65.40",
+      "open_perc": "34.60"
+    },
+    {
+      "age_bucket": "31-35",
+      "send_perc": "43.75",
+      "open_perc": "56.25"
+    }
+  ],
+  "reference_sql": "SELECT \n  ab.age_bucket,\n  ROUND(100.0 * SUM(CASE WHEN a.activity_type = 'send' THEN a.time_spent ELSE 0 END) / \n        SUM(CASE WHEN a.activity_type IN ('send', 'open') THEN a.time_spent ELSE 0 END), 2) AS send_perc,\n  ROUND(100.0 * SUM(CASE WHEN a.activity_type = 'open' THEN a.time_spent ELSE 0 END) / \n        SUM(CASE WHEN a.activity_type IN ('send', 'open') THEN a.time_spent ELSE 0 END), 2) AS open_perc\nFROM activities a\nJOIN age_breakdown ab ON a.user_id = ab.user_id\nWHERE a.activity_type IN ('send', 'open')\nGROUP BY ab.age_bucket;",
+  "tags": [
+    "aggregation",
+    "date-manipulation",
+    "math",
+    "medium",
+    "snapchat",
+    "social-media"
+  ],
+  "related_questions": [],
+  "sources": [
+    [
+      "DataLemur page (free)",
+      "https://datalemur.com/questions/time-spent-snaps"
+    ],
+    [
+      "DataLemur PDF",
+      "Page 41"
+    ]
+  ],
+  "test_cases": [
+    {
+      "test_case_id": "tc_1_baseline",
+      "description": "Baseline sample input data from problem description",
+      "input_data": {
+        "activities": [
+          {
+            "activity_id": "7274",
+            "user_id": "123",
+            "activity_type": "open",
+            "time_spent": "4.50",
+            "activity_date": "06/22/2022 12:00:00"
+          },
+          {
+            "activity_id": "2425",
+            "user_id": "123",
+            "activity_type": "send",
+            "time_spent": "3.50",
+            "activity_date": "06/22/2022 12:00:00"
+          },
+          {
+            "activity_id": "1413",
+            "user_id": "456",
+            "activity_type": "send",
+            "time_spent": "5.67",
+            "activity_date": "06/23/2022 12:00:00"
+          },
+          {
+            "activity_id": "1414",
+            "user_id": "789",
+            "activity_type": "chat",
+            "time_spent": "11.00",
+            "activity_date": "06/25/2022 12:00:00"
+          },
+          {
+            "activity_id": "2536",
+            "user_id": "456",
+            "activity_type": "open",
+            "time_spent": "3.00",
+            "activity_date": "06/25/2022 12:00:00"
+          }
+        ],
+        "age_breakdown": [
+          {
+            "user_id": "123",
+            "age_bucket": "31-35"
+          },
+          {
+            "user_id": "456",
+            "age_bucket": "26-30"
+          },
+          {
+            "user_id": "789",
+            "age_bucket": "21-25"
+          }
+        ]
+      },
+      "expected_output": [
+        {
+          "age_bucket": "31-35",
+          "send_perc": 43.75,
+          "open_perc": 56.25
+        },
+        {
+          "age_bucket": "26-30",
+          "send_perc": 65.4,
+          "open_perc": 34.6
+        }
+      ],
+      "category": "normal"
+    },
+    {
+      "test_case_id": "tc_2_high_volume",
+      "description": "Multiple entities with scaled volume and multi-group distributions",
+      "input_data": {
+        "activities": [
+          {
+            "activity_id": "7274",
+            "user_id": "123",
+            "activity_type": "open",
+            "time_spent": "4.50",
+            "activity_date": "06/22/2022 12:00:00"
+          },
+          {
+            "activity_id": "2425",
+            "user_id": "123",
+            "activity_type": "send",
+            "time_spent": "3.50",
+            "activity_date": "06/22/2022 12:00:00"
+          },
+          {
+            "activity_id": "1413",
+            "user_id": "456",
+            "activity_type": "send",
+            "time_spent": "5.67",
+            "activity_date": "06/23/2022 12:00:00"
+          },
+          {
+            "activity_id": "1414",
+            "user_id": "789",
+            "activity_type": "chat",
+            "time_spent": "11.00",
+            "activity_date": "06/25/2022 12:00:00"
+          },
+          {
+            "activity_id": "2536",
+            "user_id": "456",
+            "activity_type": "open",
+            "time_spent": "3.00",
+            "activity_date": "06/25/2022 12:00:00"
+          },
+          {
+            "activity_id": 8274,
+            "user_id": 1123,
+            "activity_type": "open",
+            "time_spent": "4.50",
+            "activity_date": "06/27/2022 12:00:00"
+          },
+          {
+            "activity_id": 3425,
+            "user_id": 1123,
+            "activity_type": "send",
+            "time_spent": "3.50",
+            "activity_date": "06/27/2022 12:00:00"
+          },
+          {
+            "activity_id": 2413,
+            "user_id": 1456,
+            "activity_type": "send",
+            "time_spent": "5.67",
+            "activity_date": "06/28/2022 12:00:00"
+          },
+          {
+            "activity_id": 2414,
+            "user_id": 1789,
+            "activity_type": "chat",
+            "time_spent": "11.00",
+            "activity_date": "06/28/2022 12:00:00"
+          },
+          {
+            "activity_id": 3536,
+            "user_id": 1456,
+            "activity_type": "open",
+            "time_spent": "3.00",
+            "activity_date": "06/28/2022 12:00:00"
+          }
+        ],
+        "age_breakdown": [
+          {
+            "user_id": "123",
+            "age_bucket": "31-35"
+          },
+          {
+            "user_id": "456",
+            "age_bucket": "26-30"
+          },
+          {
+            "user_id": "789",
+            "age_bucket": "21-25"
+          },
+          {
+            "user_id": 1123,
+            "age_bucket": "31-35"
+          },
+          {
+            "user_id": 1456,
+            "age_bucket": "26-30"
+          },
+          {
+            "user_id": 1789,
+            "age_bucket": "21-25"
+          }
+        ]
+      },
+      "expected_output": [
+        {
+          "age_bucket": "31-35",
+          "send_perc": 43.75,
+          "open_perc": 56.25
+        },
+        {
+          "age_bucket": "26-30",
+          "send_perc": 65.4,
+          "open_perc": 34.6
+        }
+      ],
+      "category": "volume"
+    },
+    {
+      "test_case_id": "tc_3_disqualifying_rows",
+      "description": "Dataset containing disqualifying rows, edge values, and cancelled/zero records",
+      "input_data": {
+        "activities": [
+          {
+            "activity_id": "7274",
+            "user_id": "123",
+            "activity_type": "open",
+            "time_spent": "4.50",
+            "activity_date": "06/22/2022 12:00:00"
+          },
+          {
+            "activity_id": "2425",
+            "user_id": "123",
+            "activity_type": "send",
+            "time_spent": "3.50",
+            "activity_date": "06/22/2022 12:00:00"
+          },
+          {
+            "activity_id": "1413",
+            "user_id": "456",
+            "activity_type": "send",
+            "time_spent": "5.67",
+            "activity_date": "06/23/2022 12:00:00"
+          },
+          {
+            "activity_id": "1414",
+            "user_id": "789",
+            "activity_type": "chat",
+            "time_spent": "11.00",
+            "activity_date": "06/25/2022 12:00:00"
+          },
+          {
+            "activity_id": "2536",
+            "user_id": "456",
+            "activity_type": "open",
+            "time_spent": "3.00",
+            "activity_date": "06/25/2022 12:00:00"
+          },
+          {
+            "activity_id": 12274,
+            "user_id": 5123,
+            "activity_type": "open",
+            "time_spent": "4.50",
+            "activity_date": "06/22/2017 12:00:00"
+          },
+          {
+            "activity_id": 7425,
+            "user_id": 5123,
+            "activity_type": "send",
+            "time_spent": "3.50",
+            "activity_date": "06/22/2017 12:00:00"
+          }
+        ],
+        "age_breakdown": [
+          {
+            "user_id": "123",
+            "age_bucket": "31-35"
+          },
+          {
+            "user_id": "456",
+            "age_bucket": "26-30"
+          },
+          {
+            "user_id": "789",
+            "age_bucket": "21-25"
+          },
+          {
+            "user_id": 5123,
+            "age_bucket": "31-35"
+          }
+        ]
+      },
+      "expected_output": [
+        {
+          "age_bucket": "31-35",
+          "send_perc": 43.75,
+          "open_perc": 56.25
+        },
+        {
+          "age_bucket": "26-30",
+          "send_perc": 65.4,
+          "open_perc": 34.6
+        }
+      ],
+      "category": "edge"
+    },
+    {
+      "test_case_id": "tc_4_empty_result",
+      "description": "Input where no rows satisfy problem criteria, verifying empty result handling",
+      "input_data": {
+        "activities": [],
+        "age_breakdown": []
+      },
+      "expected_output": [],
+      "category": "edge"
+    },
+    {
+      "test_case_id": "tc_5_ties_and_nulls",
+      "description": "Tied ranking metrics, unmatched join keys, and NULL values in nullable attributes",
+      "input_data": {
+        "activities": [
+          {
+            "activity_id": "7274",
+            "user_id": "123",
+            "activity_type": "open",
+            "time_spent": "4.50",
+            "activity_date": "06/22/2022 12:00:00"
+          },
+          {
+            "activity_id": "2425",
+            "user_id": "123",
+            "activity_type": "send",
+            "time_spent": "3.50",
+            "activity_date": "06/22/2022 12:00:00"
+          },
+          {
+            "activity_id": "1413",
+            "user_id": "456",
+            "activity_type": "send",
+            "time_spent": "5.67",
+            "activity_date": "06/23/2022 12:00:00"
+          },
+          {
+            "activity_id": "1414",
+            "user_id": "789",
+            "activity_type": "chat",
+            "time_spent": "11.00",
+            "activity_date": "06/25/2022 12:00:00"
+          },
+          {
+            "activity_id": "2536",
+            "user_id": "456",
+            "activity_type": "open",
+            "time_spent": "3.00",
+            "activity_date": "06/25/2022 12:00:00"
+          },
+          {
+            "activity_id": 16274,
+            "user_id": 9123,
+            "activity_type": "open",
+            "time_spent": "4.50",
+            "activity_date": "06/22/2022 12:00:00"
+          },
+          {
+            "activity_id": 11925,
+            "user_id": 9623,
+            "activity_type": null,
+            "time_spent": "3.50",
+            "activity_date": "06/22/2022 12:00:00"
+          }
+        ],
+        "age_breakdown": [
+          {
+            "user_id": "123",
+            "age_bucket": "31-35"
+          },
+          {
+            "user_id": "456",
+            "age_bucket": "26-30"
+          },
+          {
+            "user_id": "789",
+            "age_bucket": "21-25"
+          },
+          {
+            "user_id": 9123,
+            "age_bucket": "31-35"
+          },
+          {
+            "user_id": 9956,
+            "age_bucket": "26-30"
+          }
+        ]
+      },
+      "expected_output": [
+        {
+          "age_bucket": "31-35",
+          "send_perc": 28.0,
+          "open_perc": 72.0
+        },
+        {
+          "age_bucket": "26-30",
+          "send_perc": 65.4,
+          "open_perc": 34.6
+        }
+      ],
+      "category": "edge"
+    }
+  ],
+  "order_sensitive": false,
+  "expected_output": [
+    {
+      "age_bucket": "31-35",
+      "send_perc": 43.75,
+      "open_perc": 56.25
+    },
+    {
+      "age_bucket": "26-30",
+      "send_perc": 65.4,
+      "open_perc": 34.6
+    }
+  ]
+}

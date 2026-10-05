@@ -1,0 +1,1208 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SQLMaster — MySQL 8.0 Practice & Interview Platform</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <!-- CodeMirror for high-end SQL code editor experience -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/codemirror.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/addon/hint/show-hint.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/theme/dracula.min.css">
+  <link rel="stylesheet" href="style.css?v=2.7">
+</head>
+<body>
+  <!-- Top Navigation Bar (NxtWave / Modern LeetCode Style) -->
+  <header class="app-header">
+    <div class="header-left">
+      <div class="brand" id="nav-logo" title="Go to Dashboard">
+        <span class="brand-icon">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m13 2-2 10h7l-9 10 2-10H4z"/></svg>
+        </span>
+        <span class="brand-text">SQL<strong>Master</strong></span>
+      </div>
+
+      <!-- Practice Editor Navigation (Only visible on Practice View) -->
+      <div class="header-editor-nav" id="header-editor-nav" style="display: none;">
+        <div class="header-divider"></div>
+        <button id="btn-toggle-problem-list" class="btn-problem-list" title="Open Question Bank (Alt + Q)">
+          <span class="list-icon">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
+          </span>
+          <span>Problem List</span>
+        </button>
+
+        <div class="header-nav-arrows">
+          <button id="btn-prev-q" class="header-arrow-btn" title="Previous Question (Alt + [)">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+          </button>
+          <button id="btn-next-q" class="header-arrow-btn" title="Next Question (Alt + ])">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+          </button>
+          <button id="btn-random-q" class="header-icon-btn" title="Pick Random Question">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 3 21 3 21 8"/><line x1="4" y1="20" x2="21" y2="3"/><polyline points="21 16 21 21 16 21"/><line x1="15" y1="15" x2="21" y2="21"/><line x1="4" y1="4" x2="9" y2="9"/></svg>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Center Run / Submit Controls (Only visible on Practice View) -->
+    <div class="header-center" id="header-practice-actions" style="display: none;">
+      <button id="btn-quick-run" class="btn-run-top" title="Run (Cmd + ')">
+        <span class="play-icon">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+        </span>
+        <span>Run</span>
+      </button>
+
+      <button id="btn-submit" class="btn-submit-top" title="Submit & Validate All Test Cases (Cmd + Enter)">
+        <span id="btn-submit-spinner" class="spinner" style="display: none;"></span>
+        <span>Submit</span>
+      </button>
+    </div>
+
+    <!-- Right Controls -->
+    <div class="header-right">
+      <button id="nav-btn-home" class="header-link-btn active" title="Home Dashboard">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+        <span>Home</span>
+      </button>
+      <button id="nav-btn-notes" class="header-link-btn" title="My Notes">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+        <span>Notes</span>
+        <span id="notes-badge-count" class="badge-count" style="display: none;">0</span>
+      </button>
+
+      <div class="streak-pill" id="header-progress-pill" title="Click to view full stats">
+        <span class="streak-flame">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"/></svg>
+        </span>
+        <span id="solved-stats-text">0 / 100</span>
+      </div>
+
+      <div class="header-theme-wrap" id="header-theme-wrap">
+        <button id="btn-theme-toggle" class="header-icon-btn" title="Toggle Light / Dark Mode (Click to toggle, hover for modes)">
+          <span id="theme-toggle-icon">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></svg>
+          </span>
+        </button>
+        <div id="header-theme-menu" class="header-theme-dropdown" style="display: none;">
+          <div class="theme-dropdown-header">Application Theme</div>
+          <button class="header-theme-option" data-theme-val="light" data-code-val="leetcode">
+            <span class="theme-bullet" style="background: #ffffff; border: 1px solid #cbd5e1;"></span>
+            <span class="theme-opt-text">Clean Light Mode</span>
+          </button>
+          <button class="header-theme-option" data-theme-val="dark" data-code-val="leetcode">
+            <span class="theme-bullet" style="background: #1a1a1a; border: 1px solid #2cbb5d;"></span>
+            <span class="theme-opt-text">LeetCode Dark (Charcoal & Green)</span>
+          </button>
+          <button class="header-theme-option" data-theme-val="dark" data-code-val="hackerrank">
+            <span class="theme-bullet" style="background: #090e17; border: 1px solid #38bdf8;"></span>
+            <span class="theme-opt-text">HackerRank Dark (Midnight Navy)</span>
+          </button>
+          <button class="header-theme-option" data-theme-val="dark" data-code-val="dracula">
+            <span class="theme-bullet" style="background: #282a36; border: 1px solid #bd93f9;"></span>
+            <span class="theme-opt-text">Dracula Dark (Classic Purple)</span>
+          </button>
+        </div>
+      </div>
+
+      <button id="nav-btn-settings" class="header-icon-btn" title="Settings & Shortcuts">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/></svg>
+      </button>
+
+      <div class="user-avatar-badge" title="Profile">
+        <span>SQL</span>
+      </div>
+    </div>
+  </header>
+
+  <!-- Problem List Slide-out Drawer / Overlay -->
+  <div id="drawer-backdrop" class="drawer-backdrop"></div>
+  <aside id="problem-drawer" class="problem-drawer">
+    <div class="drawer-header">
+      <div class="drawer-title-row">
+        <div class="drawer-heading-wrap">
+          <span class="drawer-title">Question Bank</span>
+          <span id="question-count-badge" class="count-badge">100</span>
+        </div>
+        <button id="btn-close-drawer" class="btn-close-drawer" title="Close Drawer (Esc)">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+      </div>
+
+      <div class="drawer-search-wrap">
+        <input type="text" id="search-input" placeholder="Search questions, companies..." />
+        <button id="btn-clear-search" class="clear-search-btn" title="Clear search" style="display: none;">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+      </div>
+
+      <div class="drawer-filter-row">
+        <div class="diff-chips">
+          <button class="diff-chip active" data-diff="all">All</button>
+          <button class="diff-chip easy" data-diff="easy">Easy (34)</button>
+          <button class="diff-chip medium" data-diff="medium">Med (39)</button>
+          <button class="diff-chip hard" data-diff="hard">Hard (27)</button>
+          <button class="diff-chip attempted" data-diff="attempted" title="Show Attempted Only">Attempted</button>
+          <button class="diff-chip starred" data-diff="starred" title="Show Starred Only">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="#eab308" stroke="#eab308" stroke-width="1"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+          </button>
+        </div>
+
+        <div class="drawer-sort-row">
+          <select id="sort-select" class="control-select" title="Sort question list">
+            <option value="default">Sort: # Default (1–100)</option>
+            <option value="diff-asc">Sort: Difficulty (Easy → Hard)</option>
+            <option value="diff-desc">Sort: Difficulty (Hard → Easy)</option>
+            <option value="title-asc">Sort: Title (A → Z)</option>
+            <option value="company-asc">Sort: Company (A → Z)</option>
+            <option value="status">Sort: Status (Solved & Attempted)</option>
+            <option value="starred">Sort: Starred First</option>
+          </select>
+          <select id="company-select" class="control-select" title="Filter by company">
+            <option value="all">All Companies</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <div id="question-list" class="drawer-question-list">
+      <!-- Rendered dynamically -->
+    </div>
+  </aside>
+
+  <!-- Views Wrapper -->
+  <div class="views-wrapper">
+
+    <!-- ================= VIEW 1: PRACTICE WORKSPACE (Target Layout from Image 2) ================= -->
+    <div id="view-practice" class="view-panel">
+      <div class="split-workspace" id="split-workspace">
+        
+        <!-- Collapsed Vertical Rail for Question Panel (Matches Screenshot 2) -->
+        <div id="desc-collapsed-rail" class="desc-collapsed-rail" style="display: none;">
+          <button id="btn-rail-expand" class="rail-expand-btn" title="Expand Description Panel (Alt + [)">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+          </button>
+          <div class="rail-tabs-flow">
+            <button class="rail-tab-item active" data-tab="desc" title="Description">
+              <span class="rail-tab-indicator"></span>
+              <span class="rail-tab-icon">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+              </span>
+              <span class="rail-tab-text">Description</span>
+            </button>
+            <button class="rail-tab-item" data-tab="editorial" title="Editorial">
+              <span class="rail-tab-indicator"></span>
+              <span class="rail-tab-icon">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+              </span>
+              <span class="rail-tab-text">Editorial</span>
+            </button>
+            <button class="rail-tab-item" data-tab="notes" title="My Notes">
+              <span class="rail-tab-indicator"></span>
+              <span class="rail-tab-icon">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+              </span>
+              <span class="rail-tab-text">My Notes</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Left Panel: Problem Description (Clean Light Aesthetic) -->
+        <section class="description-panel" id="description-panel">
+          <!-- Panel Header Tabs -->
+          <div class="panel-tab-bar">
+            <div class="panel-tabs-left">
+              <button class="doc-tab active" id="tab-doc-desc" data-tab="desc">
+                <span class="tab-icon">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+                </span>
+                <span>Description</span>
+              </button>
+              <button class="doc-tab" id="tab-doc-editorial" data-tab="editorial">
+                <span class="tab-icon">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+                </span>
+                <span>Editorial</span>
+              </button>
+              <button class="doc-tab" id="tab-doc-notes" data-tab="notes">
+                <span class="tab-icon">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                </span>
+                <span>My Notes</span>
+              </button>
+            </div>
+            <div class="panel-tabs-right">
+              <button id="btn-star-question" class="panel-icon-btn star-btn" title="Star / Bookmark question">
+                <span class="star-icon">
+                  <svg id="star-icon-svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+                </span>
+              </button>
+              <button id="btn-maximize-desc" class="panel-icon-btn" title="Maximize Question Panel (Full Space)">
+                <svg id="icon-desc-maximize" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 3 21 3 21 9"/><polyline points="9 21 3 21 3 15"/><line x1="21" y1="3" x2="14" y2="10"/><line x1="3" y1="21" x2="10" y2="14"/></svg>
+              </button>
+              <button id="btn-collapse-desc" class="panel-icon-btn" title="Collapse Question Panel (Alt + [)">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+              </button>
+            </div>
+          </div>
+
+          <!-- SUBPAGE 1: Problem Description -->
+          <div id="subpage-desc" class="subpage-pane active">
+            <!-- Problem Header Meta -->
+            <div class="problem-head-meta">
+              <h1 id="problem-title" class="doc-problem-title">Loading...</h1>
+              <div class="status-indicator-badge" id="problem-status-badge">
+                <span class="status-dot"></span>
+                <span id="problem-status-text">Not Attempted</span>
+              </div>
+            </div>
+
+            <!-- Badges: Easy / Company -->
+            <div class="doc-badges-row">
+              <span id="problem-diff-pill" class="doc-diff-pill easy">Easy</span>
+              <span id="problem-company-pill" class="doc-meta-pill">Facebook</span>
+              <span id="problem-extra-tags" class="doc-extra-tags" style="display: none;"></span>
+            </div>
+
+            <!-- Problem Description Text -->
+            <div id="problem-description" class="doc-body-text">
+              <!-- Rendered paragraphs with inline code highlights -->
+            </div>
+
+            <!-- Table Schema and Sample Data (Continuous flow for each table) -->
+            <div id="problem-tables-container" class="doc-tables-flow">
+              <!-- Rendered dynamically -->
+            </div>
+
+            <!-- Example Output Card (Pastel Blue Card) -->
+            <div id="problem-output-section" class="doc-example-section">
+              <h3 class="example-heading">Output:</h3>
+              <div id="problem-sample-output" class="example-box"></div>
+            </div>
+
+            <!-- Explanation / Notes -->
+            <div id="notes-section" class="doc-example-section" style="display: none;">
+              <h3 class="example-heading">Explanation:</h3>
+              <div id="problem-notes" class="doc-explanation-box"></div>
+            </div>
+          </div>
+
+          <!-- SUBPAGE 2: Editorial & Reference Solution -->
+          <div id="subpage-editorial" class="subpage-pane" style="display: none;">
+            <div class="subpage-header">
+              <h2 class="subpage-title">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1-2.5-2.5Z"></path><path d="M6 6h10M6 10h10"></path></svg>
+                <span>Editorial &amp; Approach</span>
+              </h2>
+              <p class="subpage-desc-meta">Comprehensive breakdown and reference solution for this interview question.</p>
+            </div>
+
+            <div class="editorial-scroll-body">
+              <div id="editorial-approach-content" class="doc-body-text">
+                <!-- Approach explanation -->
+              </div>
+
+              <div class="doc-editorial-card">
+                <div class="editorial-head">
+                  <span class="editorial-title">MySQL 8.0 Reference Query</span>
+                  <button id="btn-copy-solution" class="btn-copy-editorial">Copy to Editor</button>
+                </div>
+                <pre><code id="reference-sql-code"></code></pre>
+              </div>
+
+              <div class="editorial-tips-card">
+                <h4>
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 14c.2-1 .7-1.7 1.5-2.5 1-.9 1.5-2.2 1.5-3.5A6 6 0 0 0 6 8c0 1 .2 2.2 1.5 3.5.7.7 1.3 1.5 1.5 2.5"></path><path d="M9 18h6"></path><path d="M10 22h4"></path></svg>
+                  <span>Key Takeaways</span>
+                </h4>
+                <ul class="editorial-bullets">
+                  <li>Verify nullability and edge cases on filtered columns.</li>
+                  <li>Ensure GROUP BY columns match unaggregated SELECT expressions in strict SQL mode.</li>
+                  <li>Check tie-breaking ordering requirements when ranking or limiting output.</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+
+          <!-- SUBPAGE 3: My Notes -->
+          <div id="subpage-notes" class="subpage-pane subpage-notes-pane" style="display: none;">
+            <div class="subpage-header">
+              <div class="subpage-title-row">
+                <h2 class="subpage-title">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"></path><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path></svg>
+                  <span>My Personal Notes</span>
+                </h2>
+                <span id="note-save-status" class="save-toast-status"></span>
+              </div>
+              <p class="subpage-desc-meta">Notes are saved automatically to local storage for quick review before interviews.</p>
+            </div>
+
+            <div class="subpage-notes-editor-wrap">
+              <textarea id="user-note-input" class="subpage-notes-textarea" placeholder="Write your personal notes, edge case observations, or tricks for this question..."></textarea>
+            </div>
+
+            <div class="subpage-notes-footer">
+              <span class="notes-hint-text">Auto-saved as you type</span>
+              <div class="notes-action-buttons">
+                <button id="btn-save-note" class="btn-primary-clean">Save Note</button>
+                <button id="btn-delete-note" class="btn-sm-clean text-danger" style="display: none;">Delete</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Pinned Bottom Bar (As shown in Image 2) -->
+          <div class="panel-bottom-bar">
+            <div class="bottom-bar-left">
+              <button id="btn-bottom-prev" class="bottom-icon-btn" title="Previous Question (Alt + [)">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+              </button>
+              <button id="btn-bottom-star" class="bottom-icon-btn" title="Star / Bookmark">
+                <svg id="bottom-star-svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+              </button>
+              <button id="btn-bottom-notes" class="bottom-icon-btn" title="Scroll to Notes">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+              </button>
+            </div>
+            <div class="bottom-bar-right">
+              <span id="bottom-q-counter" class="bottom-counter-text">1 / 100</span>
+              <button id="btn-bottom-next" class="bottom-icon-btn" title="Next Question (Alt + ])">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+              </button>
+            </div>
+          </div>
+        </section>
+
+        <!-- Vertical Draggable Resizer Handle (Between Question and Editor) -->
+        <div id="resizer-vertical" class="split-resizer-v" title="Drag to resize Question vs Editor (Double click to reset)">
+          <div class="resizer-v-bar"></div>
+        </div>
+
+        <!-- Right Panel: Dark Code Editor + Testcase Panel (Like Image 2) -->
+        <section class="editor-panel" id="editor-panel">
+          <!-- Editor Top Bar -->
+          <div class="editor-top-bar">
+            <div class="editor-top-left">
+              <div class="lang-dropdown">
+                <span class="lang-icon">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M3 5v14c0 1.66 4.03 3 9 3s9-1.34 9-3V5"/><path d="M3 12c0 1.66 4.03 3 9 3s9-1.34 9-3"/></svg>
+                </span>
+                <span class="lang-label">MySQL 8.0</span>
+                <span class="caret-down">
+                  <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
+                </span>
+              </div>
+
+              <!-- Practice Stopwatch & Countdown Timer Component (Matches Screenshots 3, 4, 5) -->
+              <div class="timer-widget-wrap" id="timer-widget-wrap">
+                <!-- Collapsed Idle / Trigger Button -->
+                <button id="btn-timer-trigger" class="btn-timer-trigger" title="Stopwatch & Timer (Click to open)">
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="12" cy="13" r="8"></circle>
+                    <path d="M12 9v4l2 2"></path>
+                    <path d="M5 3 2 6"></path>
+                    <path d="m22 6-3-3"></path>
+                    <path d="M12 2v3"></path>
+                  </svg>
+                  <span id="timer-trigger-badge" class="timer-running-dot" style="display: none;"></span>
+                </button>
+
+                <!-- Expanded Running Timer Bar -->
+                <div id="timer-active-bar" class="timer-active-bar" style="display: none;">
+                  <button id="btn-timer-toggle-run" class="timer-ctrl-btn" title="Pause / Resume">
+                    <svg id="timer-icon-pause" width="12" height="12" viewBox="0 0 24 24" fill="currentColor">
+                      <rect x="6" y="4" width="4" height="16"></rect>
+                      <rect x="14" y="4" width="4" height="16"></rect>
+                    </svg>
+                    <svg id="timer-icon-play" width="12" height="12" viewBox="0 0 24 24" fill="currentColor" style="display: none;">
+                      <polygon points="5 3 19 12 5 21 5 3"></polygon>
+                    </svg>
+                  </button>
+                  <span id="timer-digits-display" class="timer-digits">00:00:00</span>
+                  <button id="btn-timer-reset-bar" class="timer-ctrl-btn" title="Reset Timer">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <polyline points="1 4 1 10 7 10"></polyline>
+                      <path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"></path>
+                    </svg>
+                  </button>
+                  <button id="btn-timer-collapse-bar" class="timer-ctrl-btn" title="Collapse to Icon">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                      <polyline points="15 18 9 12 15 6"></polyline>
+                    </svg>
+                  </button>
+                </div>
+
+                <!-- Timer Popover Modal Card (Matches Screenshot 4) -->
+                <div id="timer-popover" class="timer-popover" style="display: none;">
+                  <div class="popover-caret"></div>
+                  <div class="timer-popover-modes">
+                    <!-- Stopwatch Mode Tile -->
+                    <div id="popover-tile-stopwatch" class="timer-mode-tile active" data-mode="stopwatch">
+                      <div class="tile-icon-circle blue">
+                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                          <circle cx="12" cy="13" r="8"></circle>
+                          <path d="M12 9v4l2 2"></path>
+                          <path d="M5 3 2 6"></path>
+                          <path d="m22 6-3-3"></path>
+                          <path d="M12 2v3"></path>
+                        </svg>
+                      </div>
+                      <span class="tile-label">Stopwatch</span>
+                    </div>
+
+                    <!-- Countdown Timer Mode Tile -->
+                    <div id="popover-tile-timer" class="timer-mode-tile" data-mode="timer">
+                      <div class="tile-icon-circle orange">
+                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#ea580c" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                          <circle cx="12" cy="12" r="10"></circle>
+                          <polyline points="12 6 12 12 16 14"></polyline>
+                        </svg>
+                      </div>
+                      <div class="timer-inputs-row">
+                        <div class="timer-input-group">
+                          <input type="number" id="timer-input-hr" min="0" max="23" value="01" class="timer-num-input" />
+                          <span class="timer-unit-label">hr</span>
+                        </div>
+                        <span class="timer-input-sep">:</span>
+                        <div class="timer-input-group">
+                          <input type="number" id="timer-input-min" min="0" max="59" value="00" class="timer-num-input" />
+                          <span class="timer-unit-label">min</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <button id="btn-timer-popover-action" class="btn-timer-primary">Start Stopwatch</button>
+                </div>
+              </div>
+            </div>
+            <div class="editor-top-right">
+              <!-- Quick Plain / Monochrome Toggle Button (Tests user without color coding!) -->
+              <button id="btn-toggle-plain-mode" class="editor-plain-toggle-btn" title="Toggle Plain B&W Mode: Strips all colors (Pure White in Dark, Pure Black in Light) to test your SQL knowledge without syntax hints">
+                <span class="plain-dot">
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/></svg>
+                </span>
+                <span id="plain-btn-text">Plain B&W</span>
+              </button>
+
+              <button id="btn-format-code" class="editor-icon-btn" title="Format SQL">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7V4h16v3"/><path d="M9 20h6"/><path d="M12 4v16"/></svg>
+              </button>
+              <button id="btn-reset-code" class="editor-icon-btn" title="Reset to Starter Template">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/></svg>
+              </button>
+              <button id="btn-maximize-editor" class="editor-icon-btn" title="Maximize Editor (Full Workspace Space)">
+                <svg id="icon-editor-maximize" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 3 21 3 21 9"/><polyline points="9 21 3 21 3 15"/><line x1="21" y1="3" x2="14" y2="10"/><line x1="3" y1="21" x2="10" y2="14"/></svg>
+              </button>
+              <button id="btn-collapse-editor" class="editor-icon-btn" title="Collapse Testcase / Full Editor Height">
+                <svg id="icon-editor-collapse" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="18 15 12 9 6 15"/></svg>
+              </button>
+            </div>
+          </div>
+
+          <!-- CodeMirror Editor Area -->
+          <div class="editor-wrapper" id="editor-wrapper">
+            <textarea id="sql-editor" placeholder="Write your MySQL 8.0 query here..."></textarea>
+          </div>
+
+          <!-- Horizontal Draggable Resizer Handle (Between Code Editor and Testcases, with 3 dots grip) -->
+          <div id="resizer-horizontal" class="split-resizer-h" title="Drag to resize Code Editor vs Testcase (Double click to reset)">
+            <div class="resizer-h-line"></div>
+            <div class="resizer-h-grip">
+              <span></span><span></span><span></span>
+            </div>
+          </div>
+
+          <!-- Testcase Bottom Drawer (Matches Image 2) -->
+          <div class="testcase-panel" id="testcase-panel">
+            <div class="testcase-header">
+              <div class="testcase-title-wrap">
+                <span id="testcase-bracket-icon" class="code-bracket">
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
+                </span>
+                <span class="testcase-title">Testcase</span>
+                <div id="console-status-badge" class="testcase-status-badge ready">Ready</div>
+              </div>
+
+              <div class="testcase-header-actions">
+                <button id="btn-expand-testcase" class="testcase-chevron-btn" title="Maximize Testcase Panel (Full Space)">
+                  <svg id="icon-testcase-maximize" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 3 21 3 21 9"/><polyline points="9 21 3 21 3 15"/><line x1="21" y1="3" x2="14" y2="10"/><line x1="3" y1="21" x2="10" y2="14"/></svg>
+                </button>
+                <button id="btn-toggle-testcase" class="testcase-chevron-btn" title="Collapse / Expand Testcase">
+                  <svg id="chevron-testcase-icon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
+                </button>
+              </div>
+            </div>
+
+            <div class="testcase-body" id="console-body">
+              <!-- Case 1, Case 2 tabs row + Add Case (Matches Image 2) -->
+              <div class="testcase-tabs-bar" id="test-case-tabs-bar">
+                <div class="testcase-tabs-row" id="test-case-tabs">
+                  <!-- Case 1, Case 2 tabs rendered dynamically -->
+                </div>
+                <button id="btn-add-custom-case" class="btn-add-case" title="Add Custom Testcase">
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                </button>
+              </div>
+
+              <!-- Main Testcase Content (Verdict heading, Input box, Output box) -->
+              <div id="console-results" class="testcase-results">
+                <!-- Dynamically rendered (Input visible even BEFORE running!) -->
+              </div>
+            </div>
+          </div>
+
+          <!-- Editor Bottom Action Bar (Matches LeetCode & HackerRank Placement) -->
+          <div class="editor-bottom-bar">
+            <div class="editor-bottom-left">
+              <span id="editor-cursor-pos" class="editor-meta-text">Ln 1, Col 1</span>
+              <span class="editor-meta-divider">•</span>
+              <span id="editor-status-saved" class="editor-meta-text saved">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                <span>Saved</span>
+              </span>
+              <span class="editor-meta-divider">•</span>
+              <span id="editor-theme-indicator" class="editor-meta-badge">LeetCode</span>
+              <span id="editor-plain-badge" class="editor-meta-badge plain" style="display: none;">
+                <svg width="9" height="9" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="12" r="10"/></svg>
+                <span>Plain B&amp;W</span>
+              </span>
+            </div>
+            <div class="editor-bottom-right">
+              <button id="btn-bottom-run" class="btn-editor-run" title="Run Baseline Preview (Cmd + ')">
+                <span class="play-icon">
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><polygon points="6 3 20 12 6 21 6 3"/></svg>
+                </span>
+                <span>Run</span>
+              </button>
+              <button id="btn-bottom-submit" class="btn-editor-submit" title="Submit & Validate All Test Cases (Cmd + Enter)">
+                <span id="btn-bottom-submit-spinner" class="spinner" style="display: none;"></span>
+                <span>Submit</span>
+              </button>
+            </div>
+          </div>
+        </section>
+
+      </div>
+    </div>
+
+    <!-- ================= VIEW 2: HOME DASHBOARD ================= -->
+    <div id="view-home" class="view-panel active">
+      <div class="home-container">
+        <!-- Hero Section -->
+        <section class="home-hero">
+          <div class="home-hero-content">
+            <div class="home-badge">Interview Preparation Platform</div>
+            <h1 class="home-hero-title">Master SQL for Data & Software Engineering</h1>
+            <p class="home-hero-subtitle">100 curated MySQL 8.0 interview questions sourced from FAANG & top tech companies. Validated with automated test cases covering normal, edge, and volume scenarios.</p>
+            <div class="home-hero-actions">
+              <button id="home-btn-resume" class="btn-lg btn-primary">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><polygon points="6 3 20 12 6 21 6 3"/></svg>
+                <span>Continue Practicing</span>
+              </button>
+              <button id="home-btn-random" class="btn-lg btn-secondary">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="3" rx="2" ry="2"/><circle cx="8" cy="8" r="1.5"/><circle cx="16" cy="8" r="1.5"/><circle cx="12" cy="12" r="1.5"/><circle cx="8" cy="16" r="1.5"/><circle cx="16" cy="16" r="1.5"/></svg>
+                <span>Random Question</span>
+              </button>
+            </div>
+          </div>
+        </section>
+
+        <!-- Top Section: Progress Tracker & Streak Tracker (Matches Screenshot 1 / media_1791095452786) -->
+        <section class="home-trackers-grid">
+          <!-- Card 1: Progress Tracker (LeetCode Style from Reference Recording) -->
+          <div class="tracker-card progress-tracker-card">
+            <div class="tracker-card-head progress-card-head">
+              <div class="progress-head-title">Progress</div>
+              <button id="btn-progress-reset" class="btn-progress-reset" title="Reset Practice Progress">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/>
+                  <path d="M3 3v5h5"/>
+                </svg>
+              </button>
+            </div>
+
+            <div class="progress-body-row">
+              <!-- Left: Interactive Horseshoe Gauge Card -->
+              <div class="progress-gauge-card" id="progress-gauge-card">
+                <div class="gauge-svg-wrap">
+                  <svg class="gauge-arc-svg" viewBox="0 0 165 140">
+                    <!-- Background track -->
+                    <path class="gauge-track-bg" d="M 44.5 103.5 A 52 52 0 1 1 120.5 103.5" fill="none" stroke-width="7.5" stroke-linecap="round" pathLength="100" />
+                    
+                    <!-- Hover Breakdown segments -->
+                    <path id="gauge-arc-easy" class="gauge-arc-segment easy" d="M 44.5 103.5 A 52 52 0 1 1 120.5 103.5" fill="none" stroke-width="7.5" stroke-linecap="round" pathLength="100" stroke-dasharray="0 100" stroke-dashoffset="0" />
+                    <path id="gauge-arc-med" class="gauge-arc-segment med" d="M 44.5 103.5 A 52 52 0 1 1 120.5 103.5" fill="none" stroke-width="7.5" stroke-linecap="round" pathLength="100" stroke-dasharray="0 100" stroke-dashoffset="0" />
+                    <path id="gauge-arc-hard" class="gauge-arc-segment hard" d="M 44.5 103.5 A 52 52 0 1 1 120.5 103.5" fill="none" stroke-width="7.5" stroke-linecap="round" pathLength="100" stroke-dasharray="0 100" stroke-dashoffset="0" />
+
+                    <!-- Default Solved arc -->
+                    <path id="gauge-arc-solved" class="gauge-arc-main" d="M 44.5 103.5 A 52 52 0 1 1 120.5 103.5" fill="none" stroke-width="7.5" stroke-linecap="round" pathLength="100" stroke-dasharray="0 100" stroke-dashoffset="0" />
+                    
+                    <!-- Default Attempted arc / dot -->
+                    <path id="gauge-arc-attempted" class="gauge-arc-attempted" d="M 44.5 103.5 A 52 52 0 1 1 120.5 103.5" fill="none" stroke-width="7.5" stroke-linecap="round" pathLength="100" stroke-dasharray="0 100" stroke-dashoffset="0" />
+                  </svg>
+
+                  <!-- Center Text Overlay -->
+                  <div class="gauge-center-content">
+                    <!-- Default State -->
+                    <div class="gauge-view-default">
+                      <div class="gauge-ratio-row">
+                        <span id="home-stat-solved-big" class="gauge-big-num">0</span>
+                        <span id="home-stat-total-denom" class="gauge-denom">/100</span>
+                      </div>
+                      <div class="gauge-solved-badge">
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                          <polyline points="20 6 9 17 4 12"/>
+                        </svg>
+                        <span>Solved</span>
+                      </div>
+                      <div id="home-stat-attempting" class="gauge-attempting-label">0 Attempting</div>
+                    </div>
+
+                    <!-- Hover State -->
+                    <div class="gauge-view-hover">
+                      <div class="gauge-pct-row">
+                        <span id="home-stat-acc-int" class="gauge-big-num">0</span>
+                        <span id="home-stat-acc-dec" class="gauge-dec-num">.00%</span>
+                      </div>
+                      <div class="gauge-hover-title">Acceptance</div>
+                      <div id="home-stat-submissions" class="gauge-submissions-label">0 submissions</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Right: Stacked Difficulty Cards (Matches Screenshot 1 & Recording) -->
+              <div class="progress-diff-stack">
+                <div class="diff-card-item easy home-jump-btn" data-filter="easy" title="Click to practice Easy questions">
+                  <span class="diff-label easy">Easy</span>
+                  <span id="home-stat-easy" class="diff-count">0/34</span>
+                </div>
+                <div class="diff-card-item medium home-jump-btn" data-filter="medium" title="Click to practice Medium questions">
+                  <span class="diff-label medium">Med.</span>
+                  <span id="home-stat-medium" class="diff-count">0/39</span>
+                </div>
+                <div class="diff-card-item hard home-jump-btn" data-filter="hard" title="Click to practice Hard questions">
+                  <span class="diff-label hard">Hard</span>
+                  <span id="home-stat-hard" class="diff-count">0/27</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Card 2: Streak Tracker -->
+          <div class="tracker-card streak-tracker-card">
+            <div class="tracker-card-head">
+              <div class="tracker-head-title">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#ea580c" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"/></svg>
+                <span>Streak Tracker</span>
+              </div>
+              <div class="streak-month-nav">
+                <button id="btn-streak-prev" class="streak-arrow-btn" title="Previous Month">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"/></svg>
+                </button>
+                <span id="streak-month-title" class="streak-month-label">October 2026</span>
+                <button id="btn-streak-next" class="streak-arrow-btn" title="Next Month">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>
+                </button>
+              </div>
+            </div>
+
+            <!-- Calendar Days Header -->
+            <div class="streak-weekdays-row">
+              <span>MON</span>
+              <span>TUE</span>
+              <span>WED</span>
+              <span>THU</span>
+              <span>FRI</span>
+              <span>SAT</span>
+              <span>SUN</span>
+            </div>
+
+            <!-- Calendar Month Grid -->
+            <div id="streak-calendar-grid" class="streak-calendar-grid">
+              <!-- Dynamically populated days with active streak rings -->
+            </div>
+          </div>
+        </section>
+
+        <!-- Main Home Practice Sheet Section (Matches Screenshot 3 & 4) -->
+        <div class="home-sheet-layout">
+          <!-- Main Problems Sheet (Left / Center) -->
+          <div class="home-sheet-main">
+            <div class="home-sheet-header">
+              <div class="home-sheet-title-wrap">
+                <h2 class="home-sheet-title">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><rect x="8" y="2" width="8" height="4" rx="1" ry="1"/></svg>
+                  <span>Interview Question Sheet</span>
+                </h2>
+                <span id="home-sheet-counter" class="home-sheet-counter">100 Problems</span>
+              </div>
+              <p class="home-sheet-subtext">Click any question to open in the interactive SQL editor with automated test validation.</p>
+            </div>
+
+            <!-- Refined Filter Toolbar (Matches Screenshots 2, 3, 4) -->
+            <div class="refined-filter-toolbar">
+              <div class="filter-toolbar-top-row">
+                <!-- Segmented Control [ All | Starred | Notes ] (Screenshot 2) -->
+                <div class="filter-segmented-pill">
+                  <button class="seg-btn active" data-segment="all">All</button>
+                  <button class="seg-btn" data-segment="starred">Starred</button>
+                  <button class="seg-btn" data-segment="notes">Notes</button>
+                </div>
+
+                <!-- Dropdown Filters Group (Screenshot 3 & 4) -->
+                <div class="filter-dropdowns-group">
+                  <span class="filter-group-label">Filters:</span>
+
+                  <!-- Status Dropdown -->
+                  <div class="filter-dropdown-wrap" id="wrap-filter-status">
+                    <button id="btn-filter-status" class="filter-pill-btn">
+                      <span>Status</span>
+                      <svg class="dropdown-caret" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
+                    </button>
+                    <div id="menu-filter-status" class="filter-popover-menu" style="display: none;">
+                      <label class="filter-menu-opt">
+                        <input type="checkbox" value="solved" class="filter-cb-status" />
+                        <span class="opt-tag solved">Solved</span>
+                      </label>
+                      <label class="filter-menu-opt">
+                        <input type="checkbox" value="attempted" class="filter-cb-status" />
+                        <span class="opt-tag attempted">Attempted</span>
+                      </label>
+                      <label class="filter-menu-opt">
+                        <input type="checkbox" value="unsolved" class="filter-cb-status" />
+                        <span>Not Attempted</span>
+                      </label>
+                    </div>
+                  </div>
+
+                  <!-- Difficulty Dropdown -->
+                  <div class="filter-dropdown-wrap" id="wrap-filter-diff">
+                    <button id="btn-filter-diff" class="filter-pill-btn">
+                      <span>Difficulty</span>
+                      <svg class="dropdown-caret" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
+                    </button>
+                    <div id="menu-filter-diff" class="filter-popover-menu" style="display: none;">
+                      <label class="filter-menu-opt">
+                        <input type="checkbox" value="easy" class="filter-cb-diff" />
+                        <span class="opt-tag easy">Easy</span>
+                      </label>
+                      <label class="filter-menu-opt">
+                        <input type="checkbox" value="medium" class="filter-cb-diff" />
+                        <span class="opt-tag medium">Medium</span>
+                      </label>
+                      <label class="filter-menu-opt">
+                        <input type="checkbox" value="hard" class="filter-cb-diff" />
+                        <span class="opt-tag hard">Hard</span>
+                      </label>
+                    </div>
+                  </div>
+
+                  <!-- Company Dropdown -->
+                  <div class="filter-dropdown-wrap" id="wrap-filter-company">
+                    <button id="btn-filter-company" class="filter-pill-btn">
+                      <span>Company</span>
+                      <svg class="dropdown-caret" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
+                    </button>
+                    <div id="menu-filter-company" class="filter-popover-menu company-menu" style="display: none;">
+                      <div class="menu-company-search-box">
+                        <input type="text" id="menu-search-companies" placeholder="Search company..." />
+                      </div>
+                      <div id="menu-company-list" class="menu-company-list-scroll">
+                        <!-- Populated dynamically -->
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- Reset All Button (Matches Screenshot 4) -->
+                  <button id="btn-filter-reset-all" class="filter-reset-all-btn" style="display: none;">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/></svg>
+                    <span>Reset All</span>
+                  </button>
+                </div>
+
+                <!-- Right Side Actions: Search, Pick Randomly, Solved Counter (Screenshot 3 & 4) -->
+                <div class="filter-right-group">
+                  <div class="filter-search-box">
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+                    <input type="text" id="home-sheet-search" placeholder="Search questions..." />
+                  </div>
+
+                  <button id="btn-pick-randomly" class="btn-pick-randomly" title="Pick Random Question">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="16 3 21 3 21 8"/><line x1="4" y1="20" x2="21" y2="3"/><polyline points="21 16 21 21 16 21"/><line x1="15" y1="15" x2="21" y2="21"/><line x1="4" y1="4" x2="9" y2="9"/></svg>
+                    <span>Pick randomly</span>
+                  </button>
+
+                  <div class="filter-counter-pill" title="Total Solved Progress">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/></svg>
+                    <span id="filter-progress-count">0 / 100</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Active Filter Tags Row (Screenshot 4) -->
+              <div id="home-filter-tags-row" class="home-filter-tags-row" style="display: none;">
+                <!-- Dynamically rendered tags: Solved, Easy, Company, etc. -->
+              </div>
+            </div>
+
+            <!-- Problems Sheet Table (Matches Screenshot 3 & 4) -->
+            <div class="home-table-wrap">
+              <table class="home-problems-table">
+                <thead>
+                  <tr>
+                    <th style="width: 50px; text-align: center;">Status</th>
+                    <th style="width: 44px;">#</th>
+                    <th>Problem Name</th>
+                    <th style="width: 105px;">Difficulty</th>
+                    <th style="width: 125px;">Company</th>
+                    <th style="width: 85px;">Tests</th>
+                    <th style="width: 90px; text-align: center;">Action</th>
+                    <th style="width: 44px; text-align: center;">Notes</th>
+                    <th style="width: 44px; text-align: center;">Star</th>
+                  </tr>
+                </thead>
+                <tbody id="home-problems-tbody">
+                  <!-- Dynamically rendered rows -->
+                </tbody>
+              </table>
+              <div id="home-problems-empty" class="home-empty-notice" style="display: none;">
+                No questions match your current filters. <button id="btn-reset-home-filters" class="btn-link">Reset filters</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Right Sidebar Widgets (Company cloud & Quick Access, Matches Screenshot 4) -->
+          <div class="home-sheet-sidebar">
+            <!-- Search Companies Cloud Card -->
+            <div class="sidebar-card">
+              <div class="sidebar-card-header">
+                <span class="sidebar-card-title">
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 22V4a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v18Z"/><path d="M6 12H4a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h2"/><path d="M18 9h2a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2h-2"/><path d="M10 6h4"/><path d="M10 10h4"/><path d="M10 14h4"/><path d="M10 18h4"/></svg>
+                  <span>Popular Companies</span>
+                </span>
+                <button id="btn-reset-company-filter" class="btn-link-sm" style="display: none;">Reset</button>
+              </div>
+              <div class="company-search-box">
+                <input type="text" id="home-company-search-input" placeholder="Filter company tags..." class="company-mini-search" />
+              </div>
+              <div id="home-company-tags-cloud" class="company-tags-cloud">
+                <!-- Dynamically populated tags with count -->
+              </div>
+            </div>
+
+            <!-- Starred Questions Quick Access Card -->
+            <div class="sidebar-card">
+              <div class="sidebar-card-header">
+                <span class="sidebar-card-title">
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="#eab308" stroke="#eab308" stroke-width="1"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+                  <span>Bookmarked (<span id="home-starred-count">0</span>)</span>
+                </span>
+                <button id="home-btn-view-all-starred" class="btn-link-sm">View All</button>
+              </div>
+              <div id="home-starred-list" class="home-sidebar-list">
+                <!-- Dynamically populated -->
+              </div>
+            </div>
+
+            <!-- Recent Notes Quick Access Card -->
+            <div class="sidebar-card">
+              <div class="sidebar-card-header">
+                <span class="sidebar-card-title">
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+                  <span>Personal Notes (<span id="home-notes-count">0</span>)</span>
+                </span>
+                <button id="home-btn-view-all-notes" class="btn-link-sm">View All</button>
+              </div>
+              <div id="home-recent-notes-list" class="home-sidebar-list">
+                <!-- Dynamically populated -->
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ================= VIEW 3: ALL NOTES HUB ================= -->
+    <div id="view-notes" class="view-panel">
+      <div class="notes-hub-container">
+        <div class="notes-hub-header">
+          <div>
+            <h1 class="notes-hub-title">Question-wise Personal Notes</h1>
+            <p class="notes-hub-subtitle">Review all your saved approaches, notes, and key takeaways across questions.</p>
+          </div>
+          <div class="notes-hub-actions">
+            <input type="text" id="notes-search-input" class="notes-search-box" placeholder="Search your notes or question titles..." />
+          </div>
+        </div>
+
+        <div id="notes-hub-grid" class="notes-hub-grid">
+          <!-- Rendered dynamically -->
+        </div>
+      </div>
+    </div>
+
+    <!-- ================= VIEW 4: SETTINGS VIEW ================= -->
+    <div id="view-settings" class="view-panel">
+      <div class="settings-container">
+        <div class="settings-header">
+          <h1 class="settings-title">Preferences & Shortcuts</h1>
+          <p class="settings-subtitle">Customize keyboard shortcuts, layout preferences, and editor behavior.</p>
+        </div>
+
+        <div class="settings-cards-list">
+          <!-- Keyboard Shortcuts Section -->
+          <div class="settings-card">
+            <div class="settings-card-header">
+              <h3 style="display: flex; align-items: center; gap: 8px;">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2" ry="2"/><line x1="6" y1="8" x2="6" y2="8"/><line x1="10" y1="8" x2="10" y2="8"/><line x1="14" y1="8" x2="14" y2="8"/><line x1="18" y1="8" x2="18" y2="8"/><line x1="6" y1="12" x2="6" y2="12"/><line x1="18" y1="12" x2="18" y2="12"/><line x1="9" y1="16" x2="15" y2="16"/></svg>
+                <span>Keyboard Shortcuts</span>
+              </h3>
+              <p>Configure keys to run tests and baseline preview.</p>
+            </div>
+            <div class="settings-card-body">
+              <div class="setting-row">
+                <div class="setting-info">
+                  <label for="setting-shortcut-run">Submit / Run Tests</label>
+                  <span class="setting-desc">Validates query against all hidden normal, edge, and volume cases.</span>
+                </div>
+                <div class="setting-control">
+                  <select id="setting-shortcut-run" class="control-select">
+                    <option value="cmd-enter">Cmd / Ctrl + Enter (Default)</option>
+                    <option value="shift-enter">Shift + Enter</option>
+                    <option value="cmd-s">Cmd / Ctrl + S</option>
+                  </select>
+                </div>
+              </div>
+
+              <div class="setting-row">
+                <div class="setting-info">
+                  <label for="setting-shortcut-preview">Run Baseline Preview</label>
+                  <span class="setting-desc">Quick test against sample input data only without executing full test suites.</span>
+                </div>
+                <div class="setting-control">
+                  <select id="setting-shortcut-preview" class="control-select">
+                    <option value="cmd-quote">Cmd / Ctrl + ' (Quote)</option>
+                    <option value="cmd-b">Cmd / Ctrl + B</option>
+                    <option value="alt-enter">Alt + Enter</option>
+                  </select>
+                </div>
+              </div>
+
+              <div class="setting-row">
+                <div class="setting-info">
+                  <span>Toggle Question Bank Drawer</span>
+                  <span class="setting-desc">Open or close the left problem list.</span>
+                </div>
+                <div class="setting-control">
+                  <kbd class="shortcut-kbd">Alt + Q</kbd>
+                </div>
+              </div>
+
+              <div class="setting-row">
+                <div class="setting-info">
+                  <span>Previous / Next Question</span>
+                  <span class="setting-desc">Navigate questions in current filtered & sorted order.</span>
+                </div>
+                <div class="setting-control">
+                  <kbd class="shortcut-kbd">Alt + [</kbd> <span style="margin: 0 4px; color: var(--text-muted);">/</span> <kbd class="shortcut-kbd">Alt + ]</kbd>
+                </div>
+              </div>
+
+              <div class="setting-row">
+                <div class="setting-info">
+                  <span>Toggle Comment (Selection or Line)</span>
+                  <span class="setting-desc">Comment or uncomment code with SQL single-line prefix (--).</span>
+                </div>
+                <div class="setting-control">
+                  <kbd class="shortcut-kbd">Cmd / Ctrl + /</kbd>
+                </div>
+              </div>
+
+              <div class="setting-row">
+                <div class="setting-info">
+                  <span>Trigger Autocomplete</span>
+                  <span class="setting-desc">Trigger SQL keywords, functions, or editor words completion menu.</span>
+                </div>
+                <div class="setting-control">
+                  <kbd class="shortcut-kbd">Ctrl + Space</kbd>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Display & Content Preferences -->
+          <div class="settings-card">
+            <div class="settings-card-header">
+              <h3 style="display: flex; align-items: center; gap: 8px;">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="13.5" cy="6.5" r=".5" fill="currentColor"/><circle cx="17.5" cy="10.5" r=".5" fill="currentColor"/><circle cx="8.5" cy="7.5" r=".5" fill="currentColor"/><circle cx="6.5" cy="12.5" r=".5" fill="currentColor"/><path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10c.926 0 1.648-.746 1.648-1.688 0-.437-.18-.835-.437-1.125-.29-.289-.438-.652-.438-1.125a1.64 1.64 0 0 1 1.668-1.668h1.996c3.051 0 5.555-2.503 5.555-5.554C21.965 6.012 17.461 2 12 2z"/></svg>
+                <span>Display & Content Preferences</span>
+              </h3>
+              <p>Control what details are displayed on problem statements.</p>
+            </div>
+            <div class="settings-card-body">
+              <div class="setting-row">
+                <div class="setting-info">
+                  <label for="setting-auto-start-timer">Auto-start Stopwatch on Question Open</label>
+                  <span class="setting-desc">Automatically start counting when opening a question. When off, click the stopwatch icon to start whenever you are ready.</span>
+                </div>
+                <div class="setting-control">
+                  <label class="toggle-switch">
+                    <input type="checkbox" id="setting-auto-start-timer" />
+                    <span class="slider"></span>
+                  </label>
+                </div>
+              </div>
+
+              <div class="setting-row">
+                <div class="setting-info">
+                  <label for="setting-theme">Theme Mode</label>
+                  <span class="setting-desc">Switch between Clean Light Mode and Focused Dark Mode.</span>
+                </div>
+                <div class="setting-control">
+                  <select id="setting-theme" class="control-select">
+                    <option value="light">Light Mode</option>
+                    <option value="dark">Dark Mode</option>
+                  </select>
+                </div>
+              </div>
+
+              <div class="setting-row">
+                <div class="setting-info">
+                  <label for="setting-code-theme">Editor Syntax Color Style</label>
+                  <span class="setting-desc">Choose between LeetCode dark/light aesthetic, HackerRank vibrant palette, or classic Dracula.</span>
+                </div>
+                <div class="setting-control">
+                  <select id="setting-code-theme" class="control-select">
+                    <option value="leetcode">LeetCode Style (Charcoal & Blue/Green Accent)</option>
+                    <option value="hackerrank">HackerRank Style (Midnight Navy & Red/Purple Accent)</option>
+                    <option value="dracula">Dracula Style (Classic Purple)</option>
+                  </select>
+                </div>
+              </div>
+
+              <div class="setting-row">
+                <div class="setting-info">
+                  <label for="setting-plain-mode">Interview Mode (Plain Monochrome)</label>
+                  <span class="setting-desc">Disables syntax coloring (Pure White text in Dark Mode, Pure Black in Light Mode) to test yourself without color hints.</span>
+                </div>
+                <div class="setting-control">
+                  <label class="toggle-switch">
+                    <input type="checkbox" id="setting-plain-mode" />
+                    <span class="slider"></span>
+                  </label>
+                </div>
+              </div>
+
+              <div class="setting-row">
+                <div class="setting-info">
+                  <label for="setting-show-tags">Show Topic Tags in Problem Header</label>
+                  <span class="setting-desc">Show or hide detailed tags like "date-manipulation", "ecommerce", "healthcare" in problem title bar.</span>
+                </div>
+                <div class="setting-control">
+                  <label class="toggle-switch">
+                    <input type="checkbox" id="setting-show-tags" />
+                    <span class="slider"></span>
+                  </label>
+                </div>
+              </div>
+
+              <div class="setting-row">
+                <div class="setting-info">
+                  <label for="setting-font-size">Editor Font Size</label>
+                  <span class="setting-desc">Adjust CodeMirror editor font scale.</span>
+                </div>
+                <div class="setting-control">
+                  <select id="setting-font-size" class="control-select">
+                    <option value="12px">12 px (Compact)</option>
+                    <option value="13px">13 px</option>
+                    <option value="14px" selected>14 px (Default)</option>
+                    <option value="15px">15 px</option>
+                    <option value="16px">16 px (Large)</option>
+                  </select>
+                </div>
+              </div>
+
+              <div class="setting-row">
+                <div class="setting-info">
+                  <label for="setting-auto-format">Auto-uppercase SQL Keywords</label>
+                  <span class="setting-desc">Capitalize keywords like SELECT, FROM, WHERE automatically when formatting.</span>
+                </div>
+                <div class="setting-control">
+                  <label class="toggle-switch">
+                    <input type="checkbox" id="setting-auto-format" checked />
+                    <span class="slider"></span>
+                  </label>
+                </div>
+              </div>
+
+              <div class="setting-row">
+                <div class="setting-info">
+                  <label for="setting-autocomplete-mode">Editor Autocomplete Mode</label>
+                  <span class="setting-desc">Choose completion behavior: Standard (SQL keywords & functions like CONCAT), OA / Exam mode (only suggests words already typed in editor), or Off.</span>
+                </div>
+                <div class="setting-control">
+                  <select id="setting-autocomplete-mode" class="control-select">
+                    <option value="standard" selected>Standard (Keywords, Functions & Schemas)</option>
+                    <option value="editor_only">OA / Exam Mode (Only words in editor)</option>
+                    <option value="off">Off (Disabled)</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Data & Progress Management -->
+          <div class="settings-card">
+            <div class="settings-card-header">
+              <h3 style="display: flex; align-items: center; gap: 8px;">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 12H2"/><path d="M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"/><line x1="6" y1="16" x2="6.01" y2="16"/><line x1="10" y1="16" x2="10.01" y2="16"/></svg>
+                <span>Local Data & Progress</span>
+              </h3>
+              <p>Your solved progress, drafts, stars, and notes are saved locally in your browser.</p>
+            </div>
+            <div class="settings-card-body">
+              <div class="setting-row">
+                <div class="setting-info">
+                  <span>Export Progress & Notes</span>
+                  <span class="setting-desc">Download a backup JSON of all your solved questions, stars, and personal notes.</span>
+                </div>
+                <div class="setting-control">
+                  <button id="btn-export-data" class="btn-sm btn-secondary">Export JSON</button>
+                </div>
+              </div>
+
+              <div class="setting-row">
+                <div class="setting-info">
+                  <span>Reset All Progress</span>
+                  <span class="setting-desc">Clear solved checklist and restart practice from 0/100.</span>
+                </div>
+                <div class="setting-control">
+                  <button id="btn-reset-progress" class="btn-sm btn-ghost text-danger">Reset Solved</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Toast Notification -->
+  <div id="toast-notification" class="toast" style="display: none;"></div>
+
+  <!-- Autocomplete Suggestion Popup -->
+  <div id="editor-autocomplete-popup" class="editor-autocomplete-popup" style="display: none;"></div>
+
+  <!-- Scripts -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/codemirror.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/mode/sql/sql.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/addon/hint/show-hint.min.js"></script>
+  <script src="app.js?v=2.7"></script>
+</body>
+</html>

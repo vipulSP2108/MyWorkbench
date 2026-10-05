@@ -1,0 +1,316 @@
+{
+  "question_id": "q_006_sql_average_post_hiatus_1",
+  "slug": "sql-average-post-hiatus-1",
+  "title": "Average Post Hiatus (Part 1)",
+  "difficulty": "Easy",
+  "company": "Facebook",
+  "premium": false,
+  "question": "Given a table of Facebook posts, for each user who posted at least twice in 2021, write a query to find the number of days between each user’s first post of the year and last post of the year in the year 2021. Output the user and number of the days between each user's first and last post.",
+  "notes": [
+    "The dataset you are querying against may have different input & output - this is just an example!"
+  ],
+  "tables": [
+    {
+      "table_name": "posts",
+      "columns": [
+        {
+          "column_name": "user_id",
+          "data_type": "INT"
+        },
+        {
+          "column_name": "post_id",
+          "data_type": "INT"
+        },
+        {
+          "column_name": "post_content",
+          "data_type": "TEXT"
+        },
+        {
+          "column_name": "post_date",
+          "data_type": "DATETIME"
+        }
+      ]
+    }
+  ],
+  "sample_data": {
+    "posts": [
+      {
+        "user_id": "151652",
+        "post_id": "599415",
+        "post_content": "Need a hug",
+        "post_date": "07/10/2021 12:00:00"
+      },
+      {
+        "user_id": "661093",
+        "post_id": "624356",
+        "post_content": "Bed. Class 8-12. Work 12-3. Gym 3-5 or 6. Then class 6-10. Another day that's gonna fly by. I miss my girlfriend",
+        "post_date": "07/29/2021 13:00:00"
+      },
+      {
+        "user_id": "004239",
+        "post_id": "784254",
+        "post_content": "Happy 4th of July!",
+        "post_date": "07/04/2021 11:00:00"
+      },
+      {
+        "user_id": "661093",
+        "post_id": "442560",
+        "post_content": "Just going to cry myself to sleep after watching Marley and Me.",
+        "post_date": "07/08/2021 14:00:00"
+      },
+      {
+        "user_id": "151652",
+        "post_id": "111766",
+        "post_content": "I'm so done with covid - need travelling ASAP!",
+        "post_date": "07/12/2021 19:00:00"
+      }
+    ]
+  },
+  "sample_output": [
+    {
+      "user_id": "151652",
+      "days_between": "2"
+    },
+    {
+      "user_id": "661093",
+      "days_between": "21"
+    }
+  ],
+  "reference_sql": "SELECT \n  user_id,\n  DATEDIFF(MAX(post_date), MIN(post_date)) AS days_between\nFROM posts\nWHERE YEAR(post_date) = 2021\nGROUP BY user_id\nHAVING COUNT(post_id) >= 2\nORDER BY user_id;",
+  "tags": [
+    "date-manipulation",
+    "easy",
+    "facebook",
+    "social-media"
+  ],
+  "related_questions": [],
+  "sources": [
+    [
+      "DataLemur page (free)",
+      "https://datalemur.com/questions/sql-average-post-hiatus-1"
+    ],
+    [
+      "DataLemur PDF",
+      "Page 10"
+    ]
+  ],
+  "test_cases": [
+    {
+      "test_case_id": "tc_1_baseline",
+      "description": "Baseline sample input data from problem description",
+      "input_data": {
+        "posts": [
+          {
+            "user_id": "151652",
+            "post_id": "599415",
+            "post_content": "Need a hug",
+            "post_date": "07/10/2021 12:00:00"
+          },
+          {
+            "user_id": "661093",
+            "post_id": "624356",
+            "post_content": "Bed. Class 8-12. Work 12-3. Gym 3-5 or 6. Then class 6-10. Another day that's gonna fly by. I miss my girlfriend",
+            "post_date": "07/29/2021 13:00:00"
+          },
+          {
+            "user_id": "004239",
+            "post_id": "784254",
+            "post_content": "Happy 4th of July!",
+            "post_date": "07/04/2021 11:00:00"
+          },
+          {
+            "user_id": "661093",
+            "post_id": "442560",
+            "post_content": "Just going to cry myself to sleep after watching Marley and Me.",
+            "post_date": "07/08/2021 14:00:00"
+          },
+          {
+            "user_id": "151652",
+            "post_id": "111766",
+            "post_content": "I'm so done with covid - need travelling ASAP!",
+            "post_date": "07/12/2021 19:00:00"
+          }
+        ]
+      },
+      "expected_output": [
+        {
+          "user_id": 151652,
+          "days_between": 2
+        },
+        {
+          "user_id": 661093,
+          "days_between": 21
+        }
+      ],
+      "category": "normal"
+    },
+    {
+      "test_case_id": "tc_2_high_volume",
+      "description": "Multiple entities with scaled volume and multi-group distributions",
+      "input_data": {
+        "posts": [
+          {
+            "user_id": "151652",
+            "post_id": "599415",
+            "post_content": "Need a hug",
+            "post_date": "07/10/2021 12:00:00"
+          },
+          {
+            "user_id": "661093",
+            "post_id": "624356",
+            "post_content": "Bed. Class 8-12. Work 12-3. Gym 3-5 or 6. Then class 6-10. Another day that's gonna fly by. I miss my girlfriend",
+            "post_date": "07/29/2021 13:00:00"
+          },
+          {
+            "user_id": "004239",
+            "post_id": "784254",
+            "post_content": "Happy 4th of July!",
+            "post_date": "07/04/2021 11:00:00"
+          },
+          {
+            "user_id": "661093",
+            "post_id": "442560",
+            "post_content": "Just going to cry myself to sleep after watching Marley and Me.",
+            "post_date": "07/08/2021 14:00:00"
+          },
+          {
+            "user_id": "151652",
+            "post_id": "111766",
+            "post_content": "I'm so done with covid - need travelling ASAP!",
+            "post_date": "07/12/2021 19:00:00"
+          },
+          {
+            "user_id": 152652,
+            "post_id": 600415,
+            "post_content": "Need a hug",
+            "post_date": "07/15/2021 12:00:00"
+          },
+          {
+            "user_id": 662093,
+            "post_id": 625356,
+            "post_content": "Bed. Class 8-12. Work 12-3. Gym 3-5 or 6. Then class 6-10. Another day that's gonna fly by. I miss my girlfriend",
+            "post_date": "07/28/2021 13:00:00"
+          },
+          {
+            "user_id": 5239,
+            "post_id": 785254,
+            "post_content": "Happy 4th of July!",
+            "post_date": "07/09/2021 11:00:00"
+          },
+          {
+            "user_id": 662093,
+            "post_id": 443560,
+            "post_content": "Just going to cry myself to sleep after watching Marley and Me.",
+            "post_date": "07/13/2021 14:00:00"
+          },
+          {
+            "user_id": 152652,
+            "post_id": 112766,
+            "post_content": "I'm so done with covid - need travelling ASAP!",
+            "post_date": "07/17/2021 19:00:00"
+          }
+        ]
+      },
+      "expected_output": [
+        {
+          "user_id": 151652,
+          "days_between": 2
+        },
+        {
+          "user_id": 152652,
+          "days_between": 2
+        },
+        {
+          "user_id": 661093,
+          "days_between": 21
+        },
+        {
+          "user_id": 662093,
+          "days_between": 15
+        }
+      ],
+      "category": "volume"
+    },
+    {
+      "test_case_id": "tc_3_disqualifying_rows",
+      "description": "Dataset containing disqualifying rows, edge values, and cancelled/zero records",
+      "input_data": {
+        "posts": [
+          {
+            "user_id": "151652",
+            "post_id": "599415",
+            "post_content": "Need a hug",
+            "post_date": "07/10/2021 12:00:00"
+          },
+          {
+            "user_id": "661093",
+            "post_id": "624356",
+            "post_content": "Bed. Class 8-12. Work 12-3. Gym 3-5 or 6. Then class 6-10. Another day that's gonna fly by. I miss my girlfriend",
+            "post_date": "07/29/2021 13:00:00"
+          },
+          {
+            "user_id": "004239",
+            "post_id": "784254",
+            "post_content": "Happy 4th of July!",
+            "post_date": "07/04/2021 11:00:00"
+          },
+          {
+            "user_id": "661093",
+            "post_id": "442560",
+            "post_content": "Just going to cry myself to sleep after watching Marley and Me.",
+            "post_date": "07/08/2021 14:00:00"
+          },
+          {
+            "user_id": "151652",
+            "post_id": "111766",
+            "post_content": "I'm so done with covid - need travelling ASAP!",
+            "post_date": "07/12/2021 19:00:00"
+          },
+          {
+            "user_id": 156652,
+            "post_id": 604415,
+            "post_content": "Need a hug",
+            "post_date": "07/10/2016 12:00:00"
+          },
+          {
+            "user_id": 666093,
+            "post_id": 629356,
+            "post_content": "Bed. Class 8-12. Work 12-3. Gym 3-5 or 6. Then class 6-10. Another day that's gonna fly by. I miss my girlfriend",
+            "post_date": "07/28/2016 13:00:00"
+          }
+        ]
+      },
+      "expected_output": [
+        {
+          "user_id": 151652,
+          "days_between": 2
+        },
+        {
+          "user_id": 661093,
+          "days_between": 21
+        }
+      ],
+      "category": "edge"
+    },
+    {
+      "test_case_id": "tc_4_empty_result",
+      "description": "Input where no rows satisfy problem criteria, verifying empty result handling",
+      "input_data": {
+        "posts": []
+      },
+      "expected_output": [],
+      "category": "edge"
+    }
+  ],
+  "order_sensitive": false,
+  "expected_output": [
+    {
+      "user_id": 151652,
+      "days_between": 2
+    },
+    {
+      "user_id": 661093,
+      "days_between": 21
+    }
+  ]
+}

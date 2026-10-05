@@ -1,0 +1,468 @@
+{
+  "question_id": "q_084_repeated_payments",
+  "slug": "repeated-payments",
+  "title": "Repeated Payments",
+  "difficulty": "Hard",
+  "company": "Stripe",
+  "premium": false,
+  "question": "Sometimes, payment transactions are repeated by accident; it could be due to user error, API failure or a retry error that causes a credit card to be charged twice.\n\nUsing the transactions table, identify any payments made at the same merchant with the same credit card for the same amount within 10 minutes of each other. Count such repeated payments.\n\nAssumptions:",
+  "notes": [
+    "The first transaction of such payments should not be counted as a repeated payment. This means, if there are two transactions performed by a merchant with the same credit card and for the same amount within 10 minutes, there will only be 1 repeated payment.",
+    "Within 10 minutes after Transaction 1, Transaction 2 is conducted at Merchant 1 using the same credit card for the same amount. This is the only instance of repeated payment in the given sample data.",
+    "Since Transaction 3 is completed after Transactions 2 and 1, each of which occurs after 20 and 28 minutes, respectively hence it does not meet the repeated payments' conditions. Whereas, Transactions 4 and 6 have different amounts.",
+    "The dataset you are querying against may have different input & output - this is just an example!"
+  ],
+  "tables": [
+    {
+      "table_name": "transactions",
+      "columns": [
+        {
+          "column_name": "transaction_id",
+          "data_type": "INT"
+        },
+        {
+          "column_name": "merchant_id",
+          "data_type": "INT"
+        },
+        {
+          "column_name": "credit_card_id",
+          "data_type": "INT"
+        },
+        {
+          "column_name": "amount",
+          "data_type": "INT"
+        },
+        {
+          "column_name": "transaction_timestamp",
+          "data_type": "DATETIME"
+        }
+      ]
+    }
+  ],
+  "sample_data": {
+    "transactions": [
+      {
+        "transaction_id": "1",
+        "merchant_id": "101",
+        "credit_card_id": "1",
+        "amount": "100",
+        "transaction_timestamp": "09/25/2022 12:00:00"
+      },
+      {
+        "transaction_id": "2",
+        "merchant_id": "101",
+        "credit_card_id": "1",
+        "amount": "100",
+        "transaction_timestamp": "09/25/2022 12:08:00"
+      },
+      {
+        "transaction_id": "3",
+        "merchant_id": "101",
+        "credit_card_id": "1",
+        "amount": "100",
+        "transaction_timestamp": "09/25/2022 12:28:00"
+      },
+      {
+        "transaction_id": "4",
+        "merchant_id": "102",
+        "credit_card_id": "2",
+        "amount": "300",
+        "transaction_timestamp": "09/25/2022 12:00:00"
+      },
+      {
+        "transaction_id": "6",
+        "merchant_id": "102",
+        "credit_card_id": "2",
+        "amount": "400",
+        "transaction_timestamp": "09/25/2022 14:00:00"
+      }
+    ]
+  },
+  "sample_output": [
+    {
+      "payment_count": 1
+    }
+  ],
+  "reference_sql": "WITH ordered_payments AS (\n  SELECT \n    merchant_id,\n    credit_card_id,\n    amount,\n    transaction_timestamp,\n    LAG(transaction_timestamp) OVER (\n      PARTITION BY merchant_id, credit_card_id, amount \n      ORDER BY transaction_timestamp\n    ) AS prev_timestamp\n  FROM transactions\n)\nSELECT COUNT(*) AS payment_count\nFROM ordered_payments\nWHERE prev_timestamp IS NOT NULL\n  AND TIMESTAMPDIFF(MINUTE, prev_timestamp, transaction_timestamp) <= 10;",
+  "tags": [
+    "aggregation",
+    "finance",
+    "hard",
+    "stripe"
+  ],
+  "related_questions": [],
+  "sources": [
+    [
+      "DataLemur page (free)",
+      "https://datalemur.com/questions/repeated-payments"
+    ],
+    [
+      "DataLemur PDF",
+      "Page 88"
+    ]
+  ],
+  "test_cases": [
+    {
+      "test_case_id": "tc_1_baseline",
+      "description": "Baseline sample input data from problem description",
+      "input_data": {
+        "transactions": [
+          {
+            "transaction_id": "1",
+            "merchant_id": "101",
+            "credit_card_id": "1",
+            "amount": "100",
+            "transaction_timestamp": "09/25/2022 12:00:00"
+          },
+          {
+            "transaction_id": "2",
+            "merchant_id": "101",
+            "credit_card_id": "1",
+            "amount": "100",
+            "transaction_timestamp": "09/25/2022 12:08:00"
+          },
+          {
+            "transaction_id": "3",
+            "merchant_id": "101",
+            "credit_card_id": "1",
+            "amount": "100",
+            "transaction_timestamp": "09/25/2022 12:28:00"
+          },
+          {
+            "transaction_id": "4",
+            "merchant_id": "102",
+            "credit_card_id": "2",
+            "amount": "300",
+            "transaction_timestamp": "09/25/2022 12:00:00"
+          },
+          {
+            "transaction_id": "6",
+            "merchant_id": "102",
+            "credit_card_id": "2",
+            "amount": "400",
+            "transaction_timestamp": "09/25/2022 14:00:00"
+          }
+        ]
+      },
+      "expected_output": [
+        {
+          "payment_count": 1
+        }
+      ],
+      "category": "normal"
+    },
+    {
+      "test_case_id": "tc_2_high_volume",
+      "description": "Multiple entities with scaled volume and multi-group distributions",
+      "input_data": {
+        "transactions": [
+          {
+            "transaction_id": "1",
+            "merchant_id": "101",
+            "credit_card_id": "1",
+            "amount": "100",
+            "transaction_timestamp": "09/25/2022 12:00:00"
+          },
+          {
+            "transaction_id": "2",
+            "merchant_id": "101",
+            "credit_card_id": "1",
+            "amount": "100",
+            "transaction_timestamp": "09/25/2022 12:08:00"
+          },
+          {
+            "transaction_id": "3",
+            "merchant_id": "101",
+            "credit_card_id": "1",
+            "amount": "100",
+            "transaction_timestamp": "09/25/2022 12:28:00"
+          },
+          {
+            "transaction_id": "4",
+            "merchant_id": "102",
+            "credit_card_id": "2",
+            "amount": "300",
+            "transaction_timestamp": "09/25/2022 12:00:00"
+          },
+          {
+            "transaction_id": "6",
+            "merchant_id": "102",
+            "credit_card_id": "2",
+            "amount": "400",
+            "transaction_timestamp": "09/25/2022 14:00:00"
+          },
+          {
+            "transaction_id": 1001,
+            "merchant_id": 1101,
+            "credit_card_id": 1001,
+            "amount": 150.0,
+            "transaction_timestamp": "09/28/2022 12:00:00"
+          },
+          {
+            "transaction_id": 1002,
+            "merchant_id": 1101,
+            "credit_card_id": 1001,
+            "amount": 150.0,
+            "transaction_timestamp": "09/28/2022 12:08:00"
+          },
+          {
+            "transaction_id": 1003,
+            "merchant_id": 1101,
+            "credit_card_id": 1001,
+            "amount": 150.0,
+            "transaction_timestamp": "09/28/2022 12:28:00"
+          },
+          {
+            "transaction_id": 1004,
+            "merchant_id": 1102,
+            "credit_card_id": 1002,
+            "amount": 450.0,
+            "transaction_timestamp": "09/28/2022 12:00:00"
+          },
+          {
+            "transaction_id": 1006,
+            "merchant_id": 1102,
+            "credit_card_id": 1002,
+            "amount": 600.0,
+            "transaction_timestamp": "09/28/2022 14:00:00"
+          }
+        ]
+      },
+      "expected_output": [
+        {
+          "payment_count": 2
+        }
+      ],
+      "category": "volume"
+    },
+    {
+      "test_case_id": "tc_3_disqualifying_rows",
+      "description": "Dataset containing disqualifying rows, edge values, and cancelled/zero records",
+      "input_data": {
+        "transactions": [
+          {
+            "transaction_id": "1",
+            "merchant_id": "101",
+            "credit_card_id": "1",
+            "amount": "100",
+            "transaction_timestamp": "09/25/2022 12:00:00"
+          },
+          {
+            "transaction_id": "2",
+            "merchant_id": "101",
+            "credit_card_id": "1",
+            "amount": "100",
+            "transaction_timestamp": "09/25/2022 12:08:00"
+          },
+          {
+            "transaction_id": "3",
+            "merchant_id": "101",
+            "credit_card_id": "1",
+            "amount": "100",
+            "transaction_timestamp": "09/25/2022 12:28:00"
+          },
+          {
+            "transaction_id": "4",
+            "merchant_id": "102",
+            "credit_card_id": "2",
+            "amount": "300",
+            "transaction_timestamp": "09/25/2022 12:00:00"
+          },
+          {
+            "transaction_id": "6",
+            "merchant_id": "102",
+            "credit_card_id": "2",
+            "amount": "400",
+            "transaction_timestamp": "09/25/2022 14:00:00"
+          },
+          {
+            "transaction_id": 5001,
+            "merchant_id": 5101,
+            "credit_card_id": 5001,
+            "amount": 0,
+            "transaction_timestamp": "09/25/2017 12:00:00"
+          },
+          {
+            "transaction_id": 5002,
+            "merchant_id": 5101,
+            "credit_card_id": 5001,
+            "amount": 0,
+            "transaction_timestamp": "09/25/2017 12:08:00"
+          }
+        ]
+      },
+      "expected_output": [
+        {
+          "payment_count": 2
+        }
+      ],
+      "category": "edge"
+    },
+    {
+      "test_case_id": "tc_4_empty_result",
+      "description": "Input where no rows satisfy problem criteria, verifying empty result handling",
+      "input_data": {
+        "transactions": []
+      },
+      "expected_output": [
+        {
+          "payment_count": 0
+        }
+      ],
+      "category": "edge"
+    },
+    {
+      "test_case_id": "tc_5_ties_and_nulls",
+      "description": "Tied ranking metrics, unmatched join keys, and NULL values in nullable attributes",
+      "input_data": {
+        "transactions": [
+          {
+            "transaction_id": "1",
+            "merchant_id": "101",
+            "credit_card_id": "1",
+            "amount": "100",
+            "transaction_timestamp": "09/25/2022 12:00:00"
+          },
+          {
+            "transaction_id": "2",
+            "merchant_id": "101",
+            "credit_card_id": "1",
+            "amount": "100",
+            "transaction_timestamp": "09/25/2022 12:08:00"
+          },
+          {
+            "transaction_id": "3",
+            "merchant_id": "101",
+            "credit_card_id": "1",
+            "amount": "100",
+            "transaction_timestamp": "09/25/2022 12:28:00"
+          },
+          {
+            "transaction_id": "4",
+            "merchant_id": "102",
+            "credit_card_id": "2",
+            "amount": "300",
+            "transaction_timestamp": "09/25/2022 12:00:00"
+          },
+          {
+            "transaction_id": "6",
+            "merchant_id": "102",
+            "credit_card_id": "2",
+            "amount": "400",
+            "transaction_timestamp": "09/25/2022 14:00:00"
+          },
+          {
+            "transaction_id": 9001,
+            "merchant_id": 9101,
+            "credit_card_id": 9001,
+            "amount": "100",
+            "transaction_timestamp": "09/25/2022 12:00:00"
+          },
+          {
+            "transaction_id": 9502,
+            "merchant_id": 9601,
+            "credit_card_id": 9501,
+            "amount": "100",
+            "transaction_timestamp": "09/25/2022 12:08:00"
+          }
+        ]
+      },
+      "expected_output": [
+        {
+          "payment_count": 1
+        }
+      ],
+      "category": "edge"
+    },
+    {
+      "test_case_id": "tc_6_extreme_boundary",
+      "description": "Consecutive day sequences, month-end date rollovers, and high-frequency transactions",
+      "input_data": {
+        "transactions": [
+          {
+            "transaction_id": "1",
+            "merchant_id": "101",
+            "credit_card_id": "1",
+            "amount": "100",
+            "transaction_timestamp": "09/25/2022 12:00:00"
+          },
+          {
+            "transaction_id": "2",
+            "merchant_id": "101",
+            "credit_card_id": "1",
+            "amount": "100",
+            "transaction_timestamp": "09/25/2022 12:08:00"
+          },
+          {
+            "transaction_id": "3",
+            "merchant_id": "101",
+            "credit_card_id": "1",
+            "amount": "100",
+            "transaction_timestamp": "09/25/2022 12:28:00"
+          },
+          {
+            "transaction_id": "4",
+            "merchant_id": "102",
+            "credit_card_id": "2",
+            "amount": "300",
+            "transaction_timestamp": "09/25/2022 12:00:00"
+          },
+          {
+            "transaction_id": "6",
+            "merchant_id": "102",
+            "credit_card_id": "2",
+            "amount": "400",
+            "transaction_timestamp": "09/25/2022 14:00:00"
+          },
+          {
+            "transaction_id": 8001,
+            "merchant_id": 8101,
+            "credit_card_id": 8001,
+            "amount": 200.0,
+            "transaction_timestamp": "09/26/2022 12:00:00"
+          },
+          {
+            "transaction_id": 8002,
+            "merchant_id": 8101,
+            "credit_card_id": 8001,
+            "amount": 200.0,
+            "transaction_timestamp": "09/26/2022 12:08:00"
+          },
+          {
+            "transaction_id": 8003,
+            "merchant_id": 8101,
+            "credit_card_id": 8001,
+            "amount": 200.0,
+            "transaction_timestamp": "09/26/2022 12:28:00"
+          },
+          {
+            "transaction_id": 8004,
+            "merchant_id": 8102,
+            "credit_card_id": 8002,
+            "amount": 600.0,
+            "transaction_timestamp": "09/26/2022 12:00:00"
+          },
+          {
+            "transaction_id": 8006,
+            "merchant_id": 8102,
+            "credit_card_id": 8002,
+            "amount": 800.0,
+            "transaction_timestamp": "09/26/2022 14:00:00"
+          }
+        ]
+      },
+      "expected_output": [
+        {
+          "payment_count": 2
+        }
+      ],
+      "category": "boundary"
+    }
+  ],
+  "order_sensitive": false,
+  "expected_output": [
+    {
+      "repeated_payments": 2
+    }
+  ]
+}

@@ -1,0 +1,654 @@
+{
+  "question_id": "q_079_consecutive_filing_years",
+  "slug": "consecutive-filing-years",
+  "title": "Consecutive Filing Years",
+  "difficulty": "Hard",
+  "company": "Intuit",
+  "premium": false,
+  "question": "Intuit, a company known for its tax filing products like TurboTax and QuickBooks, offers multiple versions of these products.\n\nWrite a query that identifies the user IDs of individuals who have filed their taxes using any version of TurboTax for three or more consecutive years. Each user is allowed to file taxes once a year using a specific product. Display the output in the ascending order of user IDs.",
+  "notes": [
+    "User 1 has consistently filed their taxes using TurboTax for 3 consecutive years. User 2 is excluded from the results because they missed filing in the third year and User 3 transitioned to using QuickBooks in their third year.",
+    "The dataset you are querying against may have different input & output - this is just an example!"
+  ],
+  "tables": [
+    {
+      "table_name": "filed_taxes",
+      "columns": [
+        {
+          "column_name": "filing_id",
+          "data_type": "INT"
+        },
+        {
+          "column_name": "user_id",
+          "data_type": "VARCHAR(255)"
+        },
+        {
+          "column_name": "filing_date",
+          "data_type": "DATETIME"
+        },
+        {
+          "column_name": "product",
+          "data_type": "VARCHAR(255)"
+        }
+      ]
+    }
+  ],
+  "sample_data": {
+    "filed_taxes": [
+      {
+        "filing_id": "1",
+        "user_id": "1",
+        "filing_date": "4/14/2019",
+        "product": "TurboTax Desktop 2019"
+      },
+      {
+        "filing_id": "2",
+        "user_id": "1",
+        "filing_date": "4/15/2020",
+        "product": "TurboTax Deluxe"
+      },
+      {
+        "filing_id": "3",
+        "user_id": "1",
+        "filing_date": "4/15/2021",
+        "product": "TurboTax Online"
+      },
+      {
+        "filing_id": "4",
+        "user_id": "2",
+        "filing_date": "4/07/2020",
+        "product": "TurboTax Online"
+      },
+      {
+        "filing_id": "5",
+        "user_id": "2",
+        "filing_date": "4/10/2021",
+        "product": "TurboTax Online"
+      },
+      {
+        "filing_id": "6",
+        "user_id": "3",
+        "filing_date": "4/07/2020",
+        "product": "TurboTax Online"
+      },
+      {
+        "filing_id": "7",
+        "user_id": "3",
+        "filing_date": "4/15/2021",
+        "product": "TurboTax Online"
+      },
+      {
+        "filing_id": "8",
+        "user_id": "3",
+        "filing_date": "3/11/2022",
+        "product": "QuickBooks Desktop Pro"
+      },
+      {
+        "filing_id": "9",
+        "user_id": "4",
+        "filing_date": "4/15/2022",
+        "product": "QuickBooks Online"
+      }
+    ]
+  },
+  "sample_output": [
+    {
+      "user_id": "1"
+    }
+  ],
+  "reference_sql": "WITH yearly AS (\n  SELECT DISTINCT user_id, YEAR(filing_date) AS filing_year\n  FROM filed_taxes\n),\nranked AS (\n  SELECT user_id, filing_year,\n         filing_year - ROW_NUMBER() OVER (PARTITION BY user_id ORDER BY filing_year) AS grp\n  FROM yearly\n)\nSELECT DISTINCT user_id\nFROM ranked\nGROUP BY user_id, grp\nHAVING COUNT(*) >= 3\nORDER BY user_id;",
+  "tags": [
+    "date-manipulation",
+    "ecommerce",
+    "hard",
+    "intuit",
+    "lead-lag",
+    "social-media",
+    "window-function"
+  ],
+  "related_questions": [],
+  "sources": [
+    [
+      "DataLemur page (free)",
+      "https://datalemur.com/questions/consecutive-filing-years"
+    ],
+    [
+      "DataLemur PDF",
+      "Page 83"
+    ]
+  ],
+  "test_cases": [
+    {
+      "test_case_id": "tc_1_baseline",
+      "description": "Baseline sample input data from problem description",
+      "input_data": {
+        "filed_taxes": [
+          {
+            "filing_id": "1",
+            "user_id": "1",
+            "filing_date": "4/14/2019",
+            "product": "TurboTax Desktop 2019"
+          },
+          {
+            "filing_id": "2",
+            "user_id": "1",
+            "filing_date": "4/15/2020",
+            "product": "TurboTax Deluxe"
+          },
+          {
+            "filing_id": "3",
+            "user_id": "1",
+            "filing_date": "4/15/2021",
+            "product": "TurboTax Online"
+          },
+          {
+            "filing_id": "4",
+            "user_id": "2",
+            "filing_date": "4/07/2020",
+            "product": "TurboTax Online"
+          },
+          {
+            "filing_id": "5",
+            "user_id": "2",
+            "filing_date": "4/10/2021",
+            "product": "TurboTax Online"
+          },
+          {
+            "filing_id": "6",
+            "user_id": "3",
+            "filing_date": "4/07/2020",
+            "product": "TurboTax Online"
+          },
+          {
+            "filing_id": "7",
+            "user_id": "3",
+            "filing_date": "4/15/2021",
+            "product": "TurboTax Online"
+          },
+          {
+            "filing_id": "8",
+            "user_id": "3",
+            "filing_date": "3/11/2022",
+            "product": "QuickBooks Desktop Pro"
+          },
+          {
+            "filing_id": "9",
+            "user_id": "4",
+            "filing_date": "4/15/2022",
+            "product": "QuickBooks Online"
+          }
+        ]
+      },
+      "expected_output": [
+        {
+          "user_id": "1"
+        },
+        {
+          "user_id": "3"
+        }
+      ],
+      "category": "normal"
+    },
+    {
+      "test_case_id": "tc_2_high_volume",
+      "description": "Multiple entities with scaled volume and multi-group distributions",
+      "input_data": {
+        "filed_taxes": [
+          {
+            "filing_id": "1",
+            "user_id": "1",
+            "filing_date": "4/14/2019",
+            "product": "TurboTax Desktop 2019"
+          },
+          {
+            "filing_id": "2",
+            "user_id": "1",
+            "filing_date": "4/15/2020",
+            "product": "TurboTax Deluxe"
+          },
+          {
+            "filing_id": "3",
+            "user_id": "1",
+            "filing_date": "4/15/2021",
+            "product": "TurboTax Online"
+          },
+          {
+            "filing_id": "4",
+            "user_id": "2",
+            "filing_date": "4/07/2020",
+            "product": "TurboTax Online"
+          },
+          {
+            "filing_id": "5",
+            "user_id": "2",
+            "filing_date": "4/10/2021",
+            "product": "TurboTax Online"
+          },
+          {
+            "filing_id": "6",
+            "user_id": "3",
+            "filing_date": "4/07/2020",
+            "product": "TurboTax Online"
+          },
+          {
+            "filing_id": "7",
+            "user_id": "3",
+            "filing_date": "4/15/2021",
+            "product": "TurboTax Online"
+          },
+          {
+            "filing_id": "8",
+            "user_id": "3",
+            "filing_date": "3/11/2022",
+            "product": "QuickBooks Desktop Pro"
+          },
+          {
+            "filing_id": "9",
+            "user_id": "4",
+            "filing_date": "4/15/2022",
+            "product": "QuickBooks Online"
+          },
+          {
+            "filing_id": 1001,
+            "user_id": 1001,
+            "filing_date": "4/19/2019",
+            "product": "TurboTax Desktop 2019"
+          },
+          {
+            "filing_id": 1002,
+            "user_id": 1001,
+            "filing_date": "4/20/2020",
+            "product": "TurboTax Deluxe"
+          },
+          {
+            "filing_id": 1003,
+            "user_id": 1001,
+            "filing_date": "4/20/2021",
+            "product": "TurboTax Online"
+          },
+          {
+            "filing_id": 1004,
+            "user_id": 1002,
+            "filing_date": "4/12/2020",
+            "product": "TurboTax Online"
+          },
+          {
+            "filing_id": 1005,
+            "user_id": 1002,
+            "filing_date": "4/15/2021",
+            "product": "TurboTax Online"
+          },
+          {
+            "filing_id": 1006,
+            "user_id": 1003,
+            "filing_date": "4/12/2020",
+            "product": "TurboTax Online"
+          },
+          {
+            "filing_id": 1007,
+            "user_id": 1003,
+            "filing_date": "4/20/2021",
+            "product": "TurboTax Online"
+          },
+          {
+            "filing_id": 1008,
+            "user_id": 1003,
+            "filing_date": "3/16/2022",
+            "product": "QuickBooks Desktop Pro"
+          },
+          {
+            "filing_id": 1009,
+            "user_id": 1004,
+            "filing_date": "4/20/2022",
+            "product": "QuickBooks Online"
+          }
+        ]
+      },
+      "expected_output": [
+        {
+          "user_id": "1"
+        },
+        {
+          "user_id": "1001"
+        },
+        {
+          "user_id": "1003"
+        },
+        {
+          "user_id": "3"
+        }
+      ],
+      "category": "volume"
+    },
+    {
+      "test_case_id": "tc_3_disqualifying_rows",
+      "description": "Dataset containing disqualifying rows, edge values, and cancelled/zero records",
+      "input_data": {
+        "filed_taxes": [
+          {
+            "filing_id": "1",
+            "user_id": "1",
+            "filing_date": "4/14/2019",
+            "product": "TurboTax Desktop 2019"
+          },
+          {
+            "filing_id": "2",
+            "user_id": "1",
+            "filing_date": "4/15/2020",
+            "product": "TurboTax Deluxe"
+          },
+          {
+            "filing_id": "3",
+            "user_id": "1",
+            "filing_date": "4/15/2021",
+            "product": "TurboTax Online"
+          },
+          {
+            "filing_id": "4",
+            "user_id": "2",
+            "filing_date": "4/07/2020",
+            "product": "TurboTax Online"
+          },
+          {
+            "filing_id": "5",
+            "user_id": "2",
+            "filing_date": "4/10/2021",
+            "product": "TurboTax Online"
+          },
+          {
+            "filing_id": "6",
+            "user_id": "3",
+            "filing_date": "4/07/2020",
+            "product": "TurboTax Online"
+          },
+          {
+            "filing_id": "7",
+            "user_id": "3",
+            "filing_date": "4/15/2021",
+            "product": "TurboTax Online"
+          },
+          {
+            "filing_id": "8",
+            "user_id": "3",
+            "filing_date": "3/11/2022",
+            "product": "QuickBooks Desktop Pro"
+          },
+          {
+            "filing_id": "9",
+            "user_id": "4",
+            "filing_date": "4/15/2022",
+            "product": "QuickBooks Online"
+          },
+          {
+            "filing_id": 5001,
+            "user_id": 5001,
+            "filing_date": "4/14/2014",
+            "product": "TurboTax Desktop 2019"
+          },
+          {
+            "filing_id": 5002,
+            "user_id": 5001,
+            "filing_date": "4/15/2015",
+            "product": "TurboTax Deluxe"
+          },
+          {
+            "filing_id": 5003,
+            "user_id": 5001,
+            "filing_date": "4/15/2016",
+            "product": "TurboTax Online"
+          },
+          {
+            "filing_id": 5004,
+            "user_id": 5002,
+            "filing_date": "4/07/2015",
+            "product": "TurboTax Online"
+          }
+        ]
+      },
+      "expected_output": [
+        {
+          "user_id": "1"
+        },
+        {
+          "user_id": "3"
+        },
+        {
+          "user_id": "5001"
+        }
+      ],
+      "category": "edge"
+    },
+    {
+      "test_case_id": "tc_4_empty_result",
+      "description": "Input where no rows satisfy problem criteria, verifying empty result handling",
+      "input_data": {
+        "filed_taxes": []
+      },
+      "expected_output": [],
+      "category": "edge"
+    },
+    {
+      "test_case_id": "tc_5_ties_and_nulls",
+      "description": "Tied ranking metrics, unmatched join keys, and NULL values in nullable attributes",
+      "input_data": {
+        "filed_taxes": [
+          {
+            "filing_id": "1",
+            "user_id": "1",
+            "filing_date": "4/14/2019",
+            "product": "TurboTax Desktop 2019"
+          },
+          {
+            "filing_id": "2",
+            "user_id": "1",
+            "filing_date": "4/15/2020",
+            "product": "TurboTax Deluxe"
+          },
+          {
+            "filing_id": "3",
+            "user_id": "1",
+            "filing_date": "4/15/2021",
+            "product": "TurboTax Online"
+          },
+          {
+            "filing_id": "4",
+            "user_id": "2",
+            "filing_date": "4/07/2020",
+            "product": "TurboTax Online"
+          },
+          {
+            "filing_id": "5",
+            "user_id": "2",
+            "filing_date": "4/10/2021",
+            "product": "TurboTax Online"
+          },
+          {
+            "filing_id": "6",
+            "user_id": "3",
+            "filing_date": "4/07/2020",
+            "product": "TurboTax Online"
+          },
+          {
+            "filing_id": "7",
+            "user_id": "3",
+            "filing_date": "4/15/2021",
+            "product": "TurboTax Online"
+          },
+          {
+            "filing_id": "8",
+            "user_id": "3",
+            "filing_date": "3/11/2022",
+            "product": "QuickBooks Desktop Pro"
+          },
+          {
+            "filing_id": "9",
+            "user_id": "4",
+            "filing_date": "4/15/2022",
+            "product": "QuickBooks Online"
+          },
+          {
+            "filing_id": 9001,
+            "user_id": 9001,
+            "filing_date": "4/14/2019",
+            "product": "TurboTax Desktop 2019"
+          },
+          {
+            "filing_id": 9502,
+            "user_id": 9501,
+            "filing_date": "4/15/2020",
+            "product": "TurboTax Deluxe"
+          }
+        ]
+      },
+      "expected_output": [
+        {
+          "user_id": "1"
+        },
+        {
+          "user_id": "3"
+        }
+      ],
+      "category": "edge"
+    },
+    {
+      "test_case_id": "tc_6_extreme_boundary",
+      "description": "Consecutive day sequences, month-end date rollovers, and high-frequency transactions",
+      "input_data": {
+        "filed_taxes": [
+          {
+            "filing_id": "1",
+            "user_id": "1",
+            "filing_date": "4/14/2019",
+            "product": "TurboTax Desktop 2019"
+          },
+          {
+            "filing_id": "2",
+            "user_id": "1",
+            "filing_date": "4/15/2020",
+            "product": "TurboTax Deluxe"
+          },
+          {
+            "filing_id": "3",
+            "user_id": "1",
+            "filing_date": "4/15/2021",
+            "product": "TurboTax Online"
+          },
+          {
+            "filing_id": "4",
+            "user_id": "2",
+            "filing_date": "4/07/2020",
+            "product": "TurboTax Online"
+          },
+          {
+            "filing_id": "5",
+            "user_id": "2",
+            "filing_date": "4/10/2021",
+            "product": "TurboTax Online"
+          },
+          {
+            "filing_id": "6",
+            "user_id": "3",
+            "filing_date": "4/07/2020",
+            "product": "TurboTax Online"
+          },
+          {
+            "filing_id": "7",
+            "user_id": "3",
+            "filing_date": "4/15/2021",
+            "product": "TurboTax Online"
+          },
+          {
+            "filing_id": "8",
+            "user_id": "3",
+            "filing_date": "3/11/2022",
+            "product": "QuickBooks Desktop Pro"
+          },
+          {
+            "filing_id": "9",
+            "user_id": "4",
+            "filing_date": "4/15/2022",
+            "product": "QuickBooks Online"
+          },
+          {
+            "filing_id": 8001,
+            "user_id": 8001,
+            "filing_date": "4/15/2019",
+            "product": "TurboTax Desktop 2019"
+          },
+          {
+            "filing_id": 8002,
+            "user_id": 8001,
+            "filing_date": "4/16/2020",
+            "product": "TurboTax Deluxe"
+          },
+          {
+            "filing_id": 8003,
+            "user_id": 8001,
+            "filing_date": "4/16/2021",
+            "product": "TurboTax Online"
+          },
+          {
+            "filing_id": 8004,
+            "user_id": 8002,
+            "filing_date": "4/08/2020",
+            "product": "TurboTax Online"
+          },
+          {
+            "filing_id": 8005,
+            "user_id": 8002,
+            "filing_date": "4/11/2021",
+            "product": "TurboTax Online"
+          },
+          {
+            "filing_id": 8006,
+            "user_id": 8003,
+            "filing_date": "4/08/2020",
+            "product": "TurboTax Online"
+          },
+          {
+            "filing_id": 8007,
+            "user_id": 8003,
+            "filing_date": "4/16/2021",
+            "product": "TurboTax Online"
+          },
+          {
+            "filing_id": 8008,
+            "user_id": 8003,
+            "filing_date": "3/12/2022",
+            "product": "QuickBooks Desktop Pro"
+          },
+          {
+            "filing_id": 8009,
+            "user_id": 8004,
+            "filing_date": "4/16/2022",
+            "product": "QuickBooks Online"
+          }
+        ]
+      },
+      "expected_output": [
+        {
+          "user_id": "1"
+        },
+        {
+          "user_id": "3"
+        },
+        {
+          "user_id": "8001"
+        },
+        {
+          "user_id": "8003"
+        }
+      ],
+      "category": "boundary"
+    }
+  ],
+  "order_sensitive": true,
+  "expected_output": [
+    {
+      "user_id": "1"
+    },
+    {
+      "user_id": "3"
+    }
+  ]
+}

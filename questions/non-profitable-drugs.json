@@ -1,0 +1,372 @@
+{
+  "question_id": "q_020_non_profitable_drugs",
+  "slug": "non-profitable-drugs",
+  "title": "Pharmacy Analytics (Part 2)",
+  "difficulty": "Easy",
+  "company": "CVS Health",
+  "premium": false,
+  "question": "CVS Health is analyzing its pharmacy sales data, and how well different products are selling in the market. Each drug is exclusively manufactured by a single manufacturer.\n\nWrite a query to identify the manufacturers associated with the drugs that resulted in losses for CVS Health and calculate the total amount of losses incurred.\n\nOutput the manufacturer's name, the number of drugs associated with losses, and the total losses in absolute value. Display the results sorted in descending order with the highest losses displayed at the top.\n\nIf you like this question, try out Pharmacy Analytics (Part 3)!",
+  "notes": [
+    "The first three rows indicate that some drugs resulted in losses. Among these, Biogen had the highest losses, followed by AbbVie and Eli Lilly. However, the Medi-Chord drug manufactured by Biogen reported a profit and was excluded from the result.",
+    "The dataset you are querying against may have different input & output - this is just an example!"
+  ],
+  "tables": [
+    {
+      "table_name": "pharmacy_sales",
+      "columns": [
+        {
+          "column_name": "product_id",
+          "data_type": "INT"
+        },
+        {
+          "column_name": "units_sold",
+          "data_type": "INT"
+        },
+        {
+          "column_name": "total_sales",
+          "data_type": "DECIMAL(10,2)"
+        },
+        {
+          "column_name": "cogs",
+          "data_type": "DECIMAL(10,2)"
+        },
+        {
+          "column_name": "manufacturer",
+          "data_type": "VARCHAR(255)"
+        },
+        {
+          "column_name": "drug",
+          "data_type": "VARCHAR(255)"
+        }
+      ]
+    }
+  ],
+  "sample_data": {
+    "pharmacy_sales": [
+      {
+        "product_id": "156",
+        "units_sold": "89514",
+        "total_sales": "3130097.00",
+        "cogs": "3427421.73",
+        "manufacturer": "Biogen",
+        "drug": "Acyclovir"
+      },
+      {
+        "product_id": "25",
+        "units_sold": "222331",
+        "total_sales": "2753546.00",
+        "cogs": "2974975.36",
+        "manufacturer": "AbbVie",
+        "drug": "Lamivudine and Zidovudine"
+      },
+      {
+        "product_id": "50",
+        "units_sold": "90484",
+        "total_sales": "2521023.73",
+        "cogs": "2742445.90",
+        "manufacturer": "Eli Lilly",
+        "drug": "Dermasorb TA Complete Kit"
+      },
+      {
+        "product_id": "98",
+        "units_sold": "110746",
+        "total_sales": "813188.82",
+        "cogs": "140422.87",
+        "manufacturer": "Biogen",
+        "drug": "Medi-Chord"
+      }
+    ]
+  },
+  "sample_output": [
+    {
+      "manufacturer": "Biogen",
+      "drug_count": "1",
+      "total_loss": "297324.73"
+    },
+    {
+      "manufacturer": "AbbVie",
+      "drug_count": "1",
+      "total_loss": "221429.36"
+    },
+    {
+      "manufacturer": "Eli Lilly",
+      "drug_count": "1",
+      "total_loss": "221422.17"
+    }
+  ],
+  "reference_sql": "SELECT \n  manufacturer,\n  COUNT(drug) AS drug_count,\n  SUM(cogs - total_sales) AS total_loss\nFROM pharmacy_sales\nWHERE total_sales < cogs\nGROUP BY manufacturer\nORDER BY total_loss DESC, manufacturer ASC;",
+  "tags": [
+    "aggregation",
+    "cvs health",
+    "easy",
+    "ecommerce",
+    "healthcare",
+    "social-media"
+  ],
+  "related_questions": [
+    "top-profitable-drugs",
+    "total-drugs-sales",
+    "top-drugs-sold"
+  ],
+  "sources": [
+    [
+      "DataLemur page (free)",
+      "https://datalemur.com/questions/non-profitable-drugs"
+    ],
+    [
+      "DataLemur PDF",
+      "Page 24"
+    ]
+  ],
+  "test_cases": [
+    {
+      "test_case_id": "tc_1_baseline",
+      "description": "Baseline sample input data from problem description",
+      "input_data": {
+        "pharmacy_sales": [
+          {
+            "product_id": "156",
+            "units_sold": "89514",
+            "total_sales": "3130097.00",
+            "cogs": "3427421.73",
+            "manufacturer": "Biogen",
+            "drug": "Acyclovir"
+          },
+          {
+            "product_id": "25",
+            "units_sold": "222331",
+            "total_sales": "2753546.00",
+            "cogs": "2974975.36",
+            "manufacturer": "AbbVie",
+            "drug": "Lamivudine and Zidovudine"
+          },
+          {
+            "product_id": "50",
+            "units_sold": "90484",
+            "total_sales": "2521023.73",
+            "cogs": "2742445.90",
+            "manufacturer": "Eli Lilly",
+            "drug": "Dermasorb TA Complete Kit"
+          },
+          {
+            "product_id": "98",
+            "units_sold": "110746",
+            "total_sales": "813188.82",
+            "cogs": "140422.87",
+            "manufacturer": "Biogen",
+            "drug": "Medi-Chord"
+          }
+        ]
+      },
+      "expected_output": [
+        {
+          "manufacturer": "Biogen",
+          "drug_count": 1,
+          "total_loss": 297324.73
+        },
+        {
+          "manufacturer": "AbbVie",
+          "drug_count": 1,
+          "total_loss": 221429.36
+        },
+        {
+          "manufacturer": "Eli Lilly",
+          "drug_count": 1,
+          "total_loss": 221422.17
+        }
+      ],
+      "category": "normal"
+    },
+    {
+      "test_case_id": "tc_2_high_volume",
+      "description": "Multiple entities with scaled volume and multi-group distributions",
+      "input_data": {
+        "pharmacy_sales": [
+          {
+            "product_id": "156",
+            "units_sold": "89514",
+            "total_sales": "3130097.00",
+            "cogs": "3427421.73",
+            "manufacturer": "Biogen",
+            "drug": "Acyclovir"
+          },
+          {
+            "product_id": "25",
+            "units_sold": "222331",
+            "total_sales": "2753546.00",
+            "cogs": "2974975.36",
+            "manufacturer": "AbbVie",
+            "drug": "Lamivudine and Zidovudine"
+          },
+          {
+            "product_id": "50",
+            "units_sold": "90484",
+            "total_sales": "2521023.73",
+            "cogs": "2742445.90",
+            "manufacturer": "Eli Lilly",
+            "drug": "Dermasorb TA Complete Kit"
+          },
+          {
+            "product_id": "98",
+            "units_sold": "110746",
+            "total_sales": "813188.82",
+            "cogs": "140422.87",
+            "manufacturer": "Biogen",
+            "drug": "Medi-Chord"
+          },
+          {
+            "product_id": 1156,
+            "units_sold": "89514",
+            "total_sales": 4695145.5,
+            "cogs": "3427421.73",
+            "manufacturer": "Biogen",
+            "drug": "Acyclovir"
+          },
+          {
+            "product_id": 1025,
+            "units_sold": "222331",
+            "total_sales": 4130319.0,
+            "cogs": "2974975.36",
+            "manufacturer": "AbbVie",
+            "drug": "Lamivudine and Zidovudine"
+          },
+          {
+            "product_id": 1050,
+            "units_sold": "90484",
+            "total_sales": 3781535.59,
+            "cogs": "2742445.90",
+            "manufacturer": "Eli Lilly",
+            "drug": "Dermasorb TA Complete Kit"
+          },
+          {
+            "product_id": 1098,
+            "units_sold": "110746",
+            "total_sales": 1219783.23,
+            "cogs": "140422.87",
+            "manufacturer": "Biogen",
+            "drug": "Medi-Chord"
+          }
+        ]
+      },
+      "expected_output": [
+        {
+          "manufacturer": "Biogen",
+          "drug_count": 1,
+          "total_loss": 297324.73
+        },
+        {
+          "manufacturer": "AbbVie",
+          "drug_count": 1,
+          "total_loss": 221429.36
+        },
+        {
+          "manufacturer": "Eli Lilly",
+          "drug_count": 1,
+          "total_loss": 221422.17
+        }
+      ],
+      "category": "volume"
+    },
+    {
+      "test_case_id": "tc_3_disqualifying_rows",
+      "description": "Dataset containing disqualifying rows, edge values, and cancelled/zero records",
+      "input_data": {
+        "pharmacy_sales": [
+          {
+            "product_id": "156",
+            "units_sold": "89514",
+            "total_sales": "3130097.00",
+            "cogs": "3427421.73",
+            "manufacturer": "Biogen",
+            "drug": "Acyclovir"
+          },
+          {
+            "product_id": "25",
+            "units_sold": "222331",
+            "total_sales": "2753546.00",
+            "cogs": "2974975.36",
+            "manufacturer": "AbbVie",
+            "drug": "Lamivudine and Zidovudine"
+          },
+          {
+            "product_id": "50",
+            "units_sold": "90484",
+            "total_sales": "2521023.73",
+            "cogs": "2742445.90",
+            "manufacturer": "Eli Lilly",
+            "drug": "Dermasorb TA Complete Kit"
+          },
+          {
+            "product_id": "98",
+            "units_sold": "110746",
+            "total_sales": "813188.82",
+            "cogs": "140422.87",
+            "manufacturer": "Biogen",
+            "drug": "Medi-Chord"
+          },
+          {
+            "product_id": 5156,
+            "units_sold": "89514",
+            "total_sales": "3130097.00",
+            "cogs": "3427421.73",
+            "manufacturer": "Biogen",
+            "drug": "Acyclovir"
+          },
+          {
+            "product_id": 5025,
+            "units_sold": "222331",
+            "total_sales": "2753546.00",
+            "cogs": "2974975.36",
+            "manufacturer": "AbbVie",
+            "drug": "Lamivudine and Zidovudine"
+          }
+        ]
+      },
+      "expected_output": [
+        {
+          "manufacturer": "Biogen",
+          "drug_count": 2,
+          "total_loss": 594649.46
+        },
+        {
+          "manufacturer": "AbbVie",
+          "drug_count": 2,
+          "total_loss": 442858.72
+        },
+        {
+          "manufacturer": "Eli Lilly",
+          "drug_count": 1,
+          "total_loss": 221422.17
+        }
+      ],
+      "category": "edge"
+    },
+    {
+      "test_case_id": "tc_4_empty_result",
+      "description": "Input where no rows satisfy problem criteria, verifying empty result handling",
+      "input_data": {
+        "pharmacy_sales": []
+      },
+      "expected_output": [],
+      "category": "edge"
+    }
+  ],
+  "order_sensitive": true,
+  "expected_output": [
+    {
+      "manufacturer": "Biogen",
+      "drug_count": 1,
+      "total_loss": 297324.73
+    },
+    {
+      "manufacturer": "AbbVie",
+      "drug_count": 1,
+      "total_loss": 221429.36
+    },
+    {
+      "manufacturer": "Eli Lilly",
+      "drug_count": 1,
+      "total_loss": 221422.17
+    }
+  ]
+}

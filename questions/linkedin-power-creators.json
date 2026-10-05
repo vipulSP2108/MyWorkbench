@@ -1,0 +1,561 @@
+{
+  "question_id": "q_026_linkedin_power_creators",
+  "slug": "linkedin-power-creators",
+  "title": "LinkedIn Power Creators (Part 1)",
+  "difficulty": "Easy",
+  "company": "LinkedIn",
+  "premium": true,
+  "question": "The LinkedIn Creator team is seeking individuals with a strong influence on the platform, using their personal profiles as a company or influencer page. To identify such power creators, compare the number of followers on a person's LinkedIn page with the number of followers of the company they work for. If the person's page has more followers than their company, they are a power creator.\n\nWrite a query to retrieve the profile IDs of these LinkedIn power creators, in ascending order of profile ID.",
+  "notes": [],
+  "tables": [
+    {
+      "table_name": "personal_profiles",
+      "columns": [
+        {
+          "column_name": "profile_id",
+          "data_type": "INT"
+        },
+        {
+          "column_name": "name",
+          "data_type": "VARCHAR(255)"
+        },
+        {
+          "column_name": "followers",
+          "data_type": "INT"
+        },
+        {
+          "column_name": "employer_id",
+          "data_type": "INT"
+        }
+      ]
+    },
+    {
+      "table_name": "company_pages",
+      "columns": [
+        {
+          "column_name": "company_id",
+          "data_type": "INT"
+        },
+        {
+          "column_name": "name",
+          "data_type": "VARCHAR(255)"
+        },
+        {
+          "column_name": "followers",
+          "data_type": "INT"
+        }
+      ]
+    }
+  ],
+  "sample_data": {
+    "personal_profiles": [
+      {
+        "profile_id": 1,
+        "name": "Nick Singh",
+        "followers": "92,000",
+        "employer_id": 4
+      },
+      {
+        "profile_id": 2,
+        "name": "Zach Wilson",
+        "followers": "199,000",
+        "employer_id": 2
+      },
+      {
+        "profile_id": 3,
+        "name": "Daliana Liu",
+        "followers": "171,000",
+        "employer_id": 1
+      },
+      {
+        "profile_id": 4,
+        "name": "Ravit Jain",
+        "followers": "107,000",
+        "employer_id": 3
+      },
+      {
+        "profile_id": 5,
+        "name": "Vin Vashishta",
+        "followers": "139,000",
+        "employer_id": 6
+      },
+      {
+        "profile_id": 6,
+        "name": "Susan Wojcicki",
+        "followers": "39,000",
+        "employer_id": 5
+      }
+    ],
+    "company_pages": [
+      {
+        "company_id": 1,
+        "name": "The Data Science Podcast",
+        "followers": "8,000"
+      },
+      {
+        "company_id": 2,
+        "name": "Airbnb",
+        "followers": "700,000"
+      },
+      {
+        "company_id": 3,
+        "name": "The Ravit Show",
+        "followers": "6,000"
+      },
+      {
+        "company_id": 4,
+        "name": "DataLemur",
+        "followers": "200"
+      },
+      {
+        "company_id": 5,
+        "name": "YouTube",
+        "followers": "1,6000,000"
+      },
+      {
+        "company_id": 6,
+        "name": "DataScience.Vin",
+        "followers": "4,500"
+      }
+    ]
+  },
+  "sample_output": [
+    {
+      "profile_id": 1
+    },
+    {
+      "profile_id": 3
+    },
+    {
+      "profile_id": 4
+    },
+    {
+      "profile_id": 5
+    }
+  ],
+  "reference_sql": "SELECT p.profile_id\nFROM personal_profiles p\nJOIN company_pages c ON p.employer_id = c.company_id\nWHERE p.followers > c.followers\nORDER BY p.profile_id;",
+  "tags": [
+    "easy",
+    "ecommerce",
+    "linkedin",
+    "social-media"
+  ],
+  "related_questions": [
+    "linkedin-power-creators-part2"
+  ],
+  "sources": [
+    [
+      "DataLemur blog: 8 LinkedIn SQL questions (#2)",
+      "https://datalemur.com/blog/linkedin-sql-interview-questions"
+    ],
+    [
+      "DataLemur page (locked)",
+      "https://datalemur.com/questions/linkedin-power-creators"
+    ],
+    [
+      "DataLemur PDF",
+      "Page 30"
+    ]
+  ],
+  "test_cases": [
+    {
+      "test_case_id": "tc_1_baseline",
+      "description": "Baseline sample input data from problem description",
+      "input_data": {
+        "personal_profiles": [
+          {
+            "profile_id": 1,
+            "name": "Nick Singh",
+            "followers": "92,000",
+            "employer_id": 4
+          },
+          {
+            "profile_id": 2,
+            "name": "Zach Wilson",
+            "followers": "199,000",
+            "employer_id": 2
+          },
+          {
+            "profile_id": 3,
+            "name": "Daliana Liu",
+            "followers": "171,000",
+            "employer_id": 1
+          },
+          {
+            "profile_id": 4,
+            "name": "Ravit Jain",
+            "followers": "107,000",
+            "employer_id": 3
+          },
+          {
+            "profile_id": 5,
+            "name": "Vin Vashishta",
+            "followers": "139,000",
+            "employer_id": 6
+          },
+          {
+            "profile_id": 6,
+            "name": "Susan Wojcicki",
+            "followers": "39,000",
+            "employer_id": 5
+          }
+        ],
+        "company_pages": [
+          {
+            "company_id": 1,
+            "name": "The Data Science Podcast",
+            "followers": "8,000"
+          },
+          {
+            "company_id": 2,
+            "name": "Airbnb",
+            "followers": "700,000"
+          },
+          {
+            "company_id": 3,
+            "name": "The Ravit Show",
+            "followers": "6,000"
+          },
+          {
+            "company_id": 4,
+            "name": "DataLemur",
+            "followers": "200"
+          },
+          {
+            "company_id": 5,
+            "name": "YouTube",
+            "followers": "1,6000,000"
+          },
+          {
+            "company_id": 6,
+            "name": "DataScience.Vin",
+            "followers": "4,500"
+          }
+        ]
+      },
+      "expected_output": [
+        {
+          "profile_id": 1
+        },
+        {
+          "profile_id": 3
+        },
+        {
+          "profile_id": 4
+        },
+        {
+          "profile_id": 5
+        }
+      ],
+      "category": "normal"
+    },
+    {
+      "test_case_id": "tc_2_high_volume",
+      "description": "Multiple entities with scaled volume and multi-group distributions",
+      "input_data": {
+        "personal_profiles": [
+          {
+            "profile_id": 1,
+            "name": "Nick Singh",
+            "followers": "92,000",
+            "employer_id": 4
+          },
+          {
+            "profile_id": 2,
+            "name": "Zach Wilson",
+            "followers": "199,000",
+            "employer_id": 2
+          },
+          {
+            "profile_id": 3,
+            "name": "Daliana Liu",
+            "followers": "171,000",
+            "employer_id": 1
+          },
+          {
+            "profile_id": 4,
+            "name": "Ravit Jain",
+            "followers": "107,000",
+            "employer_id": 3
+          },
+          {
+            "profile_id": 5,
+            "name": "Vin Vashishta",
+            "followers": "139,000",
+            "employer_id": 6
+          },
+          {
+            "profile_id": 6,
+            "name": "Susan Wojcicki",
+            "followers": "39,000",
+            "employer_id": 5
+          },
+          {
+            "profile_id": 1001,
+            "name": "Nick Singh",
+            "followers": "92,000",
+            "employer_id": 1004
+          },
+          {
+            "profile_id": 1002,
+            "name": "Zach Wilson",
+            "followers": "199,000",
+            "employer_id": 1002
+          },
+          {
+            "profile_id": 1003,
+            "name": "Daliana Liu",
+            "followers": "171,000",
+            "employer_id": 1001
+          },
+          {
+            "profile_id": 1004,
+            "name": "Ravit Jain",
+            "followers": "107,000",
+            "employer_id": 1003
+          },
+          {
+            "profile_id": 1005,
+            "name": "Vin Vashishta",
+            "followers": "139,000",
+            "employer_id": 1006
+          },
+          {
+            "profile_id": 1006,
+            "name": "Susan Wojcicki",
+            "followers": "39,000",
+            "employer_id": 1005
+          }
+        ],
+        "company_pages": [
+          {
+            "company_id": 1,
+            "name": "The Data Science Podcast",
+            "followers": "8,000"
+          },
+          {
+            "company_id": 2,
+            "name": "Airbnb",
+            "followers": "700,000"
+          },
+          {
+            "company_id": 3,
+            "name": "The Ravit Show",
+            "followers": "6,000"
+          },
+          {
+            "company_id": 4,
+            "name": "DataLemur",
+            "followers": "200"
+          },
+          {
+            "company_id": 5,
+            "name": "YouTube",
+            "followers": "1,6000,000"
+          },
+          {
+            "company_id": 6,
+            "name": "DataScience.Vin",
+            "followers": "4,500"
+          },
+          {
+            "company_id": 1001,
+            "name": "The Data Science Podcast",
+            "followers": "8,000"
+          },
+          {
+            "company_id": 1002,
+            "name": "Airbnb",
+            "followers": "700,000"
+          },
+          {
+            "company_id": 1003,
+            "name": "The Ravit Show",
+            "followers": "6,000"
+          },
+          {
+            "company_id": 1004,
+            "name": "DataLemur",
+            "followers": "200"
+          },
+          {
+            "company_id": 1005,
+            "name": "YouTube",
+            "followers": "1,6000,000"
+          },
+          {
+            "company_id": 1006,
+            "name": "DataScience.Vin",
+            "followers": "4,500"
+          }
+        ]
+      },
+      "expected_output": [
+        {
+          "profile_id": 1
+        },
+        {
+          "profile_id": 3
+        },
+        {
+          "profile_id": 4
+        },
+        {
+          "profile_id": 5
+        },
+        {
+          "profile_id": 1001
+        },
+        {
+          "profile_id": 1003
+        },
+        {
+          "profile_id": 1004
+        },
+        {
+          "profile_id": 1005
+        }
+      ],
+      "category": "volume"
+    },
+    {
+      "test_case_id": "tc_3_disqualifying_rows",
+      "description": "Dataset containing disqualifying rows, edge values, and cancelled/zero records",
+      "input_data": {
+        "personal_profiles": [
+          {
+            "profile_id": 1,
+            "name": "Nick Singh",
+            "followers": "92,000",
+            "employer_id": 4
+          },
+          {
+            "profile_id": 2,
+            "name": "Zach Wilson",
+            "followers": "199,000",
+            "employer_id": 2
+          },
+          {
+            "profile_id": 3,
+            "name": "Daliana Liu",
+            "followers": "171,000",
+            "employer_id": 1
+          },
+          {
+            "profile_id": 4,
+            "name": "Ravit Jain",
+            "followers": "107,000",
+            "employer_id": 3
+          },
+          {
+            "profile_id": 5,
+            "name": "Vin Vashishta",
+            "followers": "139,000",
+            "employer_id": 6
+          },
+          {
+            "profile_id": 6,
+            "name": "Susan Wojcicki",
+            "followers": "39,000",
+            "employer_id": 5
+          },
+          {
+            "profile_id": 5001,
+            "name": "Nick Singh",
+            "followers": "92,000",
+            "employer_id": 5004
+          },
+          {
+            "profile_id": 5002,
+            "name": "Zach Wilson",
+            "followers": "199,000",
+            "employer_id": 5002
+          },
+          {
+            "profile_id": 5003,
+            "name": "Daliana Liu",
+            "followers": "171,000",
+            "employer_id": 5001
+          }
+        ],
+        "company_pages": [
+          {
+            "company_id": 1,
+            "name": "The Data Science Podcast",
+            "followers": "8,000"
+          },
+          {
+            "company_id": 2,
+            "name": "Airbnb",
+            "followers": "700,000"
+          },
+          {
+            "company_id": 3,
+            "name": "The Ravit Show",
+            "followers": "6,000"
+          },
+          {
+            "company_id": 4,
+            "name": "DataLemur",
+            "followers": "200"
+          },
+          {
+            "company_id": 5,
+            "name": "YouTube",
+            "followers": "1,6000,000"
+          },
+          {
+            "company_id": 6,
+            "name": "DataScience.Vin",
+            "followers": "4,500"
+          },
+          {
+            "company_id": 5001,
+            "name": "The Data Science Podcast",
+            "followers": "8,000"
+          },
+          {
+            "company_id": 5002,
+            "name": "Airbnb",
+            "followers": "700,000"
+          },
+          {
+            "company_id": 5003,
+            "name": "The Ravit Show",
+            "followers": "6,000"
+          }
+        ]
+      },
+      "expected_output": [
+        {
+          "profile_id": 1
+        },
+        {
+          "profile_id": 3
+        },
+        {
+          "profile_id": 4
+        },
+        {
+          "profile_id": 5
+        },
+        {
+          "profile_id": 5003
+        }
+      ],
+      "category": "edge"
+    },
+    {
+      "test_case_id": "tc_4_empty_result",
+      "description": "Input where no rows satisfy problem criteria, verifying empty result handling",
+      "input_data": {
+        "personal_profiles": [],
+        "company_pages": []
+      },
+      "expected_output": [],
+      "category": "edge"
+    }
+  ],
+  "order_sensitive": true,
+  "expected_output": []
+}

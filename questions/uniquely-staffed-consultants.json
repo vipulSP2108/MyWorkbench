@@ -1,0 +1,600 @@
+{
+  "question_id": "q_096_uniquely_staffed_consultants",
+  "slug": "uniquely-staffed-consultants",
+  "title": "Uniquely Staffed Consultants",
+  "difficulty": "Hard",
+  "company": "Accenture",
+  "premium": true,
+  "question": "As a Data Analyst on Accenture's People Operations team, work out how many consultants are staffed to each client, and how many consultants are exclusively staffed to a single client.\n\nOutput the client name with the number of staffed consultants and the number exclusively staffed, ordered by client name.",
+  "notes": [],
+  "tables": [
+    {
+      "table_name": "staffing",
+      "columns": [
+        {
+          "column_name": "employee_id",
+          "data_type": "INT"
+        },
+        {
+          "column_name": "engagement_id",
+          "data_type": "INT"
+        }
+      ]
+    },
+    {
+      "table_name": "engagements",
+      "columns": [
+        {
+          "column_name": "engagement_id",
+          "data_type": "INT"
+        },
+        {
+          "column_name": "project_name",
+          "data_type": "VARCHAR(255)"
+        },
+        {
+          "column_name": "client_name",
+          "data_type": "VARCHAR(255)"
+        }
+      ]
+    }
+  ],
+  "sample_data": {
+    "staffing": [
+      {
+        "employee_id": 1001,
+        "engagement_id": 1
+      },
+      {
+        "employee_id": 1001,
+        "engagement_id": 2
+      },
+      {
+        "employee_id": 1002,
+        "engagement_id": 1
+      },
+      {
+        "employee_id": 1003,
+        "engagement_id": 3
+      },
+      {
+        "employee_id": 1004,
+        "engagement_id": 4
+      }
+    ],
+    "engagements": [
+      {
+        "engagement_id": 1,
+        "project_name": "SAP Logistics Modernization",
+        "client_name": "Department of Defense"
+      },
+      {
+        "engagement_id": 2,
+        "project_name": "Oracle Cloud Migration",
+        "client_name": "Department of Education"
+      },
+      {
+        "engagement_id": 3,
+        "project_name": "Trust & Safety Operations",
+        "client_name": "Google"
+      },
+      {
+        "engagement_id": 4,
+        "project_name": "SAP IoT Cloud Integration",
+        "client_name": "Google"
+      }
+    ]
+  },
+  "sample_output": [
+    {
+      "client_name": "Department of Defense",
+      "total_staffed": 2,
+      "exclusive_staffed": 1
+    },
+    {
+      "client_name": "Department of Education",
+      "total_staffed": 1,
+      "exclusive_staffed": 0
+    },
+    {
+      "client_name": "Google",
+      "total_staffed": 2,
+      "exclusive_staffed": 2
+    }
+  ],
+  "reference_sql": "SELECT s.employee_id\nFROM staffing s\nJOIN engagements e ON s.engagement_id = e.engagement_id\nGROUP BY s.employee_id\nHAVING COUNT(DISTINCT e.client_name) = 1\nORDER BY s.employee_id;",
+  "tags": [
+    "accenture",
+    "aggregation",
+    "cte",
+    "ecommerce",
+    "hard",
+    "join",
+    "math"
+  ],
+  "related_questions": [],
+  "sources": [
+    [
+      "DataLemur blog: Advanced SQL questions (#9)",
+      "https://datalemur.com/blog/advanced-sql-interview-questions"
+    ],
+    [
+      "DataLemur PDF",
+      "Page 100"
+    ]
+  ],
+  "test_cases": [
+    {
+      "test_case_id": "tc_1_baseline",
+      "description": "Baseline sample input data from problem description",
+      "input_data": {
+        "staffing": [
+          {
+            "employee_id": 1001,
+            "engagement_id": 1
+          },
+          {
+            "employee_id": 1001,
+            "engagement_id": 2
+          },
+          {
+            "employee_id": 1002,
+            "engagement_id": 1
+          },
+          {
+            "employee_id": 1003,
+            "engagement_id": 3
+          },
+          {
+            "employee_id": 1004,
+            "engagement_id": 4
+          }
+        ],
+        "engagements": [
+          {
+            "engagement_id": 1,
+            "project_name": "SAP Logistics Modernization",
+            "client_name": "Department of Defense"
+          },
+          {
+            "engagement_id": 2,
+            "project_name": "Oracle Cloud Migration",
+            "client_name": "Department of Education"
+          },
+          {
+            "engagement_id": 3,
+            "project_name": "Trust & Safety Operations",
+            "client_name": "Google"
+          },
+          {
+            "engagement_id": 4,
+            "project_name": "SAP IoT Cloud Integration",
+            "client_name": "Google"
+          }
+        ]
+      },
+      "expected_output": [
+        {
+          "employee_id": 1002
+        },
+        {
+          "employee_id": 1003
+        },
+        {
+          "employee_id": 1004
+        }
+      ],
+      "category": "normal"
+    },
+    {
+      "test_case_id": "tc_2_high_volume",
+      "description": "Multiple entities with scaled volume and multi-group distributions",
+      "input_data": {
+        "staffing": [
+          {
+            "employee_id": 1001,
+            "engagement_id": 1
+          },
+          {
+            "employee_id": 1001,
+            "engagement_id": 2
+          },
+          {
+            "employee_id": 1002,
+            "engagement_id": 1
+          },
+          {
+            "employee_id": 1003,
+            "engagement_id": 3
+          },
+          {
+            "employee_id": 1004,
+            "engagement_id": 4
+          },
+          {
+            "employee_id": 2001,
+            "engagement_id": 1001
+          },
+          {
+            "employee_id": 2001,
+            "engagement_id": 1002
+          },
+          {
+            "employee_id": 2002,
+            "engagement_id": 1001
+          },
+          {
+            "employee_id": 2003,
+            "engagement_id": 1003
+          },
+          {
+            "employee_id": 2004,
+            "engagement_id": 1004
+          }
+        ],
+        "engagements": [
+          {
+            "engagement_id": 1,
+            "project_name": "SAP Logistics Modernization",
+            "client_name": "Department of Defense"
+          },
+          {
+            "engagement_id": 2,
+            "project_name": "Oracle Cloud Migration",
+            "client_name": "Department of Education"
+          },
+          {
+            "engagement_id": 3,
+            "project_name": "Trust & Safety Operations",
+            "client_name": "Google"
+          },
+          {
+            "engagement_id": 4,
+            "project_name": "SAP IoT Cloud Integration",
+            "client_name": "Google"
+          },
+          {
+            "engagement_id": 1001,
+            "project_name": "SAP Logistics Modernization",
+            "client_name": "Department of Defense"
+          },
+          {
+            "engagement_id": 1002,
+            "project_name": "Oracle Cloud Migration",
+            "client_name": "Department of Education"
+          },
+          {
+            "engagement_id": 1003,
+            "project_name": "Trust & Safety Operations",
+            "client_name": "Google"
+          },
+          {
+            "engagement_id": 1004,
+            "project_name": "SAP IoT Cloud Integration",
+            "client_name": "Google"
+          }
+        ]
+      },
+      "expected_output": [
+        {
+          "employee_id": 1002
+        },
+        {
+          "employee_id": 1003
+        },
+        {
+          "employee_id": 1004
+        },
+        {
+          "employee_id": 2002
+        },
+        {
+          "employee_id": 2003
+        },
+        {
+          "employee_id": 2004
+        }
+      ],
+      "category": "volume"
+    },
+    {
+      "test_case_id": "tc_3_disqualifying_rows",
+      "description": "Dataset containing disqualifying rows, edge values, and cancelled/zero records",
+      "input_data": {
+        "staffing": [
+          {
+            "employee_id": 1001,
+            "engagement_id": 1
+          },
+          {
+            "employee_id": 1001,
+            "engagement_id": 2
+          },
+          {
+            "employee_id": 1002,
+            "engagement_id": 1
+          },
+          {
+            "employee_id": 1003,
+            "engagement_id": 3
+          },
+          {
+            "employee_id": 1004,
+            "engagement_id": 4
+          },
+          {
+            "employee_id": 6001,
+            "engagement_id": 5001
+          },
+          {
+            "employee_id": 6001,
+            "engagement_id": 5002
+          }
+        ],
+        "engagements": [
+          {
+            "engagement_id": 1,
+            "project_name": "SAP Logistics Modernization",
+            "client_name": "Department of Defense"
+          },
+          {
+            "engagement_id": 2,
+            "project_name": "Oracle Cloud Migration",
+            "client_name": "Department of Education"
+          },
+          {
+            "engagement_id": 3,
+            "project_name": "Trust & Safety Operations",
+            "client_name": "Google"
+          },
+          {
+            "engagement_id": 4,
+            "project_name": "SAP IoT Cloud Integration",
+            "client_name": "Google"
+          },
+          {
+            "engagement_id": 5001,
+            "project_name": "SAP Logistics Modernization",
+            "client_name": "Department of Defense"
+          },
+          {
+            "engagement_id": 5002,
+            "project_name": "Oracle Cloud Migration",
+            "client_name": "Department of Education"
+          }
+        ]
+      },
+      "expected_output": [
+        {
+          "employee_id": 1002
+        },
+        {
+          "employee_id": 1003
+        },
+        {
+          "employee_id": 1004
+        }
+      ],
+      "category": "edge"
+    },
+    {
+      "test_case_id": "tc_4_empty_result",
+      "description": "Input where no rows satisfy problem criteria, verifying empty result handling",
+      "input_data": {
+        "staffing": [],
+        "engagements": []
+      },
+      "expected_output": [],
+      "category": "edge"
+    },
+    {
+      "test_case_id": "tc_5_ties_and_nulls",
+      "description": "Tied ranking metrics, unmatched join keys, and NULL values in nullable attributes",
+      "input_data": {
+        "staffing": [
+          {
+            "employee_id": 1001,
+            "engagement_id": 1
+          },
+          {
+            "employee_id": 1001,
+            "engagement_id": 2
+          },
+          {
+            "employee_id": 1002,
+            "engagement_id": 1
+          },
+          {
+            "employee_id": 1003,
+            "engagement_id": 3
+          },
+          {
+            "employee_id": 1004,
+            "engagement_id": 4
+          },
+          {
+            "employee_id": 10001,
+            "engagement_id": 9001
+          },
+          {
+            "employee_id": 10501,
+            "engagement_id": 9502
+          }
+        ],
+        "engagements": [
+          {
+            "engagement_id": 1,
+            "project_name": "SAP Logistics Modernization",
+            "client_name": "Department of Defense"
+          },
+          {
+            "engagement_id": 2,
+            "project_name": "Oracle Cloud Migration",
+            "client_name": "Department of Education"
+          },
+          {
+            "engagement_id": 3,
+            "project_name": "Trust & Safety Operations",
+            "client_name": "Google"
+          },
+          {
+            "engagement_id": 4,
+            "project_name": "SAP IoT Cloud Integration",
+            "client_name": "Google"
+          },
+          {
+            "engagement_id": 9001,
+            "project_name": "SAP Logistics Modernization Duplicate",
+            "client_name": "Department of Defense Duplicate"
+          },
+          {
+            "engagement_id": 9502,
+            "project_name": "Oracle Cloud Migration",
+            "client_name": "Department of Education"
+          }
+        ]
+      },
+      "expected_output": [
+        {
+          "employee_id": 1002
+        },
+        {
+          "employee_id": 1003
+        },
+        {
+          "employee_id": 1004
+        },
+        {
+          "employee_id": 10001
+        },
+        {
+          "employee_id": 10501
+        }
+      ],
+      "category": "edge"
+    },
+    {
+      "test_case_id": "tc_6_extreme_boundary",
+      "description": "Consecutive day sequences, month-end date rollovers, and high-frequency transactions",
+      "input_data": {
+        "staffing": [
+          {
+            "employee_id": 1001,
+            "engagement_id": 1
+          },
+          {
+            "employee_id": 1001,
+            "engagement_id": 2
+          },
+          {
+            "employee_id": 1002,
+            "engagement_id": 1
+          },
+          {
+            "employee_id": 1003,
+            "engagement_id": 3
+          },
+          {
+            "employee_id": 1004,
+            "engagement_id": 4
+          },
+          {
+            "employee_id": 9001,
+            "engagement_id": 8001
+          },
+          {
+            "employee_id": 9001,
+            "engagement_id": 8002
+          },
+          {
+            "employee_id": 9002,
+            "engagement_id": 8001
+          },
+          {
+            "employee_id": 9003,
+            "engagement_id": 8003
+          },
+          {
+            "employee_id": 9004,
+            "engagement_id": 8004
+          }
+        ],
+        "engagements": [
+          {
+            "engagement_id": 1,
+            "project_name": "SAP Logistics Modernization",
+            "client_name": "Department of Defense"
+          },
+          {
+            "engagement_id": 2,
+            "project_name": "Oracle Cloud Migration",
+            "client_name": "Department of Education"
+          },
+          {
+            "engagement_id": 3,
+            "project_name": "Trust & Safety Operations",
+            "client_name": "Google"
+          },
+          {
+            "engagement_id": 4,
+            "project_name": "SAP IoT Cloud Integration",
+            "client_name": "Google"
+          },
+          {
+            "engagement_id": 8001,
+            "project_name": "SAP Logistics Modernization",
+            "client_name": "Department of Defense"
+          },
+          {
+            "engagement_id": 8002,
+            "project_name": "Oracle Cloud Migration",
+            "client_name": "Department of Education"
+          },
+          {
+            "engagement_id": 8003,
+            "project_name": "Trust & Safety Operations",
+            "client_name": "Google"
+          },
+          {
+            "engagement_id": 8004,
+            "project_name": "SAP IoT Cloud Integration",
+            "client_name": "Google"
+          }
+        ]
+      },
+      "expected_output": [
+        {
+          "employee_id": 1002
+        },
+        {
+          "employee_id": 1003
+        },
+        {
+          "employee_id": 1004
+        },
+        {
+          "employee_id": 9002
+        },
+        {
+          "employee_id": 9003
+        },
+        {
+          "employee_id": 9004
+        }
+      ],
+      "category": "boundary"
+    }
+  ],
+  "order_sensitive": true,
+  "expected_output": [
+    {
+      "employee_id": 1002
+    },
+    {
+      "employee_id": 1003
+    },
+    {
+      "employee_id": 1004
+    }
+  ]
+}

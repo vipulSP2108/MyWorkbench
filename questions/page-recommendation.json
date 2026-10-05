@@ -1,0 +1,687 @@
+{
+  "question_id": "q_092_page_recommendation",
+  "slug": "page-recommendation",
+  "title": "Page Recommendation",
+  "difficulty": "Hard",
+  "company": "Facebook",
+  "premium": true,
+  "question": "Write an SQL query that makes recommendations using the pages that your friends liked. Assume you have two tables: a two-column table of users and their friends, and a two-column table of users and the pages they liked.\n\nIt should not recommend pages you already like.\n\nNot available: table and column names, example rows, output format and ordering rules from DataLemur's version.",
+  "notes": [],
+  "tables": [
+    {
+      "table_name": "friendship",
+      "columns": [
+        {
+          "column_name": "user_id",
+          "data_type": "INT"
+        },
+        {
+          "column_name": "friend_id",
+          "data_type": "INT"
+        }
+      ]
+    },
+    {
+      "table_name": "page_likes",
+      "columns": [
+        {
+          "column_name": "user_id",
+          "data_type": "INT"
+        },
+        {
+          "column_name": "page_id",
+          "data_type": "INT"
+        }
+      ]
+    }
+  ],
+  "sample_data": {
+    "friendship": [
+      {
+        "user_id": "2",
+        "friend_id": "2",
+        "page_id": "101"
+      },
+      {
+        "user_id": "2",
+        "friend_id": "3",
+        "page_id": "102"
+      },
+      {
+        "user_id": "3",
+        "friend_id": "1",
+        "page_id": "102"
+      },
+      {
+        "user_id": "3",
+        "friend_id": "1",
+        "page_id": "103"
+      },
+      {
+        "user_id": "4",
+        "friend_id": "4",
+        "page_id": "104"
+      },
+      {
+        "user_id": "1",
+        "friend_id": "3",
+        "page_id": "101"
+      }
+    ],
+    "page_likes": [
+      {
+        "user_id": 2,
+        "page_id": 10
+      },
+      {
+        "user_id": 3,
+        "page_id": 20
+      },
+      {
+        "user_id": 1,
+        "page_id": 10
+      },
+      {
+        "user_id": 4,
+        "page_id": 30
+      }
+    ]
+  },
+  "sample_output": [
+    {
+      "user_id": "1",
+      "recommended_page": "102"
+    },
+    {
+      "user_id": "1",
+      "recommended_page": "103"
+    },
+    {
+      "user_id": "3",
+      "recommended_page": "101"
+    },
+    {
+      "user_id": "3",
+      "recommended_page": "104"
+    },
+    {
+      "user_id": "4",
+      "recommended_page": "102"
+    },
+    {
+      "user_id": "4",
+      "recommended_page": "103"
+    }
+  ],
+  "reference_sql": "SELECT DISTINCT f.user_id, pl.page_id AS recommended_page\nFROM friendship f\nJOIN page_likes pl ON f.friend_id = pl.user_id\nLEFT JOIN page_likes my_likes ON f.user_id = my_likes.user_id AND pl.page_id = my_likes.page_id\nWHERE my_likes.page_id IS NULL\nORDER BY f.user_id, recommended_page;",
+  "tags": [
+    "ecommerce",
+    "facebook",
+    "hard",
+    "join",
+    "social-media",
+    "string-manipulation"
+  ],
+  "related_questions": [],
+  "sources": [
+    [
+      "Glassdoor: Meta interview question (public wording)",
+      "https://www.glassdoor.com/Interview/Write-an-SQL-query-that-makes-recommendations-using-the-pages-that-your-friends-liked-Assume-you-have-two-tables-a-two-c-QTN_1413464.htm"
+    ],
+    [
+      "DataLemur page (locked)",
+      "https://datalemur.com/questions/page-recommendation"
+    ],
+    [
+      "DataLemur PDF",
+      "Page 96"
+    ]
+  ],
+  "test_cases": [
+    {
+      "test_case_id": "tc_1_baseline",
+      "description": "Baseline sample input data from problem description",
+      "input_data": {
+        "friendship": [
+          {
+            "user_id": "2",
+            "friend_id": "2",
+            "page_id": "101"
+          },
+          {
+            "user_id": "2",
+            "friend_id": "3",
+            "page_id": "102"
+          },
+          {
+            "user_id": "3",
+            "friend_id": "1",
+            "page_id": "102"
+          },
+          {
+            "user_id": "3",
+            "friend_id": "1",
+            "page_id": "103"
+          },
+          {
+            "user_id": "4",
+            "friend_id": "4",
+            "page_id": "104"
+          },
+          {
+            "user_id": "1",
+            "friend_id": "3",
+            "page_id": "101"
+          }
+        ],
+        "page_likes": [
+          {
+            "user_id": 2,
+            "page_id": 10
+          },
+          {
+            "user_id": 3,
+            "page_id": 20
+          },
+          {
+            "user_id": 1,
+            "page_id": 10
+          },
+          {
+            "user_id": 4,
+            "page_id": 30
+          }
+        ]
+      },
+      "expected_output": [
+        {
+          "user_id": 1,
+          "recommended_page": 20
+        },
+        {
+          "user_id": 2,
+          "recommended_page": 20
+        },
+        {
+          "user_id": 3,
+          "recommended_page": 10
+        }
+      ],
+      "category": "normal"
+    },
+    {
+      "test_case_id": "tc_2_high_volume",
+      "description": "Multiple entities with scaled volume and multi-group distributions",
+      "input_data": {
+        "friendship": [
+          {
+            "user_id": "2",
+            "friend_id": "2",
+            "page_id": "101"
+          },
+          {
+            "user_id": "2",
+            "friend_id": "3",
+            "page_id": "102"
+          },
+          {
+            "user_id": "3",
+            "friend_id": "1",
+            "page_id": "102"
+          },
+          {
+            "user_id": "3",
+            "friend_id": "1",
+            "page_id": "103"
+          },
+          {
+            "user_id": "4",
+            "friend_id": "4",
+            "page_id": "104"
+          },
+          {
+            "user_id": "1",
+            "friend_id": "3",
+            "page_id": "101"
+          },
+          {
+            "user_id": 1002,
+            "friend_id": 1002,
+            "page_id": 1101
+          },
+          {
+            "user_id": 1002,
+            "friend_id": 1003,
+            "page_id": 1102
+          },
+          {
+            "user_id": 1003,
+            "friend_id": 1001,
+            "page_id": 1102
+          },
+          {
+            "user_id": 1003,
+            "friend_id": 1001,
+            "page_id": 1103
+          },
+          {
+            "user_id": 1004,
+            "friend_id": 1004,
+            "page_id": 1104
+          },
+          {
+            "user_id": 1001,
+            "friend_id": 1003,
+            "page_id": 1101
+          }
+        ],
+        "page_likes": [
+          {
+            "user_id": 2,
+            "page_id": 10
+          },
+          {
+            "user_id": 3,
+            "page_id": 20
+          },
+          {
+            "user_id": 1,
+            "page_id": 10
+          },
+          {
+            "user_id": 4,
+            "page_id": 30
+          },
+          {
+            "user_id": 1002,
+            "page_id": 1010
+          },
+          {
+            "user_id": 1003,
+            "page_id": 1020
+          },
+          {
+            "user_id": 1001,
+            "page_id": 1010
+          },
+          {
+            "user_id": 1004,
+            "page_id": 1030
+          }
+        ]
+      },
+      "expected_output": [
+        {
+          "user_id": 1,
+          "recommended_page": 20
+        },
+        {
+          "user_id": 2,
+          "recommended_page": 20
+        },
+        {
+          "user_id": 3,
+          "recommended_page": 10
+        },
+        {
+          "user_id": 1001,
+          "recommended_page": 1020
+        },
+        {
+          "user_id": 1002,
+          "recommended_page": 1020
+        },
+        {
+          "user_id": 1003,
+          "recommended_page": 1010
+        }
+      ],
+      "category": "volume"
+    },
+    {
+      "test_case_id": "tc_3_disqualifying_rows",
+      "description": "Dataset containing disqualifying rows, edge values, and cancelled/zero records",
+      "input_data": {
+        "friendship": [
+          {
+            "user_id": "2",
+            "friend_id": "2",
+            "page_id": "101"
+          },
+          {
+            "user_id": "2",
+            "friend_id": "3",
+            "page_id": "102"
+          },
+          {
+            "user_id": "3",
+            "friend_id": "1",
+            "page_id": "102"
+          },
+          {
+            "user_id": "3",
+            "friend_id": "1",
+            "page_id": "103"
+          },
+          {
+            "user_id": "4",
+            "friend_id": "4",
+            "page_id": "104"
+          },
+          {
+            "user_id": "1",
+            "friend_id": "3",
+            "page_id": "101"
+          },
+          {
+            "user_id": 5002,
+            "friend_id": 5002,
+            "page_id": 5101
+          },
+          {
+            "user_id": 5002,
+            "friend_id": 5003,
+            "page_id": 5102
+          },
+          {
+            "user_id": 5003,
+            "friend_id": 5001,
+            "page_id": 5102
+          }
+        ],
+        "page_likes": [
+          {
+            "user_id": 2,
+            "page_id": 10
+          },
+          {
+            "user_id": 3,
+            "page_id": 20
+          },
+          {
+            "user_id": 1,
+            "page_id": 10
+          },
+          {
+            "user_id": 4,
+            "page_id": 30
+          },
+          {
+            "user_id": 5002,
+            "page_id": 5010
+          },
+          {
+            "user_id": 5003,
+            "page_id": 5020
+          }
+        ]
+      },
+      "expected_output": [
+        {
+          "user_id": 1,
+          "recommended_page": 20
+        },
+        {
+          "user_id": 2,
+          "recommended_page": 20
+        },
+        {
+          "user_id": 3,
+          "recommended_page": 10
+        },
+        {
+          "user_id": 5002,
+          "recommended_page": 5020
+        }
+      ],
+      "category": "edge"
+    },
+    {
+      "test_case_id": "tc_4_empty_result",
+      "description": "Input where no rows satisfy problem criteria, verifying empty result handling",
+      "input_data": {
+        "friendship": [],
+        "page_likes": []
+      },
+      "expected_output": [],
+      "category": "edge"
+    },
+    {
+      "test_case_id": "tc_5_ties_and_nulls",
+      "description": "Tied ranking metrics, unmatched join keys, and NULL values in nullable attributes",
+      "input_data": {
+        "friendship": [
+          {
+            "user_id": "2",
+            "friend_id": "2",
+            "page_id": "101"
+          },
+          {
+            "user_id": "2",
+            "friend_id": "3",
+            "page_id": "102"
+          },
+          {
+            "user_id": "3",
+            "friend_id": "1",
+            "page_id": "102"
+          },
+          {
+            "user_id": "3",
+            "friend_id": "1",
+            "page_id": "103"
+          },
+          {
+            "user_id": "4",
+            "friend_id": "4",
+            "page_id": "104"
+          },
+          {
+            "user_id": "1",
+            "friend_id": "3",
+            "page_id": "101"
+          },
+          {
+            "user_id": 9002,
+            "friend_id": 9002,
+            "page_id": 9101
+          },
+          {
+            "user_id": 9502,
+            "friend_id": 9503,
+            "page_id": 9602
+          }
+        ],
+        "page_likes": [
+          {
+            "user_id": 2,
+            "page_id": 10
+          },
+          {
+            "user_id": 3,
+            "page_id": 20
+          },
+          {
+            "user_id": 1,
+            "page_id": 10
+          },
+          {
+            "user_id": 4,
+            "page_id": 30
+          },
+          {
+            "user_id": 9002,
+            "page_id": 9010
+          },
+          {
+            "user_id": 9503,
+            "page_id": 9520
+          }
+        ]
+      },
+      "expected_output": [
+        {
+          "user_id": 1,
+          "recommended_page": 20
+        },
+        {
+          "user_id": 2,
+          "recommended_page": 20
+        },
+        {
+          "user_id": 3,
+          "recommended_page": 10
+        },
+        {
+          "user_id": 9502,
+          "recommended_page": 9520
+        }
+      ],
+      "category": "edge"
+    },
+    {
+      "test_case_id": "tc_6_extreme_boundary",
+      "description": "Consecutive day sequences, month-end date rollovers, and high-frequency transactions",
+      "input_data": {
+        "friendship": [
+          {
+            "user_id": "2",
+            "friend_id": "2",
+            "page_id": "101"
+          },
+          {
+            "user_id": "2",
+            "friend_id": "3",
+            "page_id": "102"
+          },
+          {
+            "user_id": "3",
+            "friend_id": "1",
+            "page_id": "102"
+          },
+          {
+            "user_id": "3",
+            "friend_id": "1",
+            "page_id": "103"
+          },
+          {
+            "user_id": "4",
+            "friend_id": "4",
+            "page_id": "104"
+          },
+          {
+            "user_id": "1",
+            "friend_id": "3",
+            "page_id": "101"
+          },
+          {
+            "user_id": 8002,
+            "friend_id": 8002,
+            "page_id": 8101
+          },
+          {
+            "user_id": 8002,
+            "friend_id": 8003,
+            "page_id": 8102
+          },
+          {
+            "user_id": 8003,
+            "friend_id": 8001,
+            "page_id": 8102
+          },
+          {
+            "user_id": 8003,
+            "friend_id": 8001,
+            "page_id": 8103
+          },
+          {
+            "user_id": 8004,
+            "friend_id": 8004,
+            "page_id": 8104
+          },
+          {
+            "user_id": 8001,
+            "friend_id": 8003,
+            "page_id": 8101
+          }
+        ],
+        "page_likes": [
+          {
+            "user_id": 2,
+            "page_id": 10
+          },
+          {
+            "user_id": 3,
+            "page_id": 20
+          },
+          {
+            "user_id": 1,
+            "page_id": 10
+          },
+          {
+            "user_id": 4,
+            "page_id": 30
+          },
+          {
+            "user_id": 8002,
+            "page_id": 8010
+          },
+          {
+            "user_id": 8003,
+            "page_id": 8020
+          },
+          {
+            "user_id": 8001,
+            "page_id": 8010
+          },
+          {
+            "user_id": 8004,
+            "page_id": 8030
+          }
+        ]
+      },
+      "expected_output": [
+        {
+          "user_id": 1,
+          "recommended_page": 20
+        },
+        {
+          "user_id": 2,
+          "recommended_page": 20
+        },
+        {
+          "user_id": 3,
+          "recommended_page": 10
+        },
+        {
+          "user_id": 8001,
+          "recommended_page": 8020
+        },
+        {
+          "user_id": 8002,
+          "recommended_page": 8020
+        },
+        {
+          "user_id": 8003,
+          "recommended_page": 8010
+        }
+      ],
+      "category": "boundary"
+    }
+  ],
+  "order_sensitive": false,
+  "expected_output": [
+    {
+      "user_id": 1,
+      "recommended_page": 20
+    },
+    {
+      "user_id": 2,
+      "recommended_page": 20
+    },
+    {
+      "user_id": 3,
+      "recommended_page": 10
+    }
+  ]
+}

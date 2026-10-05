@@ -1,0 +1,304 @@
+{
+  "question_id": "q_071_invalid_search_pct",
+  "slug": "invalid-search-pct",
+  "title": "Invalid Search Results",
+  "difficulty": "Medium",
+  "company": "Google",
+  "premium": true,
+  "question": "Google Search Quality tracks invalid search queries. A search is classified as invalid if is_invalid is true or if num_results is 0.\n\nWrite a query to calculate the overall percentage of invalid searches, rounded to 2 decimal places.",
+  "notes": [],
+  "tables": [
+    {
+      "table_name": "search_category",
+      "columns": [
+        {
+          "column_name": "search_id",
+          "data_type": "INT"
+        },
+        {
+          "column_name": "query",
+          "data_type": "VARCHAR(255)"
+        },
+        {
+          "column_name": "num_results",
+          "data_type": "INT"
+        },
+        {
+          "column_name": "is_invalid",
+          "data_type": "BOOLEAN"
+        }
+      ]
+    }
+  ],
+  "sample_data": {
+    "search_category": [
+      {
+        "search_id": 1,
+        "query": "sql tutorial",
+        "num_results": 1500,
+        "is_invalid": "false"
+      },
+      {
+        "search_id": 2,
+        "query": "asdfghjkl",
+        "num_results": 0,
+        "is_invalid": "false"
+      },
+      {
+        "search_id": 3,
+        "query": "broken syntax",
+        "num_results": 0,
+        "is_invalid": "true"
+      },
+      {
+        "search_id": 4,
+        "query": "python docs",
+        "num_results": 300,
+        "is_invalid": "false"
+      }
+    ]
+  },
+  "sample_output": [
+    {
+      "invalid_search_pct": "50.00"
+    }
+  ],
+  "reference_sql": "SELECT \n  ROUND(100.0 * SUM(CASE WHEN is_invalid = 1 OR num_results = 0 THEN 1 ELSE 0 END) / COUNT(*), 2) AS invalid_pct\nFROM search_category;",
+  "tags": [
+    "google",
+    "math",
+    "medium"
+  ],
+  "related_questions": [],
+  "sources": [
+    [
+      "Text supplied by you (not checkable against the locked page)",
+      "https://datalemur.com/questions/invalid-search-pct"
+    ],
+    [
+      "DataLemur PDF",
+      "Page 75"
+    ]
+  ],
+  "test_cases": [
+    {
+      "test_case_id": "tc_1_baseline",
+      "description": "Baseline sample input data from problem description",
+      "input_data": {
+        "search_category": [
+          {
+            "search_id": 1,
+            "query": "sql tutorial",
+            "num_results": 1500,
+            "is_invalid": "false"
+          },
+          {
+            "search_id": 2,
+            "query": "asdfghjkl",
+            "num_results": 0,
+            "is_invalid": "false"
+          },
+          {
+            "search_id": 3,
+            "query": "broken syntax",
+            "num_results": 0,
+            "is_invalid": "true"
+          },
+          {
+            "search_id": 4,
+            "query": "python docs",
+            "num_results": 300,
+            "is_invalid": "false"
+          }
+        ]
+      },
+      "expected_output": [
+        {
+          "invalid_pct": 50.0
+        }
+      ],
+      "category": "normal"
+    },
+    {
+      "test_case_id": "tc_2_high_volume",
+      "description": "Multiple entities with scaled volume and multi-group distributions",
+      "input_data": {
+        "search_category": [
+          {
+            "search_id": 1,
+            "query": "sql tutorial",
+            "num_results": 1500,
+            "is_invalid": "false"
+          },
+          {
+            "search_id": 2,
+            "query": "asdfghjkl",
+            "num_results": 0,
+            "is_invalid": "false"
+          },
+          {
+            "search_id": 3,
+            "query": "broken syntax",
+            "num_results": 0,
+            "is_invalid": "true"
+          },
+          {
+            "search_id": 4,
+            "query": "python docs",
+            "num_results": 300,
+            "is_invalid": "false"
+          },
+          {
+            "search_id": 1001,
+            "query": "sql tutorial",
+            "num_results": 1500,
+            "is_invalid": "false"
+          },
+          {
+            "search_id": 1002,
+            "query": "asdfghjkl",
+            "num_results": 0,
+            "is_invalid": "false"
+          },
+          {
+            "search_id": 1003,
+            "query": "broken syntax",
+            "num_results": 0,
+            "is_invalid": "true"
+          },
+          {
+            "search_id": 1004,
+            "query": "python docs",
+            "num_results": 300,
+            "is_invalid": "false"
+          }
+        ]
+      },
+      "expected_output": [
+        {
+          "invalid_pct": 50.0
+        }
+      ],
+      "category": "volume"
+    },
+    {
+      "test_case_id": "tc_3_disqualifying_rows",
+      "description": "Dataset containing disqualifying rows, edge values, and cancelled/zero records",
+      "input_data": {
+        "search_category": [
+          {
+            "search_id": 1,
+            "query": "sql tutorial",
+            "num_results": 1500,
+            "is_invalid": "false"
+          },
+          {
+            "search_id": 2,
+            "query": "asdfghjkl",
+            "num_results": 0,
+            "is_invalid": "false"
+          },
+          {
+            "search_id": 3,
+            "query": "broken syntax",
+            "num_results": 0,
+            "is_invalid": "true"
+          },
+          {
+            "search_id": 4,
+            "query": "python docs",
+            "num_results": 300,
+            "is_invalid": "false"
+          },
+          {
+            "search_id": 5001,
+            "query": "sql tutorial",
+            "num_results": 1500,
+            "is_invalid": "false"
+          },
+          {
+            "search_id": 5002,
+            "query": "asdfghjkl",
+            "num_results": 0,
+            "is_invalid": "false"
+          }
+        ]
+      },
+      "expected_output": [
+        {
+          "invalid_pct": 50.0
+        }
+      ],
+      "category": "edge"
+    },
+    {
+      "test_case_id": "tc_4_empty_result",
+      "description": "Input where no rows satisfy problem criteria, verifying empty result handling",
+      "input_data": {
+        "search_category": []
+      },
+      "expected_output": [
+        {
+          "invalid_pct": null
+        }
+      ],
+      "category": "edge"
+    },
+    {
+      "test_case_id": "tc_5_ties_and_nulls",
+      "description": "Tied ranking metrics, unmatched join keys, and NULL values in nullable attributes",
+      "input_data": {
+        "search_category": [
+          {
+            "search_id": 1,
+            "query": "sql tutorial",
+            "num_results": 1500,
+            "is_invalid": "false"
+          },
+          {
+            "search_id": 2,
+            "query": "asdfghjkl",
+            "num_results": 0,
+            "is_invalid": "false"
+          },
+          {
+            "search_id": 3,
+            "query": "broken syntax",
+            "num_results": 0,
+            "is_invalid": "true"
+          },
+          {
+            "search_id": 4,
+            "query": "python docs",
+            "num_results": 300,
+            "is_invalid": "false"
+          },
+          {
+            "search_id": 9001,
+            "query": "sql tutorial",
+            "num_results": 1500,
+            "is_invalid": "false"
+          },
+          {
+            "search_id": 9502,
+            "query": "asdfghjkl",
+            "num_results": 0,
+            "is_invalid": "false"
+          }
+        ]
+      },
+      "expected_output": [
+        {
+          "invalid_pct": 50.0
+        }
+      ],
+      "category": "edge"
+    }
+  ],
+  "order_sensitive": false,
+  "expected_output": [
+    {
+      "invalid_pct": 50.0
+    }
+  ]
+}

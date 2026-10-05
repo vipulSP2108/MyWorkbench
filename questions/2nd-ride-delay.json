@@ -1,0 +1,285 @@
+{
+  "question_id": "q_054_2nd_ride_delay",
+  "slug": "2nd-ride-delay",
+  "title": "2nd Ride Delay",
+  "difficulty": "Medium",
+  "company": "Uber",
+  "premium": true,
+  "question": "As a data analyst at Uber, you report the latest metrics for specific groups of Uber users. Some riders create their Uber account the same day they book their first ride; the rider engagement team calls them 'in-the-moment' users.\n\nUber wants to know the average delay between the day of user sign-up and the day of their 2nd ride. Write a query to pull the average 2nd ride delay for 'in-the-moment' Uber users. Round the answer to 2 decimal places.\n\nTip from the source: you don't need to use date operations to get the answer (you may use them, but it is not necessary).",
+  "notes": [],
+  "tables": [
+    {
+      "table_name": "users",
+      "columns": [
+        {
+          "column_name": "user_id",
+          "data_type": "INT"
+        },
+        {
+          "column_name": "registration_date",
+          "data_type": "DATE"
+        }
+      ]
+    },
+    {
+      "table_name": "rides",
+      "columns": [
+        {
+          "column_name": "ride_id",
+          "data_type": "INT"
+        },
+        {
+          "column_name": "user_id",
+          "data_type": "INT"
+        },
+        {
+          "column_name": "ride_date",
+          "data_type": "DATE"
+        }
+      ]
+    }
+  ],
+  "sample_data": {
+    "users": [
+      {
+        "user_id": 1,
+        "registration_date": "08/15/2022"
+      },
+      {
+        "user_id": 2,
+        "registration_date": "08/21/2022"
+      }
+    ],
+    "rides": [
+      {
+        "ride_id": 1,
+        "user_id": 1,
+        "ride_date": "08/15/2022"
+      },
+      {
+        "ride_id": 2,
+        "user_id": 1,
+        "ride_date": "08/16/2022"
+      },
+      {
+        "ride_id": 3,
+        "user_id": 2,
+        "ride_date": "09/20/2022"
+      },
+      {
+        "ride_id": 4,
+        "user_id": 2,
+        "ride_date": "09/23/2022"
+      }
+    ]
+  },
+  "sample_output": [
+    {
+      "avg_delay": 1.0
+    }
+  ],
+  "reference_sql": "WITH ranked_rides AS (\n  SELECT \n    user_id, \n    ride_date,\n    ROW_NUMBER() OVER (PARTITION BY user_id ORDER BY ride_date) AS rn\n  FROM rides\n),\nfirst_rides AS (\n  SELECT user_id, ride_date AS first_ride_date\n  FROM ranked_rides\n  WHERE rn = 1\n),\nsecond_rides AS (\n  SELECT user_id, ride_date AS second_ride_date\n  FROM ranked_rides\n  WHERE rn = 2\n)\nSELECT \n  ROUND(AVG(DATEDIFF(s.second_ride_date, u.registration_date)), 2) AS avg_delay\nFROM users u\nJOIN first_rides f ON u.user_id = f.user_id AND u.registration_date = f.first_ride_date\nJOIN second_rides s ON u.user_id = s.user_id;",
+  "tags": [
+    "aggregation",
+    "date-manipulation",
+    "healthcare",
+    "math",
+    "medium",
+    "transportation",
+    "uber"
+  ],
+  "related_questions": [],
+  "sources": [
+    [
+      "DataLemur blog: 10 Uber SQL questions (#2)",
+      "https://datalemur.com/blog/uber-sql-interview-questions"
+    ],
+    [
+      "DataLemur page (locked)",
+      "https://datalemur.com/questions/2nd-ride-delay"
+    ],
+    [
+      "DataLemur PDF",
+      "Page 58"
+    ]
+  ],
+  "test_cases": [
+    {
+      "test_case_id": "tc_1_baseline",
+      "description": "Baseline: 1 in-the-moment user (delay 1) and 1 non-in-the-moment user excluded",
+      "input_data": {
+        "users": [
+          {
+            "user_id": 1,
+            "registration_date": "08/15/2022"
+          },
+          {
+            "user_id": 2,
+            "registration_date": "08/21/2022"
+          }
+        ],
+        "rides": [
+          {
+            "ride_id": 1,
+            "user_id": 1,
+            "ride_date": "08/15/2022"
+          },
+          {
+            "ride_id": 2,
+            "user_id": 1,
+            "ride_date": "08/16/2022"
+          },
+          {
+            "ride_id": 3,
+            "user_id": 2,
+            "ride_date": "09/20/2022"
+          },
+          {
+            "ride_id": 4,
+            "user_id": 2,
+            "ride_date": "09/23/2022"
+          }
+        ]
+      },
+      "expected_output": [
+        {
+          "avg_delay": 1.0
+        }
+      ],
+      "category": "normal"
+    },
+    {
+      "test_case_id": "tc_2_multiple_riders",
+      "description": "Multiple riders with delays of 3 and 7 days (avg = 5.0), 3rd rider signed up earlier",
+      "input_data": {
+        "users": [
+          {
+            "user_id": 10,
+            "registration_date": "2022-06-01"
+          },
+          {
+            "user_id": 20,
+            "registration_date": "2022-06-05"
+          },
+          {
+            "user_id": 30,
+            "registration_date": "2022-06-10"
+          }
+        ],
+        "rides": [
+          {
+            "ride_id": 101,
+            "user_id": 10,
+            "ride_date": "2022-06-01"
+          },
+          {
+            "ride_id": 102,
+            "user_id": 10,
+            "ride_date": "2022-06-04"
+          },
+          {
+            "ride_id": 201,
+            "user_id": 20,
+            "ride_date": "2022-06-05"
+          },
+          {
+            "ride_id": 202,
+            "user_id": 20,
+            "ride_date": "2022-06-12"
+          },
+          {
+            "ride_id": 301,
+            "user_id": 30,
+            "ride_date": "2022-06-15"
+          },
+          {
+            "ride_id": 302,
+            "user_id": 30,
+            "ride_date": "2022-06-18"
+          }
+        ]
+      },
+      "expected_output": [
+        {
+          "avg_delay": 5.0
+        }
+      ],
+      "category": "edge"
+    },
+    {
+      "test_case_id": "tc_3_same_day_delay",
+      "description": "Rider with same-day second ride (delay 0) and rider with 2-day delay (avg = 1.0)",
+      "input_data": {
+        "users": [
+          {
+            "user_id": 1,
+            "registration_date": "2022-01-01"
+          },
+          {
+            "user_id": 2,
+            "registration_date": "2022-02-01"
+          }
+        ],
+        "rides": [
+          {
+            "ride_id": 1,
+            "user_id": 1,
+            "ride_date": "2022-01-01"
+          },
+          {
+            "ride_id": 2,
+            "user_id": 1,
+            "ride_date": "2022-01-01"
+          },
+          {
+            "ride_id": 3,
+            "user_id": 2,
+            "ride_date": "2022-02-01"
+          },
+          {
+            "ride_id": 4,
+            "user_id": 2,
+            "ride_date": "2022-02-03"
+          }
+        ]
+      },
+      "expected_output": [
+        {
+          "avg_delay": 1.0
+        }
+      ],
+      "category": "normal"
+    },
+    {
+      "test_case_id": "tc_4_no_qualifying",
+      "description": "Edge case: No in-the-moment riders with 2nd ride",
+      "input_data": {
+        "users": [
+          {
+            "user_id": 99,
+            "registration_date": "2022-03-01"
+          }
+        ],
+        "rides": [
+          {
+            "ride_id": 500,
+            "user_id": 99,
+            "ride_date": "2022-03-05"
+          }
+        ]
+      },
+      "expected_output": [
+        {
+          "avg_delay": null
+        }
+      ],
+      "category": "edge"
+    }
+  ],
+  "order_sensitive": false,
+  "expected_output": [
+    {
+      "avg_delay": 1.0
+    }
+  ]
+}
