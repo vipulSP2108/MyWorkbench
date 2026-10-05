@@ -28,6 +28,17 @@ const state = {
   homeDiffFilters: new Set(), // Set of "easy" | "medium" | "hard"
   homeCompany: "all",
   homeSearch: "",
+  homeMatchMode: "all", // "all" | "any" (Default: "all")
+
+  // Question Bank Drawer Filter Rules State (Only Rules UI)
+  advFilterOpen: true,
+  advRulesMinimized: localStorage.getItem("sqlmaster_adv_rules_minimized") === "true",
+  advMatchMode: "all", // "all" | "any" (Default: "all")
+  advRules: [
+    { id: 1, field: "status", op: "is", values: [] },
+    { id: 2, field: "difficulty", op: "is", values: [] }
+  ],
+
 
   // Persistent Collections
   solvedSlugs: new Set(JSON.parse(localStorage.getItem("sqlmaster_solved") || "[]")),
@@ -1699,6 +1710,10 @@ async function loadQuestions() {
     });
   }
 
+  loadSavedAdvRules();
+  applyAdvRulesMinimizedState(state.advRulesMinimized);
+  document.querySelectorAll(".adv-match-btn").forEach(b => b.classList.toggle("active", b.dataset.match === state.advMatchMode));
+  renderAdvFilterRules();
   filterAndSortQuestions();
 
   // Determine initial route from URL hash
@@ -1867,6 +1882,93 @@ FROM ${firstTbl};
 }
 
 // ============================================================================
+// Advanced Rule Builder (Status, Difficulty, Topics, Company with is / is not)
+// Matches LeetCode UI from user's attached design
+// ============================================================================
+
+function getQuestionStatusKey(slug) {
+  if (state.starredSlugs.has(slug)) return "starred";
+  if (isQuestionSolved(slug)) return "solved";
+  if (isQuestionAttempted(slug)) return "attempted";
+  return "unsolved";
+}
+
+function matchesAdvRule(q, rule) {
+  if (!rule || !rule.values || rule.values.length === 0) return true;
+
+  const isPositive = (rule.op === "is");
+  const values = rule.values.map(v => String(v).toLowerCase());
+
+  if (rule.field === "status") {
+    const isSolved = isQuestionSolved(q.slug);
+    const isAttempted = isQuestionAttempted(q.slug);
+    const isStarred = state.starredSlugs.has(q.slug);
+    const hasNote = Boolean(state.userNotes[q.slug]);
+    const isUnsolved = !isSolved && !isAttempted;
+
+    const hasMatch = values.some(v => {
+      if (v === "starred") return isStarred;
+      if (v === "notes" || v === "has_notes") return hasNote;
+      if (v === "solved") return isSolved;
+      if (v === "attempted") return isAttempted;
+      if (v === "unsolved" || v === "todo") return isUnsolved;
+      return false;
+    });
+    return isPositive ? hasMatch : !hasMatch;
+  }
+
+  if (rule.field === "starred") {
+    const isStarred = state.starredSlugs.has(q.slug);
+    const hasMatch = values.some(v => {
+      if (v === "starred" || v === "yes" || v === "true") return isStarred;
+      if (v === "unstarred" || v === "no" || v === "false") return !isStarred;
+      return false;
+    });
+    return isPositive ? hasMatch : !hasMatch;
+  }
+
+  if (rule.field === "notes") {
+    const hasNote = Boolean(state.userNotes[q.slug]);
+    const hasMatch = values.some(v => {
+      if (v === "has_notes" || v === "yes" || v === "true") return hasNote;
+      if (v === "no_notes" || v === "no" || v === "false") return !hasNote;
+      return false;
+    });
+    return isPositive ? hasMatch : !hasMatch;
+  }
+
+  if (rule.field === "difficulty") {
+    const qDiff = (q.difficulty || "").toLowerCase();
+    const hasMatch = values.includes(qDiff);
+    return isPositive ? hasMatch : !hasMatch;
+  }
+
+  if (rule.field === "company") {
+    const qComp = (q.company || "General").toLowerCase();
+    const hasMatch = values.some(v => v === qComp);
+    return isPositive ? hasMatch : !hasMatch;
+  }
+
+  if (rule.field === "tags") {
+    const qTags = (q.tags || []).map(t => String(t).toLowerCase());
+    const hasMatch = values.some(v => qTags.includes(v));
+    return isPositive ? hasMatch : !hasMatch;
+  }
+
+  return true;
+}
+
+function evaluateQuestionRules(q, rules, matchMode = "all") {
+  const activeRules = (rules || []).filter(r => r.values && r.values.length > 0);
+  if (activeRules.length === 0) return true;
+
+  if (matchMode === "any") {
+    return activeRules.some(r => matchesAdvRule(q, r));
+  }
+  return activeRules.every(r => matchesAdvRule(q, r));
+}
+
+// ============================================================================
 // Filtering & Sorting (strictly maintains order for navigation)
 // ============================================================================
 function filterAndSortQuestions() {
@@ -1874,15 +1976,20 @@ function filterAndSortQuestions() {
 
   // 1. Filter
   let list = state.questions.filter(q => {
+    // Quick difficulty fallback (if invoked programmatically)
     let matchesDiff = true;
-    if (state.selectedDifficulty === "starred") {
-      matchesDiff = state.starredSlugs.has(q.slug);
-    } else if (state.selectedDifficulty === "attempted") {
-      matchesDiff = isQuestionAttempted(q.slug);
-    } else if (state.selectedDifficulty === "solved") {
-      matchesDiff = isQuestionSolved(q.slug);
-    } else if (state.selectedDifficulty !== "all") {
-      matchesDiff = q.difficulty.toLowerCase() === state.selectedDifficulty;
+    if (state.selectedDifficulty && state.selectedDifficulty !== "all") {
+      if (state.selectedDifficulty === "starred") {
+        matchesDiff = state.starredSlugs.has(q.slug);
+      } else if (state.selectedDifficulty === "attempted") {
+        matchesDiff = isQuestionAttempted(q.slug);
+      } else if (state.selectedDifficulty === "solved") {
+        matchesDiff = isQuestionSolved(q.slug);
+      } else if (state.selectedDifficulty === "unsolved") {
+        matchesDiff = !isQuestionSolved(q.slug) && !isQuestionAttempted(q.slug);
+      } else {
+        matchesDiff = q.difficulty.toLowerCase() === state.selectedDifficulty;
+      }
     }
 
     const matchesCompany = state.selectedCompany === "all" || q.company === state.selectedCompany;
@@ -1892,12 +1999,18 @@ function filterAndSortQuestions() {
       (q.company && q.company.toLowerCase().includes(query)) ||
       (q.tags && q.tags.some(t => t.toLowerCase().includes(query)));
 
-    return matchesDiff && matchesCompany && matchesSearch;
+    // Rules Evaluation (Match ALL or Match ANY)
+    const matchesRules = evaluateQuestionRules(q, state.advRules, state.advMatchMode);
+
+    return matchesDiff && matchesCompany && matchesSearch && matchesRules;
   });
 
   // 2. Sort
   const sortKey = state.selectedSort;
   list.sort((a, b) => {
+    if (sortKey === "num-desc") {
+      return (state.questions.indexOf(b) - state.questions.indexOf(a));
+    }
     if (sortKey === "diff-asc") {
       const dA = DIFFICULTY_ORDER[a.difficulty.toLowerCase()] || 2;
       const dB = DIFFICULTY_ORDER[b.difficulty.toLowerCase()] || 2;
@@ -1911,10 +2024,18 @@ function filterAndSortQuestions() {
     if (sortKey === "title-asc") {
       return a.title.localeCompare(b.title);
     }
+    if (sortKey === "title-desc") {
+      return b.title.localeCompare(a.title);
+    }
     if (sortKey === "company-asc") {
       const cA = a.company || "ZZZ";
       const cB = b.company || "ZZZ";
       return cA.localeCompare(cB) || a.title.localeCompare(b.title);
+    }
+    if (sortKey === "tests-desc") {
+      const tA = (a.test_case_count !== undefined) ? a.test_case_count : (a.test_cases ? a.test_cases.length : 0);
+      const tB = (b.test_case_count !== undefined) ? b.test_case_count : (b.test_cases ? b.test_cases.length : 0);
+      return tB - tA || a.title.localeCompare(b.title);
     }
     if (sortKey === "status") {
       const getStatusRank = (slug) => {
@@ -1924,19 +2045,371 @@ function filterAndSortQuestions() {
       };
       return getStatusRank(a.slug) - getStatusRank(b.slug) || a.title.localeCompare(b.title);
     }
+    if (sortKey === "unsolved-first") {
+      const getUnsolvedRank = (slug) => {
+        if (!isQuestionSolved(slug) && !isQuestionAttempted(slug)) return 0;
+        if (isQuestionAttempted(slug)) return 1;
+        return 2;
+      };
+      return getUnsolvedRank(a.slug) - getUnsolvedRank(b.slug) || a.title.localeCompare(b.title);
+    }
     if (sortKey === "starred") {
       const sA = state.starredSlugs.has(a.slug) ? 0 : 1;
       const sB = state.starredSlugs.has(b.slug) ? 0 : 1;
       return sA - sB || a.title.localeCompare(b.title);
     }
-    // Default: Original order in question bank
+    // Default: Original order in question bank (1–100)
     return (state.questions.indexOf(a) - state.questions.indexOf(b));
   });
 
   state.filteredQuestions = list;
   const countBadge = el("question-count-badge");
   if (countBadge) countBadge.textContent = `${list.length}/${state.questions.length}`;
+
+  // Update dynamic chips count and scope breakdown stats
+  updateDrawerStats(list);
+
+  // Automatically persist rule filter state to localStorage
+  saveAdvRulesState();
+
   renderQuestionList();
+}
+
+function updateDrawerStats(filteredList) {
+  const list = filteredList || state.filteredQuestions || [];
+  const totalInScope = list.length;
+
+  let solvedInScope = 0;
+  let attemptedInScope = 0;
+  let unsolvedInScope = 0;
+
+  list.forEach(q => {
+    if (isQuestionSolved(q.slug)) {
+      solvedInScope++;
+    } else if (isQuestionAttempted(q.slug)) {
+      attemptedInScope++;
+    } else {
+      unsolvedInScope++;
+    }
+  });
+
+  // Update numbers
+  const solvedCountEl = el("dstat-solved-count");
+  const attemptedCountEl = el("dstat-attempted-count");
+  const unsolvedCountEl = el("dstat-unsolved-count");
+
+  if (solvedCountEl) solvedCountEl.textContent = solvedInScope;
+  if (attemptedCountEl) attemptedCountEl.textContent = attemptedInScope;
+  if (unsolvedCountEl) unsolvedCountEl.textContent = unsolvedInScope;
+
+  // Update progress track
+  const solvedPct = totalInScope > 0 ? (solvedInScope / totalInScope) * 100 : 0;
+  const attemptedPct = totalInScope > 0 ? (attemptedInScope / totalInScope) * 100 : 0;
+
+  const progSolved = el("dstat-progress-solved");
+  const progAttempted = el("dstat-progress-attempted");
+
+  if (progSolved) progSolved.style.width = `${solvedPct}%`;
+  if (progAttempted) progAttempted.style.width = `${attemptedPct}%`;
+}
+
+function saveAdvRulesState() {
+  try {
+    localStorage.setItem("sqlmaster_adv_rules", JSON.stringify(state.advRules));
+    localStorage.setItem("sqlmaster_adv_match_mode", state.advMatchMode);
+  } catch (e) {
+    console.warn("Failed to persist adv rules:", e);
+  }
+}
+
+function loadSavedAdvRules() {
+  try {
+    const savedRules = localStorage.getItem("sqlmaster_adv_rules");
+    if (savedRules) {
+      const parsed = JSON.parse(savedRules);
+      if (Array.isArray(parsed)) {
+        state.advRules = parsed;
+      }
+    }
+    const savedMatch = localStorage.getItem("sqlmaster_adv_match_mode");
+    if (savedMatch === "all" || savedMatch === "any") {
+      state.advMatchMode = savedMatch;
+    }
+  } catch (e) {
+    console.warn("Failed to restore adv rules from storage:", e);
+  }
+}
+
+function applyAdvRulesMinimizedState(minimized) {
+  state.advRulesMinimized = minimized;
+  localStorage.setItem("sqlmaster_adv_rules_minimized", String(minimized));
+  const panel = el("drawer-adv-filter-panel");
+  const icon = el("icon-minimize-adv-rules");
+  const btn = el("btn-minimize-adv-rules");
+
+  if (panel) panel.classList.toggle("minimized", minimized);
+  if (icon) {
+    // When minimized, show chevron-down to expand; when expanded, show chevron-up to collapse
+    icon.innerHTML = minimized
+      ? `<polyline points="6 9 12 15 18 9"/>`
+      : `<polyline points="18 15 12 9 6 15"/>`;
+  }
+  if (btn) {
+    btn.title = minimized ? "Expand filter rules panel" : "Minimize filter rules panel";
+  }
+}
+
+function toggleAdvRulesMinimized() {
+  applyAdvRulesMinimizedState(!state.advRulesMinimized);
+}
+
+// ----------------------------------------------------------------------------
+// Advanced Rules UI Builder (Field, Operator, Multi-Values Popover, Remove)
+// ----------------------------------------------------------------------------
+function getFieldOptions(field) {
+  if (field === "status") {
+    return [
+      { val: "solved", label: "Solved", color: "#10b981" },
+      { val: "attempted", label: "Attempted", color: "#f59e0b" },
+      { val: "unsolved", label: "Todo / Unsolved", color: "#64748b" },
+      { val: "starred", label: "★ Starred", color: "#eab308" },
+      { val: "notes", label: "✎ Has Notes", color: "#38bdf8" }
+    ];
+  }
+  if (field === "starred") {
+    return [
+      { val: "starred", label: "★ Starred", color: "#eab308" },
+      { val: "unstarred", label: "☆ Without Stars", color: "#64748b" }
+    ];
+  }
+  if (field === "notes") {
+    return [
+      { val: "has_notes", label: "✎ With Notes", color: "#38bdf8" },
+      { val: "no_notes", label: "Without Notes", color: "#64748b" }
+    ];
+  }
+  if (field === "difficulty") {
+    return [
+      { val: "easy", label: "Easy", color: "#059669" },
+      { val: "medium", label: "Med.", color: "#d97706" },
+      { val: "hard", label: "Hard", color: "#e11d48" }
+    ];
+  }
+  if (field === "company") {
+    const comps = Array.from(new Set(state.questions.map(q => q.company).filter(Boolean))).sort();
+    return comps.map(c => ({ val: c.toLowerCase(), label: c }));
+  }
+  if (field === "tags") {
+    const allTags = new Set();
+    state.questions.forEach(q => (q.tags || []).forEach(t => allTags.add(t)));
+    return Array.from(allTags).sort().map(t => ({ val: t.toLowerCase(), label: t }));
+  }
+  return [];
+}
+
+function renderAdvFilterRules() {
+  const container = el("adv-rules-list");
+  if (!container) return;
+
+  container.innerHTML = "";
+
+  if (state.advRules.length === 0) {
+    container.innerHTML = `<div style="font-size: 0.74rem; color: var(--text-dark-muted); text-align: center; padding: 10px 4px;">No active rules. Click "Add Filter Rule" to construct custom query conditions.</div>`;
+    return;
+  }
+
+  state.advRules.forEach((rule, idx) => {
+    const row = document.createElement("div");
+    row.className = "adv-rule-row";
+    row.dataset.ruleId = rule.id;
+
+    // Field icon
+    const fieldIcon = rule.field === "status"
+      ? `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>`
+      : rule.field === "starred"
+      ? `<svg width="12" height="12" viewBox="0 0 24 24" fill="#eab308" stroke="#eab308" stroke-width="1"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>`
+      : rule.field === "notes"
+      ? `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>`
+      : rule.field === "difficulty"
+      ? `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>`
+      : rule.field === "tags"
+      ? `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>`
+      : `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect width="18" height="18" x="3" y="3" rx="2"/><path d="M9 3v18"/></svg>`;
+
+    // Format display for selected values (e.g., "Easy" or "Todo +1")
+    let valuesText = `<span style="color: var(--text-dark-muted);">Select values...</span>`;
+    if (rule.field === "starred" && (!rule.values || rule.values.length === 0)) {
+      rule.values = ["starred"];
+    } else if (rule.field === "notes" && (!rule.values || rule.values.length === 0)) {
+      rule.values = ["has_notes"];
+    }
+
+    if (rule.values && rule.values.length > 0) {
+      const opts = getFieldOptions(rule.field);
+      const firstOpt = opts.find(o => o.val === rule.values[0]) || { label: rule.values[0] };
+      const extraCount = rule.values.length - 1;
+      valuesText = `
+        <span class="adv-val-chip-tag">${escapeHTML(firstOpt.label)}</span>
+        ${extraCount > 0 ? `<span class="adv-val-count-badge">+${extraCount}</span>` : ""}
+      `;
+    }
+
+    const isSimpleBinary = (rule.field === "starred" || rule.field === "notes");
+
+    row.innerHTML = `
+      <div style="display:flex; align-items:center; gap:4px;">
+        <span style="color: var(--text-dark-muted); display:inline-flex;">${fieldIcon}</span>
+        <select class="adv-rule-field-select" data-rule-idx="${idx}" title="Select filter attribute">
+          <option value="status" ${rule.field === "status" ? "selected" : ""}>Status</option>
+          <option value="starred" ${rule.field === "starred" ? "selected" : ""}>Starred</option>
+          <option value="notes" ${rule.field === "notes" ? "selected" : ""}>Notes</option>
+          <option value="difficulty" ${rule.field === "difficulty" ? "selected" : ""}>Difficulty</option>
+          <option value="company" ${rule.field === "company" ? "selected" : ""}>Company</option>
+          <option value="tags" ${rule.field === "tags" ? "selected" : ""}>Topics / Tags</option>
+        </select>
+      </div>
+
+      ${isSimpleBinary ? "" : `
+      <select class="adv-rule-op-select" data-rule-idx="${idx}" title="Condition">
+        <option value="is" ${rule.op === "is" ? "selected" : ""}>is</option>
+        <option value="is_not" ${rule.op === "is_not" ? "selected" : ""}>is not</option>
+      </select>
+      `}
+
+      <div class="adv-rule-val-wrap">
+        <button type="button" class="adv-rule-val-pill-btn" data-rule-idx="${idx}" title="Choose values">
+          <span style="display:flex; align-items:center; gap:4px; overflow:hidden;">${valuesText}</span>
+          <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
+        </button>
+      </div>
+
+      <button type="button" class="adv-rule-remove-btn" data-rule-idx="${idx}" title="Remove rule">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    `;
+
+    container.appendChild(row);
+  });
+
+  // Attach row event listeners
+  container.querySelectorAll(".adv-rule-field-select").forEach(sel => {
+    sel.addEventListener("change", (e) => {
+      const idx = parseInt(e.target.dataset.ruleIdx, 10);
+      const newField = e.target.value;
+      state.advRules[idx].field = newField;
+      if (newField === "starred") {
+        state.advRules[idx].values = ["starred"];
+      } else if (newField === "notes") {
+        state.advRules[idx].values = ["has_notes"];
+      } else {
+        state.advRules[idx].values = []; // reset values on field change
+      }
+      renderAdvFilterRules();
+      filterAndSortQuestions();
+    });
+  });
+
+  container.querySelectorAll(".adv-rule-op-select").forEach(sel => {
+    sel.addEventListener("change", (e) => {
+      const idx = parseInt(e.target.dataset.ruleIdx, 10);
+      state.advRules[idx].op = e.target.value;
+      filterAndSortQuestions();
+    });
+  });
+
+  container.querySelectorAll(".adv-rule-remove-btn").forEach(btn => {
+    btn.addEventListener("click", () => {
+      const idx = parseInt(btn.dataset.ruleIdx, 10);
+      state.advRules.splice(idx, 1);
+      renderAdvFilterRules();
+      filterAndSortQuestions();
+    });
+  });
+
+  container.querySelectorAll(".adv-rule-val-pill-btn").forEach(btn => {
+    btn.addEventListener("click", (e) => {
+      e.stopPropagation();
+      const idx = parseInt(btn.dataset.ruleIdx, 10);
+      openRuleValuesPopover(btn, state.advRules[idx]);
+    });
+  });
+}
+
+function openRuleValuesPopover(anchorEl, rule) {
+  // Close any existing floating popover
+  const existing = document.getElementById("active-rule-values-popover");
+  if (existing) existing.remove();
+
+  const options = getFieldOptions(rule.field);
+  const popover = document.createElement("div");
+  popover.id = "active-rule-values-popover";
+  popover.className = "filter-popover-menu";
+  popover.style.position = "absolute";
+  popover.style.zIndex = "2000";
+  popover.style.maxHeight = "240px";
+  popover.style.overflowY = "auto";
+  popover.style.width = "200px";
+
+  // Position relative to anchorEl
+  const rect = anchorEl.getBoundingClientRect();
+  popover.style.top = `${rect.bottom + window.scrollY + 4}px`;
+  popover.style.left = `${Math.min(rect.left + window.scrollX, window.innerWidth - 210)}px`;
+
+  popover.innerHTML = `
+    <div style="padding: 4px 10px 6px; font-size: 0.70rem; font-weight: 700; color: var(--text-dark-muted); text-transform: uppercase; border-bottom: 1px solid var(--border-light);">
+      Select ${escapeHTML(rule.field)}
+    </div>
+    <div class="popover-opts-scroll">
+      ${options.map(opt => {
+        const isChecked = rule.values.includes(opt.val);
+        return `
+          <label class="filter-menu-opt" style="padding: 6px 12px; font-size: 0.78rem;">
+            <input type="checkbox" class="rule-val-cb" value="${escapeHTML(opt.val)}" ${isChecked ? "checked" : ""} />
+            <span style="${opt.color ? `color: ${opt.color}; font-weight: 600;` : ""}">${escapeHTML(opt.label)}</span>
+            ${isChecked ? `<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" style="margin-left:auto;"><polyline points="20 6 9 17 4 12"/></svg>` : ""}
+          </label>
+        `;
+      }).join("")}
+    </div>
+  `;
+
+  document.body.appendChild(popover);
+
+  const isSimpleBinary = (rule.field === "starred" || rule.field === "notes");
+
+  popover.querySelectorAll(".rule-val-cb").forEach(cb => {
+    cb.addEventListener("change", () => {
+      const val = cb.value;
+      if (isSimpleBinary) {
+        if (cb.checked) {
+          rule.values = [val];
+        } else {
+          rule.values = [];
+        }
+        renderAdvFilterRules();
+        filterAndSortQuestions();
+        popover.remove();
+        document.removeEventListener("click", onDocClick);
+        return;
+      }
+
+      if (cb.checked) {
+        if (!rule.values.includes(val)) rule.values.push(val);
+      } else {
+        rule.values = rule.values.filter(v => v !== val);
+      }
+      renderAdvFilterRules();
+      filterAndSortQuestions();
+    });
+  });
+
+  const onDocClick = (e) => {
+    if (!popover.contains(e.target) && !anchorEl.contains(e.target)) {
+      popover.remove();
+      document.removeEventListener("click", onDocClick);
+    }
+  };
+  setTimeout(() => document.addEventListener("click", onDocClick), 50);
 }
 
 function renderQuestionList() {
@@ -3078,6 +3551,7 @@ function updateProgressUI() {
   if (textEl) {
     textEl.textContent = `${solvedCount} / ${total}`;
   }
+  updateDrawerStats();
   renderHomeDashboard();
 }
 
@@ -3565,28 +4039,49 @@ function renderHomeProblemsTable() {
     if (state.homeSegment === "starred" && !state.starredSlugs.has(q.slug)) return false;
     if (state.homeSegment === "notes" && !state.userNotes[q.slug]) return false;
 
-    // 2. Status Multi-select Filter
-    if (state.homeStatusFilters.size > 0) {
-      const isSolved = isQuestionSolved(q.slug);
-      const isAttempted = isQuestionAttempted(q.slug);
-      let statusKey = isSolved ? "solved" : isAttempted ? "attempted" : "unsolved";
-      const matches = state.homeStatusFilters.has(statusKey) || 
-                      (statusKey === "attempted" && state.homeStatusFilters.has("in-progress"));
-      if (!matches) return false;
+    // Evaluate Status, Difficulty, Company with Match Mode (ALL or ANY)
+    const hasStatusFilter = state.homeStatusFilters.size > 0;
+    const hasDiffFilter = state.homeDiffFilters.size > 0;
+    const hasCompanyFilter = state.homeCompany && state.homeCompany !== "all";
+
+    if (hasStatusFilter || hasDiffFilter || hasCompanyFilter) {
+      // Status check
+      let statusMatches = true;
+      if (hasStatusFilter) {
+        const isSolved = isQuestionSolved(q.slug);
+        const isAttempted = isQuestionAttempted(q.slug);
+        let statusKey = isSolved ? "solved" : isAttempted ? "attempted" : "unsolved";
+        statusMatches = state.homeStatusFilters.has(statusKey) || 
+                        (statusKey === "attempted" && state.homeStatusFilters.has("in-progress"));
+      }
+
+      // Difficulty check
+      let diffMatches = true;
+      if (hasDiffFilter) {
+        diffMatches = state.homeDiffFilters.has(q.difficulty.toLowerCase());
+      }
+
+      // Company check
+      let compMatches = true;
+      if (hasCompanyFilter) {
+        compMatches = (q.company === state.homeCompany);
+      }
+
+      if (state.homeMatchMode === "any") {
+        const conditions = [];
+        if (hasStatusFilter) conditions.push(statusMatches);
+        if (hasDiffFilter) conditions.push(diffMatches);
+        if (hasCompanyFilter) conditions.push(compMatches);
+        if (!conditions.some(Boolean)) return false;
+      } else {
+        // Default "all"
+        if (hasStatusFilter && !statusMatches) return false;
+        if (hasDiffFilter && !diffMatches) return false;
+        if (hasCompanyFilter && !compMatches) return false;
+      }
     }
 
-    // 3. Difficulty Multi-select Filter
-    if (state.homeDiffFilters.size > 0) {
-      const diff = q.difficulty.toLowerCase();
-      if (!state.homeDiffFilters.has(diff)) return false;
-    }
-
-    // 4. Company Filter
-    if (state.homeCompany && state.homeCompany !== "all") {
-      if (q.company !== state.homeCompany) return false;
-    }
-
-    // 5. Search Filter
+    // Search Filter
     if (query) {
       const titleMatch = q.title.toLowerCase().includes(query);
       const companyMatch = q.company && q.company.toLowerCase().includes(query);
@@ -4360,14 +4855,55 @@ function setupEventListeners() {
     filterAndSortQuestions();
   });
 
-  // Drawer Difficulty filter chips
-  document.querySelectorAll(".diff-chip").forEach(chip => {
-    chip.addEventListener("click", () => {
-      document.querySelectorAll(".diff-chip").forEach(c => c.classList.remove("active"));
-      chip.classList.add("active");
-      state.selectedDifficulty = chip.dataset.diff;
+
+
+  // Drawer Advanced Filter Match Mode (ALL / ANY)
+  document.querySelectorAll(".adv-match-btn").forEach(btn => {
+    btn.addEventListener("click", () => {
+      document.querySelectorAll(".adv-match-btn").forEach(b => b.classList.remove("active"));
+      btn.classList.add("active");
+      state.advMatchMode = btn.dataset.match || "all";
       filterAndSortQuestions();
     });
+  });
+
+  // Drawer Add Filter Rule Button
+  el("btn-add-filter-rule")?.addEventListener("click", () => {
+    // Pick next unselected field or default to topics/tags
+    const existingFields = state.advRules.map(r => r.field);
+    const candidateFields = ["status", "starred", "notes", "difficulty", "company", "tags"];
+    const nextField = candidateFields.find(f => !existingFields.includes(f)) || "tags";
+
+    let initialValues = [];
+    if (nextField === "starred") initialValues = ["starred"];
+    if (nextField === "notes") initialValues = ["has_notes"];
+
+    state.advRules.push({
+      id: Date.now() + Math.random(),
+      field: nextField,
+      op: "is",
+      values: initialValues
+    });
+    renderAdvFilterRules();
+    filterAndSortQuestions();
+  });
+
+  // Drawer Minimize / Expand Filter Rules Panel Toggle
+  el("btn-minimize-adv-rules")?.addEventListener("click", () => {
+    toggleAdvRulesMinimized();
+  });
+
+  // Drawer Reset Filter Rules Button (Restores default starter rules)
+  el("btn-reset-adv-filter")?.addEventListener("click", () => {
+    state.advRules = [
+      { id: 1, field: "status", op: "is", values: [] },
+      { id: 2, field: "difficulty", op: "is", values: [] }
+    ];
+    state.advMatchMode = "all";
+    document.querySelectorAll(".adv-match-btn").forEach(b => b.classList.toggle("active", b.dataset.match === "all"));
+    renderAdvFilterRules();
+    filterAndSortQuestions();
+    showToast("Filter rules reset to default");
   });
 
   // Home Practice Jump Buttons ("Practice Easy →", "Practice Medium →", "Practice Hard →")
@@ -4405,6 +4941,16 @@ function setupEventListeners() {
       btn.classList.add("active");
       state.homeSegment = btn.dataset.segment;
       renderActiveFilterTags();
+      renderHomeProblemsTable();
+    });
+  });
+
+  // Home Sheet Match ALL / ANY Mode Toggle
+  document.querySelectorAll(".home-match-btn").forEach(btn => {
+    btn.addEventListener("click", () => {
+      document.querySelectorAll(".home-match-btn").forEach(b => b.classList.remove("active"));
+      btn.classList.add("active");
+      state.homeMatchMode = btn.dataset.match || "all";
       renderHomeProblemsTable();
     });
   });
@@ -4499,6 +5045,9 @@ function setupEventListeners() {
     if (searchInput) searchInput.value = "";
     const radioAll = document.querySelector('input[name="company-filter"][value="all"]');
     if (radioAll) radioAll.checked = true;
+
+    state.homeMatchMode = "all";
+    document.querySelectorAll(".home-match-btn").forEach(b => b.classList.toggle("active", b.dataset.match === "all"));
 
     renderActiveFilterTags();
     renderHomeProblemsTable();

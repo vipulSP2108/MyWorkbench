@@ -141,30 +141,78 @@
       </div>
 
       <div class="drawer-filter-row">
-        <div class="diff-chips">
-          <button class="diff-chip active" data-diff="all">All</button>
-          <button class="diff-chip easy" data-diff="easy">Easy (34)</button>
-          <button class="diff-chip medium" data-diff="medium">Med (39)</button>
-          <button class="diff-chip hard" data-diff="hard">Hard (27)</button>
-          <button class="diff-chip attempted" data-diff="attempted" title="Show Attempted Only">Attempted</button>
-          <button class="diff-chip starred" data-diff="starred" title="Show Starred Only">
-            <svg width="13" height="13" viewBox="0 0 24 24" fill="#eab308" stroke="#eab308" stroke-width="1"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
-          </button>
-        </div>
-
+        <!-- Controls: Multi-Sort Dropdown -->
         <div class="drawer-sort-row">
           <select id="sort-select" class="control-select" title="Sort question list">
             <option value="default">Sort: # Default (1–100)</option>
+            <option value="num-desc">Sort: # Reverse (100–1)</option>
             <option value="diff-asc">Sort: Difficulty (Easy → Hard)</option>
             <option value="diff-desc">Sort: Difficulty (Hard → Easy)</option>
             <option value="title-asc">Sort: Title (A → Z)</option>
+            <option value="title-desc">Sort: Title (Z → A)</option>
             <option value="company-asc">Sort: Company (A → Z)</option>
-            <option value="status">Sort: Status (Solved & Attempted)</option>
+            <option value="tests-desc">Sort: Most Test Cases</option>
+            <option value="status">Sort: Status (Solved → Attempted → Unsolved)</option>
+            <option value="unsolved-first">Sort: Unsolved First</option>
             <option value="starred">Sort: Starred First</option>
           </select>
-          <select id="company-select" class="control-select" title="Filter by company">
-            <option value="all">All Companies</option>
-          </select>
+        </div>
+
+        <!-- Filter Rules Builder Panel (Primary Filtering System) -->
+        <div id="drawer-adv-filter-panel" class="adv-filter-panel">
+          <div class="adv-filter-head">
+            <div class="adv-filter-match-wrap">
+              <span class="adv-filter-label">Match</span>
+              <div class="adv-match-segmented">
+                <button type="button" class="adv-match-btn active" data-match="all">ALL</button>
+                <button type="button" class="adv-match-btn" data-match="any">ANY</button>
+              </div>
+              <span class="adv-filter-sublabel">of the rules:</span>
+            </div>
+            <div class="adv-filter-head-actions">
+              <button type="button" id="btn-minimize-adv-rules" class="btn-adv-minimize" title="Minimize / Expand filter rules">
+                <svg id="icon-minimize-adv-rules" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="18 15 12 9 6 15"/></svg>
+              </button>
+            </div>
+          </div>
+
+          <div id="adv-filter-body" class="adv-filter-body">
+            <div id="adv-rules-list" class="adv-rules-list">
+              <!-- Dynamically populated filter rule rows (Status, Difficulty, Topics, Company, Starred, Notes) -->
+            </div>
+
+            <div class="adv-filter-actions-row">
+              <button type="button" id="btn-add-filter-rule" class="btn-adv-add-rule" title="Add another filter rule">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                <span>Add Filter Rule</span>
+              </button>
+              <button type="button" id="btn-reset-adv-filter" class="btn-adv-reset" title="Reset all custom rules">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
+                <span>Reset</span>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Live Scope Breakdown: Solved, Attempted, Unsolved stats in current filter -->
+        <div class="drawer-stats-summary" id="drawer-stats-summary">
+          <div class="drawer-stats-items">
+            <span class="dstat-pill solved" id="dstat-solved" title="Solved in this view">
+              <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+              <strong id="dstat-solved-count">0</strong> Solved
+            </span>
+            <span class="dstat-pill attempted" id="dstat-attempted" title="Attempted in this view">
+              <span class="dstat-dot"></span>
+              <strong id="dstat-attempted-count">0</strong> Attempted
+            </span>
+            <span class="dstat-pill unsolved" id="dstat-unsolved" title="Remaining to solve in this view">
+              <strong id="dstat-unsolved-count">0</strong> Unsolved
+            </span>
+          </div>
+          <div class="drawer-stats-progress-track" title="Solved progress in selected view">
+            <div class="drawer-stats-progress-fill solved" id="dstat-progress-solved" style="width: 0%;"></div>
+            <div class="drawer-stats-progress-fill attempted" id="dstat-progress-attempted" style="width: 0%;"></div>
+          </div>
         </div>
       </div>
     </div>
@@ -757,6 +805,15 @@
                 <!-- Dropdown Filters Group (Screenshot 3 & 4) -->
                 <div class="filter-dropdowns-group">
                   <span class="filter-group-label">Filters:</span>
+
+                  <!-- Match ALL / ANY Toggle for Home -->
+                  <div class="home-match-wrap" title="Match ALL selected filters or ANY selected filter">
+                    <span class="home-match-label">Match:</span>
+                    <div class="home-match-segmented">
+                      <button type="button" class="home-match-btn active" data-match="all">ALL</button>
+                      <button type="button" class="home-match-btn" data-match="any">ANY</button>
+                    </div>
+                  </div>
 
                   <!-- Status Dropdown -->
                   <div class="filter-dropdown-wrap" id="wrap-filter-status">
