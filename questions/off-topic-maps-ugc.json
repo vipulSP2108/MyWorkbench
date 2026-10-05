@@ -5,7 +5,7 @@
   "difficulty": "Medium",
   "company": "Google",
   "premium": true,
-  "question": "As a Data Analyst on the Google Maps User Generated Content team, you and your Product Manager are investigating user-generated content (UGC): photos and reviews that independent users upload to Google Maps.\n\nWrite a query to determine which type of place (place_category) attracts the most UGC tagged as 'off-topic'. In the case of a tie, show the output in ascending order of place_category.\n\nAssumptions:\n- Some places may not have any tags.\n- Each UGC upload with the “off-topic” tag will be counted separately.",
+  "question": "As a Data Analyst on the Google Maps User Generated Content team, you and your Product Manager are investigating user-generated content (UGC): photos and reviews that independent users upload to Google Maps.\n\nWrite a query to determine which type of place (place_category) attracts the most UGC tagged as 'off-topic'. In the case of a tie, show the output in ascending order of place_category.\n\nAssumptions:\n- Some places may not have any tags.\n- Each UGC upload with the \u201coff-topic\u201d tag will be counted separately.",
   "notes": [],
   "tables": [
     {

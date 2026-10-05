@@ -5,7 +5,7 @@
   "difficulty": "Medium",
   "company": "Google",
   "premium": true,
-  "question": "In consulting, being “on the bench” means you have a gap between two client engagements.\n\nGoogle wants to know how many days of bench time each consultant had in 2021. Assume that each consultant is only staffed to one consulting engagement at a time.\n\nWrite a query to pull each employee ID and their total bench time in days during 2021.\n\nAssumptions:\n- All listed employees are current employees who were hired before 2021.\n- The engagements in the consulting_engagements table are complete for the year 2022.",
+  "question": "In consulting, being \u201con the bench\u201d means you have a gap between two client engagements.\n\nGoogle wants to know how many days of bench time each consultant had in 2021. Assume that each consultant is only staffed to one consulting engagement at a time.\n\nWrite a query to pull each employee ID and their total bench time in days during 2021.\n\nAssumptions:\n- All listed employees are current employees who were hired before 2021.\n- The engagements in the consulting_engagements table are complete for the year 2022.",
   "notes": [],
   "tables": [
     {

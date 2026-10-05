@@ -5,7 +5,7 @@
   "difficulty": "Medium",
   "company": "Airbnb",
   "premium": true,
-  "question": "The Airbnb Booking Recommendations team is trying to understand the “substitutability” of two rentals and whether one rental is a good substitute for another. They want you to write a query to determine if two Airbnb rentals have the same exact amenities offered.\n\nOutput the count of matching rental ids.\n\nAssumptions:\n- If property 1 has kitchen and pool, and property 2 has kitchen and pool too, then it is a good substitute and represents a count of 1 matching rental.\n- If property 3 has kitchen, pool and fireplace, and property 4 only has pool and fireplace, then it is not a good substitute.",
+  "question": "The Airbnb Booking Recommendations team is trying to understand the \u201csubstitutability\u201d of two rentals and whether one rental is a good substitute for another. They want you to write a query to determine if two Airbnb rentals have the same exact amenities offered.\n\nOutput the count of matching rental ids.\n\nAssumptions:\n- If property 1 has kitchen and pool, and property 2 has kitchen and pool too, then it is a good substitute and represents a count of 1 matching rental.\n- If property 3 has kitchen, pool and fireplace, and property 4 only has pool and fireplace, then it is not a good substitute.",
   "notes": [
     "A pair of rentals is a good substitute if and only if both rentals offer the exact same set of amenities.",
     "Count each matching pair once (i.e. where rental_id_1 < rental_id_2)."

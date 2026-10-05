@@ -84,7 +84,7 @@
       "product_num": 1
     }
   ],
-  "reference_sql": "SELECT user_id, COUNT(product_id) AS num_products\nFROM user_transactions\nGROUP BY user_id\nORDER BY COUNT(product_id) DESC, user_id\nLIMIT 3;",
+  "reference_sql": "SELECT user_id, COUNT(product_id) AS num_products\nFROM user_transactions\nGROUP BY user_id\nHAVING SUM(spend) >= 1000\nORDER BY num_products DESC, SUM(spend)\nLIMIT 3;",
   "tags": [
     "aggregation",
     "easy",
@@ -335,8 +335,8 @@
           "num_products": 2
         },
         {
-          "user_id": 5128,
-          "num_products": 2
+          "user_id": 102,
+          "num_products": 1
         }
       ],
       "category": "edge"

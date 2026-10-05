@@ -5,7 +5,7 @@
   "difficulty": "Medium",
   "company": "Walmart",
   "premium": false,
-  "question": "Assume you're given a table on Walmart user transactions. Based on their most recent transaction date, write a query that retrieve the users along with the number of products they bought.\n\nOutput the user's most recent transaction date, user ID, and the number of products, sorted in chronological order by the transaction date.",
+  "question": "Assume you're given a table on Walmart user transactions. Based on their most recent transaction date, write a query that retrieve the users along with the number of products they bought.\n\nOutput the user's most recent transaction date, user ID, and the number of products, sorted in chronological order by the transaction date. If the transaction date is the same, order by the user_id.",
   "notes": [
     "The dataset you are querying against may have different input & output - this is just an example!"
   ],
