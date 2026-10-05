@@ -1,4 +1,4 @@
-"""MySQL 8.0 Reference SQL queries for all 100 practice questions.
+"""MySQL 8.0 Reference SQL queries for all practice questions.
 
 Every query strictly adheres to MySQL 8.0 syntax rules:
 - No PostgreSQL cast operators (::type)
@@ -125,7 +125,7 @@ WHERE e.salary > m.salary
 ORDER BY e.employee_id;
 """,
 
-    # 12. Final Account Balance (Paypal, Easy)
+    # 12. Final Account Balance (PayPal, Easy)
     "final-account-balance": """
 SELECT 
   account_id,
@@ -180,7 +180,7 @@ GROUP BY unique_queries
 ORDER BY unique_queries;
 """,
 
-    # 17. Cards Issued Difference (JPMorgan Chase, Easy)
+    # 17. Cards Issued Difference (JPMorgan, Easy)
     "cards-issued-difference": """
 SELECT 
   card_name,
@@ -271,7 +271,7 @@ HAVING MAX(years_of_experience) >= 8
 ORDER BY employee_id;
 """,
 
-    # 26. LinkedIn Power Creators (Part 1) (LinkedIn, Medium)
+    # 26. LinkedIn Power Creators (Part 1) (LinkedIn, Easy)
     "linkedin-power-creators": """
 SELECT p.profile_id
 FROM personal_profiles p
@@ -280,16 +280,17 @@ WHERE p.followers > c.followers
 ORDER BY p.profile_id;
 """,
 
-    # 27. Highest Number of Products (eBay, Medium)
+    # 27. Highest Number of Products (eBay, Easy)
     "sql-highest-products": """
 SELECT user_id, COUNT(product_id) AS num_products
 FROM user_transactions
 GROUP BY user_id
-ORDER BY COUNT(product_id) DESC, user_id
+HAVING SUM(spend) >= 1000
+ORDER BY num_products DESC, SUM(spend)
 LIMIT 3;
 """,
 
-    # 28. Spare Server Capacity (Microsoft, Medium)
+    # 28. Spare Server Capacity (Microsoft, Easy)
     "sql-spare-server-capacity": """
 SELECT d.datacenter_id,
        d.monthly_capacity - IFNULL(SUM(f.monthly_demand), 0) AS spare_capacity
@@ -299,7 +300,7 @@ GROUP BY d.datacenter_id, d.monthly_capacity
 ORDER BY d.datacenter_id;
 """,
 
-    # 29. Top Rated Businesses (Yelp, Medium)
+    # 29. Top Rated Businesses (Yelp, Easy)
     "sql-top-businesses": """
 WITH biz AS (
   SELECT business_id, MIN(review_stars) AS worst_review
@@ -312,7 +313,7 @@ SELECT
 FROM biz;
 """,
 
-    # 30. Ad Campaign ROAS (Google, Medium)
+    # 30. Ad Campaign ROAS (Google, Easy)
     "ad-campaign-roas": """
 SELECT advertiser_id,
        ROUND(SUM(revenue) / SUM(spend), 2) AS roas
@@ -321,7 +322,7 @@ GROUP BY advertiser_id
 ORDER BY advertiser_id;
 """,
 
-    # 31. Product Line Revenue (NVIDIA, Medium)
+    # 31. Product Line Revenue (NVIDIA, Easy)
     "revenue-by-product-line": """
 SELECT p.product_line,
        SUM(t.amount) AS total_revenue
@@ -331,7 +332,7 @@ GROUP BY p.product_line
 ORDER BY total_revenue DESC, p.product_line ASC;
 """,
 
-    # 32. Trade In Payouts (Apple, Medium)
+    # 32. Trade In Payouts (Apple, Easy)
     "trade-in-payouts": """
 SELECT t.store_id,
        SUM(p.payout_amount) AS payout_total
@@ -341,14 +342,15 @@ GROUP BY t.store_id
 ORDER BY payout_total DESC, t.store_id ASC;
 """,
 
-    # 33. Webinar Popularity (Snowflake, Medium)
+    # 33. Webinar Popularity (Snowflake, Easy)
     "snowflake-webinar-popularity": """
 SELECT 
-  ROUND(100.0 * SUM(CASE WHEN event_type = 'attended' THEN 1 ELSE 0 END) / NULLIF(SUM(CASE WHEN event_type = 'registered' THEN 1 ELSE 0 END), 0), 0) AS attendance_rate
-FROM webinar_attendance;
+  ROUND(100.0 * SUM(CASE WHEN event_type = 'webinar' THEN 1 ELSE 0 END) / COUNT(*), 0) AS webinar_pct
+FROM webinar_attendance
+WHERE event_date >= '2022-04-01' AND event_date <= '2022-04-30';
 """,
 
-    # 34. Who Made Quota? (Oracle, Medium)
+    # 34. Who Made Quota? (Oracle, Easy)
     "oracle-sales-quota": """
 SELECT q.employee_id,
        CASE WHEN IFNULL(SUM(d.deal_size), 0) >= q.quota THEN 1 ELSE 0 END AS made_quota
@@ -594,7 +596,7 @@ JOIN rental_lists r2
  AND r1.rental_id < r2.rental_id;
 """,
 
-    # 52. Best-Selling Product (eBay, Medium)
+    # 52. Best-Selling Product (Amazon, Medium)
     "best-selling-products": """
 WITH ranked AS (
   SELECT p.category_name, p.product_name, ps.sales_quantity,
@@ -629,14 +631,27 @@ ORDER BY user_id;
     # 54. 2nd Ride Delay (Uber, Medium)
     "2nd-ride-delay": """
 WITH ranked_rides AS (
-  SELECT user_id, ride_date,
-         ROW_NUMBER() OVER (PARTITION BY user_id ORDER BY ride_date) AS rn
+  SELECT 
+    user_id, 
+    ride_date,
+    ROW_NUMBER() OVER (PARTITION BY user_id ORDER BY ride_date) AS rn
   FROM rides
+),
+first_rides AS (
+  SELECT user_id, ride_date AS first_ride_date
+  FROM ranked_rides
+  WHERE rn = 1
+),
+second_rides AS (
+  SELECT user_id, ride_date AS second_ride_date
+  FROM ranked_rides
+  WHERE rn = 2
 )
 SELECT 
-  ROUND(AVG(DATEDIFF(r.ride_date, u.registration_date)), 2) AS avg_delay
+  ROUND(AVG(DATEDIFF(s.second_ride_date, u.registration_date)), 2) AS avg_delay
 FROM users u
-JOIN ranked_rides r ON u.user_id = r.user_id AND r.rn = 2;
+JOIN first_rides f ON u.user_id = f.user_id AND u.registration_date = f.first_ride_date
+JOIN second_rides s ON u.user_id = s.user_id;
 """,
 
     # 55. Histogram of Users and Purchases (Walmart, Medium)
@@ -685,7 +700,7 @@ WHERE order_occurrences = (SELECT MAX(order_occurrences) FROM items_per_order)
 ORDER BY item_count;
 """,
 
-    # 58. Card Launch Success (JPMorgan Chase, Medium)
+    # 58. Card Launch Success (JPMorgan, Medium)
     "card-launch-success": """
 WITH launch_dates AS (
   SELECT card_name, issue_year, issue_month, issued_amount,
@@ -716,10 +731,14 @@ FROM callers;
 
     # 61. LinkedIn Power Creators (Part 2) (LinkedIn, Medium)
     "linkedin-power-creators-part2": """
-SELECT p.profile_id
-FROM personal_profiles p
-WHERE p.followers > 10000
-ORDER BY p.profile_id;
+SELECT 
+  pp.profile_id
+FROM personal_profiles pp
+JOIN employee_company ec ON pp.profile_id = ec.personal_profile_id
+JOIN company_pages cp ON ec.company_id = cp.company_id
+GROUP BY pp.profile_id, pp.followers
+HAVING pp.followers > SUM(cp.followers)
+ORDER BY pp.profile_id ASC;
 """,
 
     # 62. Unique Money Transfer Relationships (PayPal, Medium)
@@ -849,16 +868,29 @@ FROM search_category;
 
     # 72. Compensation Outliers (Accenture, Medium)
     "compensation-outliers": """
-WITH dept_stats AS (
-  SELECT department_id, AVG(salary) AS avg_sal
+WITH SalaryStats AS (
+  SELECT 
+    employee_id, 
+    salary, 
+    title,
+    AVG(salary) OVER (PARTITION BY title) as avg_salary
   FROM employee_pay
-  GROUP BY department_id
+),
+OutlierStatus AS (
+  SELECT 
+    employee_id, 
+    salary,
+    CASE 
+      WHEN salary > (avg_salary * 2) THEN 'Overpaid'
+      WHEN salary < (avg_salary / 2) THEN 'Underpaid'
+      ELSE NULL 
+    END as status
+  FROM SalaryStats
 )
-SELECT e.employee_id, e.salary, 'Higher' AS status
-FROM employee_pay e
-JOIN dept_stats d ON e.department_id = d.department_id
-WHERE e.salary > 2 * d.avg_sal
-ORDER BY e.employee_id;
+SELECT employee_id, salary, status
+FROM OutlierStatus
+WHERE status IS NOT NULL
+ORDER BY employee_id;
 """,
 
     # 73. FAANG Stock Monthly Change (Part 2) (Bloomberg, Medium)
@@ -896,7 +928,7 @@ WITH monthly_users AS (
     AND YEAR(event_date) = 2022
 )
 SELECT 
-  curr.mth,
+  curr.mth AS month,
   COUNT(DISTINCT curr.user_id) AS monthly_active_users
 FROM monthly_users curr
 JOIN monthly_users prev 
@@ -982,7 +1014,7 @@ SELECT
     ELSE 'EXISTING'
   END AS new_status
 FROM advertiser a
-LEFT JOIN daily_pay d ON a.user_id = d.user_id
+FULL OUTER JOIN daily_pay d ON a.user_id = d.user_id
 ORDER BY user_id;
 """,
 
@@ -1015,7 +1047,7 @@ HAVING COUNT(m.event_id) >= 2
 ORDER BY c.email;
 """,
 
-    # 81. 3-Topping Pizzas (Domino's, Hard)
+    # 81. 3-Topping Pizzas (McKinsey, Hard)
     "pizzas-topping-cost": """
 SELECT 
   CONCAT(p1.topping_name, ',', p2.topping_name, ',', p3.topping_name) AS pizza,
@@ -1028,11 +1060,17 @@ ORDER BY total_cost DESC, pizza;
 
     # 82. Patient Support Analysis (Part 3) (UnitedHealth, Hard)
     "patient-call-history": """
-SELECT policy_holder_id, COUNT(case_id) AS total_calls
-FROM callers
-GROUP BY policy_holder_id
-HAVING COUNT(case_id) > 1
-ORDER BY total_calls DESC, policy_holder_id;
+WITH lagged_calls AS (
+  SELECT 
+    policy_holder_id,
+    call_date,
+    LAG(call_date) OVER (PARTITION BY policy_holder_id ORDER BY call_date) AS prev_call_date
+  FROM callers
+)
+SELECT COUNT(DISTINCT policy_holder_id) AS policy_holder_count
+FROM lagged_calls
+WHERE prev_call_date IS NOT NULL
+  AND DATEDIFF(call_date, prev_call_date) <= 7;
 """,
 
     # 83. Patient Support Analysis (Part 4) (UnitedHealth, Hard)
@@ -1068,7 +1106,7 @@ WITH ordered_payments AS (
     ) AS prev_timestamp
   FROM transactions
 )
-SELECT COUNT(*) AS repeated_payments
+SELECT COUNT(*) AS payment_count
 FROM ordered_payments
 WHERE prev_timestamp IS NOT NULL
   AND TIMESTAMPDIFF(MINUTE, prev_timestamp, transaction_timestamp) <= 10;
@@ -1092,12 +1130,29 @@ ORDER BY curr.mth;
 
     # 86. Senior Managers (Google, Hard)
     "senior-managers-reportees": """
-SELECT manager_name, COUNT(emp_id) AS direct_reports
-FROM employees
-WHERE manager_id IS NOT NULL
-GROUP BY manager_name
-HAVING COUNT(emp_id) >= 5
-ORDER BY direct_reports DESC, manager_name;
+WITH managers AS (
+  SELECT DISTINCT manager_id
+  FROM employees
+  WHERE manager_id IS NOT NULL
+),
+mgr_reports AS (
+  SELECT e.manager_id, e.manager_name, e.emp_id
+  FROM employees e
+  WHERE e.emp_id IN (SELECT manager_id FROM managers)
+),
+senior_mgr_candidates AS (
+  SELECT manager_id, manager_name, COUNT(DISTINCT emp_id) AS direct_reportees
+  FROM mgr_reports
+  GROUP BY manager_id, manager_name
+)
+SELECT manager_name, direct_reportees
+FROM senior_mgr_candidates
+WHERE manager_id NOT IN (
+  SELECT mr.manager_id
+  FROM mgr_reports mr
+  WHERE mr.emp_id IN (SELECT manager_id FROM senior_mgr_candidates)
+)
+ORDER BY direct_reportees DESC, manager_name;
 """,
 
     # 87. Server Utilization Time (Amazon, Hard)
@@ -1125,19 +1180,19 @@ HAVING AVG(close - open) < 0
 ORDER BY avg_return ASC, ticker ASC;
 """,
 
-    # 89. User Concurrent Sessions (Twitter, Hard)
+    # 89. User Concurrent Sessions (Pinterest, Hard)
     "concurrent-user-sessions": """
 SELECT 
   a.session_id,
   COUNT(b.session_id) AS concurrent_sessions
 FROM user_sessions a
 JOIN user_sessions b 
-  ON a.user_id = b.user_id 
- AND a.session_id != b.session_id 
+  ON a.session_id != b.session_id 
  AND a.start_time < b.end_time 
  AND a.end_time > b.start_time
 GROUP BY a.session_id
-ORDER BY concurrent_sessions DESC, a.session_id;
+ORDER BY concurrent_sessions DESC, a.session_id
+LIMIT 1;
 """,
 
     # 90. Monthly Merchant Balance (Visa, Hard)
@@ -1153,11 +1208,15 @@ ORDER BY transaction_month;
     # 91. Bad Delivery Rate (DoorDash, Hard)
     "sql-bad-experience": """
 SELECT 
-  ROUND(100.0 * SUM(CASE WHEN t.actual_delivery_timestamp > t.estimated_delivery_timestamp THEN 1 ELSE 0 END) / COUNT(*), 2) AS bad_experience_pct
+  ROUND(100.0 * COUNT(CASE 
+    WHEN o.status IN ('completed incorrectly', 'never_received') 
+      OR t.actual_delivery_timestamp > t.estimated_delivery_timestamp 
+    THEN 1 END) / COUNT(*), 2) AS bad_experience_pct
 FROM orders o
 JOIN trips t ON o.trip_id = t.trip_id
 JOIN customers c ON o.customer_id = c.customer_id
-WHERE DATEDIFF(o.order_timestamp, c.signup_timestamp) <= 14;
+WHERE c.signup_timestamp >= '2022-06-01' AND c.signup_timestamp < '2022-07-01'
+  AND DATEDIFF(o.order_timestamp, c.signup_timestamp) BETWEEN 0 AND 14;
 """,
 
     # 92. Page Recommendation (Facebook, Hard)
@@ -1191,7 +1250,7 @@ HAVING COUNT(a.amenity) >= 2
 ORDER BY matching_amenities DESC, rental_1, rental_2;
 """,
 
-    # 95. First Month Retention (Facebook, Hard)
+    # 95. Weekly Churn Rates (Facebook, Hard)
     "first-month-retention": """
 SELECT 
   ROUND(100.0 * COUNT(DISTINCT a.user_id) / COUNT(DISTINCT u.user_id), 2) AS retention_rate
@@ -1260,5 +1319,6 @@ SELECT
   ROUND(100.0 * COUNT(DISTINCT CASE WHEN product_name = 'iPhone' AND next_product = 'AirPods' THEN customer_id END) / 
         NULLIF(COUNT(DISTINCT CASE WHEN product_name = 'iPhone' THEN customer_id END), 0), 0) AS follow_up_percentage
 FROM ordered_purchases;
-"""
+""",
+
 }

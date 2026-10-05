@@ -54,6 +54,7 @@ const state = {
   settings: {
     shortcutRun: "cmd-enter",       // "cmd-enter" | "shift-enter" | "cmd-s"
     shortcutPreview: "cmd-quote",    // "cmd-quote" | "cmd-b" | "alt-enter"
+    attemptTrigger: "run",          // "run" (default) | "submit" | "open"
     showTopicTags: false,           // Default hidden to remove clutter like "ecommerce", "date-manipulation"
     fontSize: "14px",
     autoFormat: true,
@@ -77,13 +78,32 @@ function isQuestionSolved(slug) {
 
 function isQuestionAttempted(slug) {
   if (state.solvedSlugs.has(slug)) return false;
-  if (state.attemptedSlugs.has(slug)) return true;
-  const draft = localStorage.getItem(`sqlmaster_draft_${slug}`);
-  if (draft && draft.trim().length > 0) {
-    state.attemptedSlugs.add(slug);
-    return true;
+  return state.attemptedSlugs.has(slug);
+}
+
+function recordAttempt(slug, triggerType) {
+  if (!slug || state.solvedSlugs.has(slug)) return;
+  const configured = state.settings.attemptTrigger || "run";
+  let shouldMark = false;
+
+  if (configured === "open") {
+    shouldMark = true;
+  } else if (configured === "run") {
+    shouldMark = (triggerType === "run" || triggerType === "submit");
+  } else if (configured === "submit") {
+    shouldMark = (triggerType === "submit");
   }
-  return false;
+
+  if (shouldMark && !state.attemptedSlugs.has(slug)) {
+    state.attemptedSlugs.add(slug);
+    localStorage.setItem("sqlmaster_attempted", JSON.stringify(Array.from(state.attemptedSlugs)));
+    updateProgressUI();
+    renderQuestionList();
+    if (state.currentQuestion && state.currentQuestion.slug === slug) {
+      renderQuestionDetail(state.currentQuestion);
+    }
+    renderHomeProblemsTable();
+  }
 }
 
 // DOM Elements Safe Getters
@@ -431,17 +451,16 @@ async function init() {
 
 function syncAttemptedSlugs() {
   try {
-    for (let i = 0; i < localStorage.length; i++) {
-      const key = localStorage.key(i);
-      if (key && key.startsWith("sqlmaster_draft_")) {
-        const slug = key.replace("sqlmaster_draft_", "");
-        const draft = localStorage.getItem(key);
-        if (draft && draft.trim().length > 0) {
-          state.attemptedSlugs.add(slug);
-        }
+    let changed = false;
+    for (const slug of Array.from(state.attemptedSlugs)) {
+      if (state.solvedSlugs.has(slug)) {
+        state.attemptedSlugs.delete(slug);
+        changed = true;
       }
     }
-    localStorage.setItem("sqlmaster_attempted", JSON.stringify(Array.from(state.attemptedSlugs)));
+    if (changed) {
+      localStorage.setItem("sqlmaster_attempted", JSON.stringify(Array.from(state.attemptedSlugs)));
+    }
   } catch (err) {
     console.warn("Could not sync attempted slugs:", err);
   }
@@ -473,11 +492,39 @@ function restorePreferences() {
   const sPlainMode = el("setting-plain-mode");
   const sAutoTimer = el("setting-auto-start-timer");
   const sAutoMode = el("setting-autocomplete-mode");
+  const sAttemptTrigger = el("setting-attempt-trigger");
 
   if (sTheme) sTheme.value = state.theme;
   if (sCodeTheme) sCodeTheme.value = state.codeTheme;
   if (sPlainMode) sPlainMode.checked = state.plainMode;
   if (sAutoMode) sAutoMode.value = state.settings.autocompleteMode || "standard";
+  if (sAttemptTrigger) {
+    sAttemptTrigger.value = state.settings.attemptTrigger || "run";
+    sAttemptTrigger.addEventListener("change", (e) => {
+      state.settings.attemptTrigger = e.target.value;
+      saveSettings();
+      const labels = {
+        run: "On First Run (Default)",
+        submit: "On First Submit Only",
+        open: "When Question is Opened"
+      };
+      showToast(`Attempt trigger set to: ${labels[e.target.value] || e.target.value}`);
+    });
+  }
+
+  const btnResetAttempted = el("btn-reset-attempted");
+  if (btnResetAttempted) {
+    btnResetAttempted.addEventListener("click", () => {
+      state.attemptedSlugs.clear();
+      localStorage.setItem("sqlmaster_attempted", "[]");
+      updateProgressUI();
+      renderQuestionList();
+      if (state.currentQuestion) renderQuestionDetail(state.currentQuestion);
+      renderHomeProblemsTable();
+      showToast("Attempted questions list has been reset");
+    });
+  }
+
   if (sAutoTimer) {
     sAutoTimer.checked = !!state.settings.autoStartTimer;
     sAutoTimer.addEventListener("change", (e) => {
@@ -1762,6 +1809,9 @@ async function loadQuestionDetail(slug, updateHash = true) {
     }
   }
 
+  // Trigger attempt recording on open if configured
+  recordAttempt(slug, "open");
+
   renderQuestionDetail(q);
   renderQuestionList();
 
@@ -1914,13 +1964,7 @@ function renderQuestionList() {
     const statusIcon = isSolved
       ? `<span class="solved-icon" title="Solved"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span>`
       : isAttempted
-      ? `<span class="attempted-icon" title="Attempted (Submitted with Wrong Answer)"><svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="12" r="7"/></svg></span>`
-      : "";
-
-    const statusTag = isSolved
-      ? `<span class="drawer-status-tag solved">Solved</span>`
-      : isAttempted
-      ? `<span class="drawer-status-tag attempted">Attempted</span>`
+      ? `<span class="attempted-icon" title="Attempted"><svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="12" r="7"/></svg></span>`
       : "";
 
     item.innerHTML = `
@@ -1935,7 +1979,6 @@ function renderQuestionList() {
         <div class="drawer-q-meta">
           <span>${q.company || "General"}</span>
           <span>· ${q.test_case_count} tests</span>
-          ${statusTag}
         </div>
       </div>
       <span class="doc-diff-pill ${q.difficulty.toLowerCase()}">${q.difficulty}</span>
@@ -2361,14 +2404,15 @@ async function runTests() {
     state.testResults = data;
     renderTestcasePanel(state.activeTestCaseIndex || 0);
 
-    // Save as attempted for any submission run
+    // Record submission and update attempt status
     recordSubmission();
-    state.attemptedSlugs.add(state.currentQuestion.slug);
-    localStorage.setItem("sqlmaster_attempted", JSON.stringify(Array.from(state.attemptedSlugs)));
+    recordAttempt(state.currentQuestion.slug, "submit");
 
     if (data.all_passed) {
       state.solvedSlugs.add(state.currentQuestion.slug);
+      state.attemptedSlugs.delete(state.currentQuestion.slug);
       localStorage.setItem("sqlmaster_solved", JSON.stringify(Array.from(state.solvedSlugs)));
+      localStorage.setItem("sqlmaster_attempted", JSON.stringify(Array.from(state.attemptedSlugs)));
       updateProgressUI();
       renderQuestionList();
       renderQuestionDetail(state.currentQuestion);
@@ -2385,8 +2429,7 @@ async function runTests() {
     console.error("Test execution failed:", err);
     recordSubmission();
     if (state.currentQuestion) {
-      state.attemptedSlugs.add(state.currentQuestion.slug);
-      localStorage.setItem("sqlmaster_attempted", JSON.stringify(Array.from(state.attemptedSlugs)));
+      recordAttempt(state.currentQuestion.slug, "submit");
       updateProgressUI();
       renderQuestionList();
       renderQuestionDetail(state.currentQuestion);
@@ -2439,9 +2482,8 @@ async function quickRunPreview() {
     });
     const data = await res.json();
 
-    // Save as attempted
-    state.attemptedSlugs.add(state.currentQuestion.slug);
-    localStorage.setItem("sqlmaster_attempted", JSON.stringify(Array.from(state.attemptedSlugs)));
+    // Record attempt on run according to configured setting
+    recordAttempt(state.currentQuestion.slug, "run");
 
     if (data.error) {
       if (statusBadge) {
@@ -2466,21 +2508,17 @@ async function quickRunPreview() {
     state.testResults = data;
     renderTestcasePanel(0);
 
-    if (data.all_passed) {
-      state.solvedSlugs.add(state.currentQuestion.slug);
-      localStorage.setItem("sqlmaster_solved", JSON.stringify(Array.from(state.solvedSlugs)));
-    }
+    // Quick run does NOT mark problem as solved - only formal Submit does!
     updateProgressUI();
     renderQuestionList();
     renderQuestionDetail(state.currentQuestion);
     renderHomeProblemsTable();
 
-    showToast(data.all_passed ? "All test cases passed!" : "Some test cases failed (Marked as Attempted)");
+    showToast(data.all_passed ? "All test cases passed! (Submit code to mark as Solved)" : "Test run finished: Some tests failed");
   } catch (err) {
     console.error("Run failed:", err);
     if (state.currentQuestion) {
-      state.attemptedSlugs.add(state.currentQuestion.slug);
-      localStorage.setItem("sqlmaster_attempted", JSON.stringify(Array.from(state.attemptedSlugs)));
+      recordAttempt(state.currentQuestion.slug, "run");
       updateProgressUI();
       renderQuestionList();
       renderQuestionDetail(state.currentQuestion);

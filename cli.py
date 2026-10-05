@@ -11,6 +11,11 @@ import json
 import argparse
 from typing import List, Dict, Any, Optional
 from tabulate import tabulate
+PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
+WORKBENCH_DIR = os.path.dirname(os.path.abspath(__file__))
+for _p in (PROJECT_ROOT, WORKBENCH_DIR):
+    if _p not in sys.path:
+        sys.path.insert(0, _p)
 
 try:
     from MyWorkbench.engine.runner import SQLRunner

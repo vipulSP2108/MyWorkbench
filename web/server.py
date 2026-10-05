@@ -14,6 +14,11 @@ except ImportError:
 from http.server import SimpleHTTPRequestHandler
 from urllib.parse import urlparse, parse_qs
 from typing import Any, Dict, List
+PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
+WORKBENCH_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
+for _p in (PROJECT_ROOT, WORKBENCH_DIR):
+    if _p not in sys.path:
+        sys.path.insert(0, _p)
 
 try:
     from MyWorkbench.cli import load_all_questions, load_question
@@ -370,8 +375,16 @@ class SQLPracticeHandler(SimpleHTTPRequestHandler):
 
 
 def run_server(port: int = 8080, host: str = "127.0.0.1"):
-    server_address = (host, port)
-    httpd = ServerClass(server_address, SQLPracticeHandler)
+    ServerClass.allow_reuse_address = True
+    try:
+        server_address = (host, port)
+        httpd = ServerClass(server_address, SQLPracticeHandler)
+    except OSError as e:
+        if e.errno == 48:  # Address already in use
+            print(f"⚠️ Port {port} is already in use. Trying port {port + 1}...")
+            return run_server(port=port + 1, host=host)
+        raise e
+
     print(f"🚀 SQL Practice Platform server running at: http://{host}:{port}/")
     print(f"Press Ctrl+C to stop.")
     try:

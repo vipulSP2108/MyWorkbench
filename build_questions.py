@@ -2,9 +2,17 @@
 
 from __future__ import annotations
 import os
+import sys
 import json
 import decimal
 from typing import Any
+
+PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
+WORKBENCH_DIR = os.path.dirname(os.path.abspath(__file__))
+for _p in (PROJECT_ROOT, WORKBENCH_DIR):
+    if _p not in sys.path:
+        sys.path.insert(0, _p)
+
 try:
     from MyWorkbench.ingest.deduplicator import build_unified_questions
     from MyWorkbench.generate.sql_writer import REFERENCE_QUERIES

@@ -5,8 +5,13 @@ the true, mathematically consistent expected output.
 """
 
 from __future__ import annotations
-from typing import Dict, Any, List
-from ..engine.runner import SQLRunner
+try:
+    from ..engine.runner import SQLRunner
+except (ImportError, ValueError):
+    try:
+        from MyWorkbench.engine.runner import SQLRunner
+    except ImportError:
+        from engine.runner import SQLRunner
 
 
 def derive_outputs_for_question(

@@ -140,7 +140,7 @@
     "tc_count": 4,
     "cats": "1N, 2E, 0B, 1V",
     "order_sensitive": "False",
-    "match_type": "UNVERIFIED"
+    "match_type": "EXACT"
   },
   {
     "num": 14,
@@ -250,7 +250,7 @@
     "tc_count": 4,
     "cats": "1N, 2E, 0B, 1V",
     "order_sensitive": "\u2713 True",
-    "match_type": "UNVERIFIED"
+    "match_type": "EXACT"
   },
   {
     "num": 24,
@@ -305,7 +305,7 @@
     "tc_count": 4,
     "cats": "1N, 2E, 0B, 1V",
     "order_sensitive": "\u2713 True",
-    "match_type": "LIKELY EXACT"
+    "match_type": "EXACT"
   },
   {
     "num": 29,
@@ -316,7 +316,7 @@
     "tc_count": 4,
     "cats": "1N, 2E, 0B, 1V",
     "order_sensitive": "False",
-    "match_type": "LIKELY EXACT"
+    "match_type": "EXACT"
   },
   {
     "num": 30,
@@ -327,7 +327,7 @@
     "tc_count": 4,
     "cats": "1N, 2E, 0B, 1V",
     "order_sensitive": "\u2713 True",
-    "match_type": "UNVERIFIED"
+    "match_type": "EXACT"
   },
   {
     "num": 31,
@@ -492,7 +492,7 @@
     "tc_count": 5,
     "cats": "1N, 3E, 0B, 1V",
     "order_sensitive": "False",
-    "match_type": "UNVERIFIED"
+    "match_type": "EXACT"
   },
   {
     "num": 46,
@@ -503,7 +503,7 @@
     "tc_count": 5,
     "cats": "1N, 3E, 0B, 1V",
     "order_sensitive": "\u2713 True",
-    "match_type": "SIMILAR"
+    "match_type": "EXACT"
   },
   {
     "num": 47,
@@ -557,8 +557,8 @@
     "slug": "booking-referral-source",
     "tc_count": 5,
     "cats": "1N, 3E, 0B, 1V",
-    "order_sensitive": "\u2713 True",
-    "match_type": "LIKELY EXACT"
+    "order_sensitive": "False",
+    "match_type": "EXACT"
   },
   {
     "num": 52,
@@ -588,8 +588,8 @@
     "company": "Uber",
     "diff": "Medium",
     "slug": "2nd-ride-delay",
-    "tc_count": 4,
-    "cats": "2N, 2E, 0B, 0V",
+    "tc_count": 5,
+    "cats": "2N, 2E, 0B, 1V",
     "order_sensitive": "False",
     "match_type": "EXACT"
   },
@@ -668,7 +668,7 @@
     "tc_count": 5,
     "cats": "1N, 2E, 1B, 1V",
     "order_sensitive": "\u2713 True",
-    "match_type": "SIMILAR"
+    "match_type": "EXACT"
   },
   {
     "num": 62,
@@ -690,7 +690,7 @@
     "tc_count": 5,
     "cats": "1N, 3E, 0B, 1V",
     "order_sensitive": "\u2713 True",
-    "match_type": "LIKELY EXACT"
+    "match_type": "EXACT"
   },
   {
     "num": 64,
@@ -723,7 +723,7 @@
     "tc_count": 5,
     "cats": "1N, 3E, 0B, 1V",
     "order_sensitive": "\u2713 True",
-    "match_type": "LIKELY EXACT"
+    "match_type": "EXACT"
   },
   {
     "num": 67,
@@ -733,7 +733,7 @@
     "slug": "consulting-bench-time",
     "tc_count": 5,
     "cats": "1N, 3E, 0B, 1V",
-    "order_sensitive": "\u2713 True",
+    "order_sensitive": "False",
     "match_type": "EXACT"
   },
   {
@@ -756,7 +756,7 @@
     "tc_count": 5,
     "cats": "1N, 3E, 0B, 1V",
     "order_sensitive": "\u2713 True",
-    "match_type": "UNVERIFIED"
+    "match_type": "EXACT"
   },
   {
     "num": 70,
@@ -767,7 +767,7 @@
     "tc_count": 5,
     "cats": "1N, 3E, 0B, 1V",
     "order_sensitive": "\u2713 True",
-    "match_type": "SIMILAR"
+    "match_type": "EXACT"
   },
   {
     "num": 71,
@@ -778,7 +778,7 @@
     "tc_count": 5,
     "cats": "1N, 3E, 0B, 1V",
     "order_sensitive": "False",
-    "match_type": "UNVERIFIED"
+    "match_type": "EXACT"
   },
   {
     "num": 72,
@@ -789,7 +789,7 @@
     "tc_count": 5,
     "cats": "1N, 2E, 1B, 1V",
     "order_sensitive": "\u2713 True",
-    "match_type": "UNVERIFIED"
+    "match_type": "EXACT"
   },
   {
     "num": 73,
@@ -800,7 +800,7 @@
     "tc_count": 5,
     "cats": "1N, 3E, 0B, 1V",
     "order_sensitive": "\u2713 True",
-    "match_type": "SIMILAR"
+    "match_type": "EXACT"
   },
   {
     "num": 74,
@@ -965,7 +965,7 @@
     "tc_count": 6,
     "cats": "1N, 3E, 1B, 1V",
     "order_sensitive": "\u2713 True",
-    "match_type": "UNVERIFIED"
+    "match_type": "EXACT"
   },
   {
     "num": 89,
@@ -976,7 +976,7 @@
     "tc_count": 5,
     "cats": "1N, 2E, 1B, 1V",
     "order_sensitive": "\u2713 True",
-    "match_type": "SIMILAR"
+    "match_type": "EXACT"
   },
   {
     "num": 90,
@@ -1009,7 +1009,7 @@
     "tc_count": 6,
     "cats": "1N, 3E, 1B, 1V",
     "order_sensitive": "False",
-    "match_type": "SIMILAR"
+    "match_type": "EXACT"
   },
   {
     "num": 93,
@@ -1031,7 +1031,7 @@
     "tc_count": 6,
     "cats": "1N, 3E, 1B, 1V",
     "order_sensitive": "False",
-    "match_type": "SIMILAR"
+    "match_type": "EXACT"
   },
   {
     "num": 95,
@@ -1042,7 +1042,7 @@
     "tc_count": 6,
     "cats": "1N, 3E, 1B, 1V",
     "order_sensitive": "False",
-    "match_type": "UNVERIFIED"
+    "match_type": "EXACT"
   },
   {
     "num": 96,
@@ -1064,7 +1064,7 @@
     "tc_count": 6,
     "cats": "1N, 3E, 1B, 1V",
     "order_sensitive": "False",
-    "match_type": "SIMILAR"
+    "match_type": "EXACT"
   },
   {
     "num": 98,

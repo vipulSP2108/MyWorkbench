@@ -1047,6 +1047,23 @@
             <div class="settings-card-body">
               <div class="setting-row">
                 <div class="setting-info">
+                  <label for="setting-attempt-trigger">Mark Question as Attempted</label>
+                  <span class="setting-desc">Choose when a problem is marked as Attempted: on First Run (default), only on Submit, or as soon as Opened.</span>
+                </div>
+                <div class="setting-control" style="display: flex; flex-direction: column; align-items: flex-end; gap: 6px;">
+                  <select id="setting-attempt-trigger" class="control-select">
+                    <option value="run" selected>On First Run (Default)</option>
+                    <option value="submit">On First Submit Only</option>
+                    <option value="open">When Question is Opened</option>
+                  </select>
+                  <button type="button" id="btn-reset-attempted" class="btn-sm btn-ghost" style="font-size: 0.72rem; padding: 2px 8px; color: var(--text-dark-muted);" title="Clear all attempted tags to start fresh">
+                    Reset Attempted List
+                  </button>
+                </div>
+              </div>
+
+              <div class="setting-row">
+                <div class="setting-info">
                   <label for="setting-auto-start-timer">Auto-start Stopwatch on Question Open</label>
                   <span class="setting-desc">Automatically start counting when opening a question. When off, click the stopwatch icon to start whenever you are ready.</span>
                 </div>
