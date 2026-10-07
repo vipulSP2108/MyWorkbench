@@ -80,7 +80,7 @@
       "portfolio_avg_close": "124.00"
     }
   ],
-  "reference_sql": "SELECT ticker, ROUND(AVG(close - open), 2) AS avg_return\nFROM stock_prices\nGROUP BY ticker\nHAVING AVG(close - open) < 0\nORDER BY avg_return ASC, ticker ASC;",
+  "reference_sql": "WITH monthly_ticker AS (\n  SELECT \n    DATE_FORMAT(date, '%m/%Y') AS issue_month,\n    YEAR(date) AS yr,\n    MONTH(date) AS mo,\n    ticker,\n    ROUND(AVG(close), 2) AS ticker_avg_close\n  FROM stock_prices\n  GROUP BY DATE_FORMAT(date, '%m/%Y'), YEAR(date), MONTH(date), ticker\n),\nmonthly_portfolio AS (\n  SELECT \n    DATE_FORMAT(date, '%m/%Y') AS issue_month,\n    ROUND(AVG(close), 2) AS portfolio_avg_close\n  FROM stock_prices\n  GROUP BY DATE_FORMAT(date, '%m/%Y')\n)\nSELECT \n  t.issue_month,\n  t.ticker,\n  t.ticker_avg_close,\n  p.portfolio_avg_close\nFROM monthly_ticker t\nJOIN monthly_portfolio p ON t.issue_month = p.issue_month\nWHERE t.ticker_avg_close < p.portfolio_avg_close\nORDER BY t.yr ASC, t.mo ASC, t.ticker ASC;",
   "tags": [
     "aggregation",
     "bloomberg",
@@ -139,15 +139,23 @@
       },
       "expected_output": [
         {
+          "issue_month": "01/2023",
           "ticker": "AMZN",
-          "avg_return": -1.0
+          "ticker_avg_close": 99.0,
+          "portfolio_avg_close": 124.0
+        },
+        {
+          "issue_month": "01/2023",
+          "ticker": "META",
+          "ticker_avg_close": 121.0,
+          "portfolio_avg_close": 124.0
         }
       ],
       "category": "normal"
     },
     {
       "test_case_id": "tc_2_high_volume",
-      "description": "Multiple entities with scaled volume and multi-group distributions",
+      "description": "Multiple months and multiple tickers verifying chronological order by month and alphabetical order by ticker",
       "input_data": {
         "stock_prices": [
           {
@@ -175,84 +183,91 @@
             "close": "121.00"
           },
           {
-            "date": "01/15/2023",
+            "date": "02/05/2023",
             "ticker": "AAPL",
-            "open": "150.00",
-            "high": "155.00",
-            "low": "149.00",
-            "close": "152.00"
+            "open": "160.00",
+            "high": "165.00",
+            "low": "158.00",
+            "close": "162.00"
           },
           {
-            "date": "01/20/2023",
-            "ticker": "AMZN",
-            "open": "100.00",
-            "high": "102.00",
-            "low": "98.00",
-            "close": "99.00"
+            "date": "02/10/2023",
+            "ticker": "GOOGL",
+            "open": "90.00",
+            "high": "92.00",
+            "low": "88.00",
+            "close": "89.00"
           },
           {
-            "date": "01/25/2023",
-            "ticker": "META",
-            "open": "120.00",
-            "high": "125.00",
-            "low": "118.00",
-            "close": "121.00"
+            "date": "02/15/2023",
+            "ticker": "MSFT",
+            "open": "250.00",
+            "high": "255.00",
+            "low": "248.00",
+            "close": "250.00"
           }
         ]
       },
       "expected_output": [
         {
+          "issue_month": "01/2023",
           "ticker": "AMZN",
-          "avg_return": -1.0
+          "ticker_avg_close": 99.0,
+          "portfolio_avg_close": 124.0
+        },
+        {
+          "issue_month": "01/2023",
+          "ticker": "META",
+          "ticker_avg_close": 121.0,
+          "portfolio_avg_close": 124.0
+        },
+        {
+          "issue_month": "02/2023",
+          "ticker": "AAPL",
+          "ticker_avg_close": 162.0,
+          "portfolio_avg_close": 167.0
+        },
+        {
+          "issue_month": "02/2023",
+          "ticker": "GOOGL",
+          "ticker_avg_close": 89.0,
+          "portfolio_avg_close": 167.0
         }
       ],
       "category": "volume"
     },
     {
       "test_case_id": "tc_3_disqualifying_rows",
-      "description": "Dataset containing disqualifying rows, edge values, and cancelled/zero records",
+      "description": "All tickers have identical avg close equal to portfolio avg, none underperforms",
       "input_data": {
         "stock_prices": [
           {
-            "date": "01/10/2023",
+            "date": "03/01/2023",
             "ticker": "AAPL",
-            "open": "150.00",
-            "high": "155.00",
-            "low": "149.00",
-            "close": "152.00"
+            "open": "100.00",
+            "high": "100.00",
+            "low": "100.00",
+            "close": "100.00"
           },
           {
-            "date": "01/15/2023",
+            "date": "03/05/2023",
             "ticker": "AMZN",
             "open": "100.00",
-            "high": "102.00",
-            "low": "98.00",
-            "close": "99.00"
+            "high": "100.00",
+            "low": "100.00",
+            "close": "100.00"
           },
           {
-            "date": "01/20/2023",
-            "ticker": "META",
-            "open": "120.00",
-            "high": "125.00",
-            "low": "118.00",
-            "close": "121.00"
-          },
-          {
-            "date": "01/10/2018",
-            "ticker": "AAPL",
-            "open": "150.00",
-            "high": "155.00",
-            "low": "149.00",
-            "close": "152.00"
+            "date": "03/10/2023",
+            "ticker": "MSFT",
+            "open": "100.00",
+            "high": "100.00",
+            "low": "100.00",
+            "close": "100.00"
           }
         ]
       },
-      "expected_output": [
-        {
-          "ticker": "AMZN",
-          "avg_return": -1.0
-        }
-      ],
+      "expected_output": [],
       "category": "edge"
     },
     {
@@ -313,8 +328,16 @@
       },
       "expected_output": [
         {
+          "issue_month": "01/2023",
           "ticker": "AMZN",
-          "avg_return": -1.0
+          "ticker_avg_close": 99.0,
+          "portfolio_avg_close": 124.6
+        },
+        {
+          "issue_month": "01/2023",
+          "ticker": "META",
+          "ticker_avg_close": 121.0,
+          "portfolio_avg_close": 124.6
         }
       ],
       "category": "edge"
@@ -376,8 +399,16 @@
       },
       "expected_output": [
         {
+          "issue_month": "01/2023",
           "ticker": "AMZN",
-          "avg_return": -1.0
+          "ticker_avg_close": 99.0,
+          "portfolio_avg_close": 124.0
+        },
+        {
+          "issue_month": "01/2023",
+          "ticker": "META",
+          "ticker_avg_close": 121.0,
+          "portfolio_avg_close": 124.0
         }
       ],
       "category": "boundary"
@@ -386,8 +417,16 @@
   "order_sensitive": true,
   "expected_output": [
     {
+      "issue_month": "01/2023",
       "ticker": "AMZN",
-      "avg_return": -1.0
+      "ticker_avg_close": 99.0,
+      "portfolio_avg_close": 124.0
+    },
+    {
+      "issue_month": "01/2023",
+      "ticker": "META",
+      "ticker_avg_close": 121.0,
+      "portfolio_avg_close": 124.0
     }
   ]
 }

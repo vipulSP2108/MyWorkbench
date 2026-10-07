@@ -397,6 +397,153 @@
       },
       "expected_output": [],
       "category": "edge"
+    },
+    {
+      "test_case_id": "tc_5_histogram_distribution",
+      "description": "Multi-bucket histogram distribution verifying distinct query counts, Q3 date boundaries, and zero-query employees",
+      "input_data": {
+        "employees": [
+          {
+            "employee_id": 1,
+            "full_name": "Judas Beardon",
+            "gender": "Male"
+          },
+          {
+            "employee_id": 2,
+            "full_name": "Lainey Franciotti",
+            "gender": "Female"
+          },
+          {
+            "employee_id": 3,
+            "full_name": "Ashbey Strahan",
+            "gender": "Male"
+          },
+          {
+            "employee_id": 4,
+            "full_name": "Dina Vance",
+            "gender": "Female"
+          },
+          {
+            "employee_id": 5,
+            "full_name": "Evan Stone",
+            "gender": "Male"
+          },
+          {
+            "employee_id": 6,
+            "full_name": "Faye Clark",
+            "gender": "Female"
+          },
+          {
+            "employee_id": 7,
+            "full_name": "Gary Moore",
+            "gender": "Male"
+          },
+          {
+            "employee_id": 8,
+            "full_name": "Hannah Abbott",
+            "gender": "Female"
+          }
+        ],
+        "queries": [
+          {
+            "employee_id": 4,
+            "query_id": 101,
+            "query_starttime": "07/05/2023 10:00:00",
+            "execution_time": 120
+          },
+          {
+            "employee_id": 4,
+            "query_id": 101,
+            "query_starttime": "07/06/2023 11:00:00",
+            "execution_time": 130
+          },
+          {
+            "employee_id": 5,
+            "query_id": 102,
+            "query_starttime": "07/10/2023 09:15:00",
+            "execution_time": 200
+          },
+          {
+            "employee_id": 5,
+            "query_id": 103,
+            "query_starttime": "06/20/2023 14:00:00",
+            "execution_time": 90
+          },
+          {
+            "employee_id": 6,
+            "query_id": 104,
+            "query_starttime": "08/01/2023 12:00:00",
+            "execution_time": 300
+          },
+          {
+            "employee_id": 6,
+            "query_id": 105,
+            "query_starttime": "08/15/2023 15:30:00",
+            "execution_time": 450
+          },
+          {
+            "employee_id": 6,
+            "query_id": 106,
+            "query_starttime": "10/02/2023 08:00:00",
+            "execution_time": 500
+          },
+          {
+            "employee_id": 7,
+            "query_id": 107,
+            "query_starttime": "09/01/2023 10:00:00",
+            "execution_time": 210
+          },
+          {
+            "employee_id": 7,
+            "query_id": 108,
+            "query_starttime": "09/28/2023 16:45:00",
+            "execution_time": 320
+          },
+          {
+            "employee_id": 8,
+            "query_id": 109,
+            "query_starttime": "07/15/2023 08:30:00",
+            "execution_time": 110
+          },
+          {
+            "employee_id": 8,
+            "query_id": 110,
+            "query_starttime": "08/20/2023 11:20:00",
+            "execution_time": 180
+          },
+          {
+            "employee_id": 8,
+            "query_id": 111,
+            "query_starttime": "09/10/2023 17:00:00",
+            "execution_time": 250
+          },
+          {
+            "employee_id": 1,
+            "query_id": 901,
+            "query_starttime": "12/15/2022 10:00:00",
+            "execution_time": 60
+          }
+        ]
+      },
+      "category": "edge",
+      "expected_output": [
+        {
+          "unique_queries": 0,
+          "employee_count": 3
+        },
+        {
+          "unique_queries": 1,
+          "employee_count": 2
+        },
+        {
+          "unique_queries": 2,
+          "employee_count": 2
+        },
+        {
+          "unique_queries": 3,
+          "employee_count": 1
+        }
+      ]
     }
   ],
   "order_sensitive": false,

@@ -170,8 +170,8 @@
     "company": "IBM",
     "diff": "Easy",
     "slug": "sql-ibm-db2-product-analytics",
-    "tc_count": 4,
-    "cats": "1N, 2E, 0B, 1V",
+    "tc_count": 5,
+    "cats": "1N, 3E, 0B, 1V",
     "order_sensitive": "False",
     "match_type": "EXACT"
   },
@@ -819,8 +819,8 @@
     "company": "Wayfair",
     "diff": "Hard",
     "slug": "yoy-growth-rate",
-    "tc_count": 8,
-    "cats": "1N, 4E, 2B, 1V",
+    "tc_count": 9,
+    "cats": "1N, 5E, 2B, 1V",
     "order_sensitive": "\u2713 True",
     "match_type": "EXACT"
   },

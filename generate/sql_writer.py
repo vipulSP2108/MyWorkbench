@@ -940,21 +940,46 @@ GROUP BY curr.mth;
 
     # 75. Y-on-Y Growth Rate (Wayfair, Hard)
     "yoy-growth-rate": """
-WITH yearly_spend AS (
-  SELECT 
-    YEAR(transaction_date) AS yr,
-    product_id,
-    spend AS curr_year_spend,
-    LAG(spend) OVER (PARTITION BY product_id ORDER BY YEAR(transaction_date)) AS prev_year_spend
-  FROM user_transactions
+WITH cte AS (
+    SELECT
+        EXTRACT(YEAR FROM transaction_date) AS yr,
+        product_id,
+        spend
+    FROM user_transactions
+),
+cte2 AS (
+    SELECT
+        yr,
+        product_id,
+        SUM(spend) AS curr_year_spend,
+        LAG(SUM(spend)) OVER (
+            PARTITION BY product_id
+            ORDER BY yr
+        ) AS prev_year_spend,
+        LAG(yr) OVER (
+            PARTITION BY product_id
+            ORDER BY yr
+        ) AS prev_yr
+    FROM cte
+    GROUP BY product_id, yr
 )
-SELECT 
-  yr,
-  product_id,
-  curr_year_spend,
-  prev_year_spend,
-  ROUND(100.0 * (curr_year_spend - prev_year_spend) / prev_year_spend, 2) AS yoy_rate
-FROM yearly_spend
+SELECT
+    yr,
+    product_id,
+    curr_year_spend,
+    CASE
+        WHEN prev_yr = yr - 1
+        THEN prev_year_spend
+    END AS prev_year_spend,
+    CASE
+        WHEN prev_yr = yr - 1
+        THEN ROUND(
+            ((curr_year_spend - prev_year_spend)
+             / prev_year_spend) * 100.0,
+            2
+        )
+    END AS yoy_rate
+FROM cte2
 ORDER BY product_id, yr;
 """,
 
@@ -1023,6 +1048,7 @@ ORDER BY user_id;
 WITH yearly AS (
   SELECT DISTINCT user_id, YEAR(filing_date) AS filing_year
   FROM filed_taxes
+  WHERE LOWER(product) LIKE '%turbotax%'
 ),
 ranked AS (
   SELECT user_id, filing_year,
@@ -1173,11 +1199,32 @@ WHERE session_status = 'start' AND stop_time IS NOT NULL;
 
     # 88. FAANG Underperforming Stocks (Part 3) (Bloomberg, Hard)
     "sql-bloomberg-underperforming-stocks": """
-SELECT ticker, ROUND(AVG(close - open), 2) AS avg_return
-FROM stock_prices
-GROUP BY ticker
-HAVING AVG(close - open) < 0
-ORDER BY avg_return ASC, ticker ASC;
+WITH monthly_ticker AS (
+  SELECT 
+    DATE_FORMAT(date, '%m/%Y') AS issue_month,
+    YEAR(date) AS yr,
+    MONTH(date) AS mo,
+    ticker,
+    ROUND(AVG(close), 2) AS ticker_avg_close
+  FROM stock_prices
+  GROUP BY DATE_FORMAT(date, '%m/%Y'), YEAR(date), MONTH(date), ticker
+),
+monthly_portfolio AS (
+  SELECT 
+    DATE_FORMAT(date, '%m/%Y') AS issue_month,
+    ROUND(AVG(close), 2) AS portfolio_avg_close
+  FROM stock_prices
+  GROUP BY DATE_FORMAT(date, '%m/%Y')
+)
+SELECT 
+  t.issue_month,
+  t.ticker,
+  t.ticker_avg_close,
+  p.portfolio_avg_close
+FROM monthly_ticker t
+JOIN monthly_portfolio p ON t.issue_month = p.issue_month
+WHERE t.ticker_avg_close < p.portfolio_avg_close
+ORDER BY t.yr ASC, t.mo ASC, t.ticker ASC;
 """,
 
     # 89. User Concurrent Sessions (Pinterest, Hard)

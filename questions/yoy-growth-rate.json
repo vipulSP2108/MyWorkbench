@@ -95,7 +95,7 @@
       "yoy_rate": "72.12"
     }
   ],
-  "reference_sql": "WITH yearly_spend AS (\n  SELECT \n    YEAR(transaction_date) AS yr,\n    product_id,\n    spend AS curr_year_spend,\n    LAG(spend) OVER (PARTITION BY product_id ORDER BY YEAR(transaction_date)) AS prev_year_spend\n  FROM user_transactions\n)\nSELECT \n  yr,\n  product_id,\n  curr_year_spend,\n  prev_year_spend,\n  ROUND(100.0 * (curr_year_spend - prev_year_spend) / prev_year_spend, 2) AS yoy_rate\nFROM yearly_spend\nORDER BY product_id, yr;",
+  "reference_sql": "WITH cte AS (\n    SELECT\n        EXTRACT(YEAR FROM transaction_date) AS yr,\n        product_id,\n        spend\n    FROM user_transactions\n),\ncte2 AS (\n    SELECT\n        yr,\n        product_id,\n        SUM(spend) AS curr_year_spend,\n        LAG(SUM(spend)) OVER (\n            PARTITION BY product_id\n            ORDER BY yr\n        ) AS prev_year_spend,\n        LAG(yr) OVER (\n            PARTITION BY product_id\n            ORDER BY yr\n        ) AS prev_yr\n    FROM cte\n    GROUP BY product_id, yr\n)\nSELECT\n    yr,\n    product_id,\n    curr_year_spend,\n    CASE\n        WHEN prev_yr = yr - 1\n        THEN prev_year_spend\n    END AS prev_year_spend,\n    CASE\n        WHEN prev_yr = yr - 1\n        THEN ROUND(\n            ((curr_year_spend - prev_year_spend)\n             / prev_year_spend) * 100.0,\n            2\n        )\n    END AS yoy_rate\nFROM cte2\nORDER BY product_id, yr;",
   "tags": [
     "aggregation",
     "date-manipulation",
@@ -372,15 +372,15 @@
         {
           "yr": 2014,
           "product_id": 128424,
-          "curr_year_spend": 0.0,
+          "curr_year_spend": 0,
           "prev_year_spend": null,
           "yoy_rate": null
         },
         {
           "yr": 2015,
           "product_id": 128424,
-          "curr_year_spend": 0.0,
-          "prev_year_spend": 0.0,
+          "curr_year_spend": 0,
+          "prev_year_spend": 0,
           "yoy_rate": null
         }
       ],
@@ -616,7 +616,7 @@
         {
           "yr": 2021,
           "product_id": 999,
-          "curr_year_spend": 5000.0,
+          "curr_year_spend": 5000,
           "prev_year_spend": null,
           "yoy_rate": null
         }
@@ -646,19 +646,82 @@
         {
           "yr": 2020,
           "product_id": 888,
-          "curr_year_spend": 2000.0,
+          "curr_year_spend": 2000,
           "prev_year_spend": null,
           "yoy_rate": null
         },
         {
           "yr": 2021,
           "product_id": 888,
-          "curr_year_spend": 4000.0,
-          "prev_year_spend": 2000.0,
+          "curr_year_spend": 4000,
+          "prev_year_spend": 2000,
           "yoy_rate": 100.0
         }
       ],
       "category": "edge"
+    },
+    {
+      "test_case_id": "tc_9_year_gap_null_yoy",
+      "description": "Non-consecutive year gap (e.g. 2021 to 2024): prev_year_spend and yoy_rate must be NULL since previous record was not the immediately preceding calendar year.",
+      "input_data": {
+        "user_transactions": [
+          {
+            "transaction_id": 1,
+            "product_id": 100,
+            "spend": "100.00",
+            "transaction_date": "04/15/2019 00:00:00"
+          },
+          {
+            "transaction_id": 2,
+            "product_id": 100,
+            "spend": "120.00",
+            "transaction_date": "04/15/2020 00:00:00"
+          },
+          {
+            "transaction_id": 3,
+            "product_id": 100,
+            "spend": "150.00",
+            "transaction_date": "04/15/2021 00:00:00"
+          },
+          {
+            "transaction_id": 4,
+            "product_id": 100,
+            "spend": "200.00",
+            "transaction_date": "04/15/2024 00:00:00"
+          }
+        ]
+      },
+      "category": "edge",
+      "expected_output": [
+        {
+          "yr": 2019,
+          "product_id": 100,
+          "curr_year_spend": 100,
+          "prev_year_spend": null,
+          "yoy_rate": null
+        },
+        {
+          "yr": 2020,
+          "product_id": 100,
+          "curr_year_spend": 120,
+          "prev_year_spend": 100,
+          "yoy_rate": 20.0
+        },
+        {
+          "yr": 2021,
+          "product_id": 100,
+          "curr_year_spend": 150,
+          "prev_year_spend": 120,
+          "yoy_rate": 25.0
+        },
+        {
+          "yr": 2024,
+          "product_id": 100,
+          "curr_year_spend": 200,
+          "prev_year_spend": null,
+          "yoy_rate": null
+        }
+      ]
     }
   ],
   "order_sensitive": true,

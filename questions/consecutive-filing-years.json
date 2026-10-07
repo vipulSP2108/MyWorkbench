@@ -96,7 +96,7 @@
       "user_id": "1"
     }
   ],
-  "reference_sql": "WITH yearly AS (\n  SELECT DISTINCT user_id, YEAR(filing_date) AS filing_year\n  FROM filed_taxes\n),\nranked AS (\n  SELECT user_id, filing_year,\n         filing_year - ROW_NUMBER() OVER (PARTITION BY user_id ORDER BY filing_year) AS grp\n  FROM yearly\n)\nSELECT DISTINCT user_id\nFROM ranked\nGROUP BY user_id, grp\nHAVING COUNT(*) >= 3\nORDER BY user_id;",
+  "reference_sql": "WITH yearly AS (\n  SELECT DISTINCT user_id, YEAR(filing_date) AS filing_year\n  FROM filed_taxes\n  WHERE LOWER(product) LIKE '%turbotax%'\n),\nranked AS (\n  SELECT user_id, filing_year,\n         filing_year - ROW_NUMBER() OVER (PARTITION BY user_id ORDER BY filing_year) AS grp\n  FROM yearly\n)\nSELECT DISTINCT user_id\nFROM ranked\nGROUP BY user_id, grp\nHAVING COUNT(*) >= 3\nORDER BY user_id;",
   "tags": [
     "date-manipulation",
     "ecommerce",
@@ -182,9 +182,6 @@
       "expected_output": [
         {
           "user_id": "1"
-        },
-        {
-          "user_id": "3"
         }
       ],
       "category": "normal"
@@ -310,12 +307,6 @@
         },
         {
           "user_id": "1001"
-        },
-        {
-          "user_id": "1003"
-        },
-        {
-          "user_id": "3"
         }
       ],
       "category": "volume"
@@ -410,9 +401,6 @@
           "user_id": "1"
         },
         {
-          "user_id": "3"
-        },
-        {
           "user_id": "5001"
         }
       ],
@@ -503,9 +491,6 @@
       "expected_output": [
         {
           "user_id": "1"
-        },
-        {
-          "user_id": "3"
         }
       ],
       "category": "edge"
@@ -630,13 +615,7 @@
           "user_id": "1"
         },
         {
-          "user_id": "3"
-        },
-        {
           "user_id": "8001"
-        },
-        {
-          "user_id": "8003"
         }
       ],
       "category": "boundary"
@@ -649,17 +628,20 @@
           {
             "filing_id": 1,
             "user_id": "1",
-            "filing_date": "2020-04-15"
+            "filing_date": "2020-04-15",
+            "product": "TurboTax Online"
           },
           {
             "filing_id": 2,
             "user_id": "1",
-            "filing_date": "2021-04-15"
+            "filing_date": "2021-04-15",
+            "product": "TurboTax Online"
           },
           {
             "filing_id": 3,
             "user_id": "2",
-            "filing_date": "2020-04-15"
+            "filing_date": "2020-04-15",
+            "product": "TurboTax Online"
           }
         ]
       },
@@ -668,38 +650,62 @@
     },
     {
       "test_case_id": "tc_8_gap_breaks_streak",
-      "description": "User filed in 2019, 2021, 2022 \u2014 there's a gap in 2020. The streak starting 2021-2022 has 2 years but 2019-2021 is NOT consecutive.",
+      "description": "User 10 has gap in 2020, User 20 filed 3 consecutive years with TurboTax (qualifies), User 30 filed 3 consecutive years with QuickBooks (disqualified).",
       "input_data": {
         "filed_taxes": [
           {
             "filing_id": 1,
             "user_id": "10",
-            "filing_date": "2019-04-15"
+            "filing_date": "2019-04-15",
+            "product": "TurboTax Deluxe"
           },
           {
             "filing_id": 2,
             "user_id": "10",
-            "filing_date": "2021-04-15"
+            "filing_date": "2021-04-15",
+            "product": "TurboTax Deluxe"
           },
           {
             "filing_id": 3,
             "user_id": "10",
-            "filing_date": "2022-04-15"
+            "filing_date": "2022-04-15",
+            "product": "TurboTax Deluxe"
           },
           {
             "filing_id": 4,
             "user_id": "20",
-            "filing_date": "2019-04-15"
+            "filing_date": "2019-04-15",
+            "product": "TurboTax Deluxe"
           },
           {
             "filing_id": 5,
             "user_id": "20",
-            "filing_date": "2020-04-15"
+            "filing_date": "2020-04-15",
+            "product": "TurboTax Deluxe"
           },
           {
             "filing_id": 6,
             "user_id": "20",
-            "filing_date": "2021-04-15"
+            "filing_date": "2021-04-15",
+            "product": "TurboTax Deluxe"
+          },
+          {
+            "filing_id": 7,
+            "user_id": "30",
+            "filing_date": "2019-04-15",
+            "product": "QuickBooks Online"
+          },
+          {
+            "filing_id": 8,
+            "user_id": "30",
+            "filing_date": "2020-04-15",
+            "product": "QuickBooks Online"
+          },
+          {
+            "filing_id": 9,
+            "user_id": "30",
+            "filing_date": "2021-04-15",
+            "product": "QuickBooks Desktop Pro"
           }
         ]
       },
@@ -715,9 +721,6 @@
   "expected_output": [
     {
       "user_id": "1"
-    },
-    {
-      "user_id": "3"
     }
   ]
 }
